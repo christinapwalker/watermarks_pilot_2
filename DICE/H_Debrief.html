@@ -210,10 +210,11 @@ table.table {
 
                 <p> This was necessary for us to better understand natural reactions to deepfakes. When designing this study, we took care to minimize any possible risks or discomforts that might be related to the deception. <br> </p>
 
-                <p> To make sure you understand this message, please type out the following sentence below: <strong>The image about {{ disclaimer }} is AI-generated.</strong></p>
 
-                {{ formfield 'understand_AI' with_label=False }}
-
+<label for="id_understand_AI" class="form-label">
+    To make sure you understand this message, please type the following sentence: <strong>The image about {{ disclaimer }} is AI-generated.</strong>
+</label>
+<textarea name="understand_AI" id="id_understand_AI" rows="4" class="form-control" required></textarea>
 
 
                 <p> <strong>Additional information about deepfakes:</strong> : A deepfake is a highly realistic but fake image, video, or audio recording of a person saying or doing something that they never actually said or did.  Some tips for recognizing deepfakes generated with AI include looking for:</p>
