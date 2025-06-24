@@ -241,7 +241,8 @@
   </div>
 
   <!-- Hidden input to store all checked values as JSON string -->
-  <input type="hidden" name="watermark_image_check" id="watermark_image_check_input" value="{{ player.watermark_image_check|default:'' }}">
+  <input type="hidden" name="watermark_image_check" id="watermark_image_check_input"
+       value="{% if player.watermark_image_check %}{{ player.watermark_image_check }}{% else %}{% endif %}">
 </div>
 
   <div class="submit-container">
