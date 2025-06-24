@@ -16,6 +16,7 @@ ROOMS = [
     ),
 ]
 
+ALLOWED_HOSTS = ['watermark-pilot2.herokuapp.com', 'localhost', '127.0.0.1']
 
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
