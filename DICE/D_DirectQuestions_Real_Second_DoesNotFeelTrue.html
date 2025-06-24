@@ -1,0 +1,369 @@
+{% extends "global/Page.html" %}
+
+{% block content %}
+<!-- Screenshot at the top, with click listener and marker -->
+<div class="image-container">
+    <img src="{{ player.screenshot_control }}" id="clickable-image" alt="Screenshot" />
+    <div id="click-marker"></div>
+</div>
+
+<form method="post">
+    <!-- Hidden fields for click coordinates and flags -->
+    <input type="hidden" id="click_x_real" name="click_x_real" />
+    <input type="hidden" id="click_y_real" name="click_y_real" />
+    <input type="hidden" id="image_feelstrue_answered" name="image_feelstrue_answered" value="False" />
+    <input type="hidden" id="image_feelsnottrue_answered" name="image_feelsnottrue_answered" value="False" />
+
+    <div class="question">
+        <p><strong>Based on your own assessment, is the image in the post above AI-generated?</strong></p>
+        <div class="multiple-choice">
+            <label><input type="radio" name="image_accuracy_real" value="AI-generated"> Yes</label>
+            <label><input type="radio" name="image_accuracy_real" value="Accurate"> No</label>
+        </div>
+    </div>
+
+    <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
+
+    <div class="slider-container">
+        <span class="slider-label-left">0% Confidence</span>
+        <input type="range" name="confidence" min="0" max="10" oninput="updateConfidence(this)">
+        <span class="slider-label-right">100% Confidence</span>
+        <p id="description-image_confidence_real" class="slider-result"></p>
+    </div>
+
+    <p><strong>In the post above, please click on the part of the post or image that helped you make your determination about whether the image is AI-generated. A red dot will appear to confirm your selection.</strong></p>
+
+    <div class="question">
+        <p><strong>Regardless of whether you think the image in the post is AI-generated or not, what <em>claim</em> do you believe the post is making?</strong></p>
+        <textarea id="claim-response" name="claim_response_real" rows="4" placeholder="Type your claim here..."></textarea>
+        <br />
+        <button type="button" class="btn btn-primary" onclick="submitClaim(this)">Submit Claim</button>
+    </div>
+
+    <div id="interpretations-section" style="display:none;">
+        <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
+        {% for value, label in claim_choices_real %}
+            <label class="claim-option">
+                <input type="radio" name="image_claim_real" value="{{ value }}"
+                       onclick="updateClaimText(this);
+                                document.getElementById('claim-truth-section').style.display='block';
+                                document.getElementById('feel-true-question').style.display='block';">
+                {{ label }}
+            </label><br>
+        {% endfor %}
+    </div>
+
+    <div id="claim-truth-section" style="display:none;">
+        <p><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></p>
+        <div class="multiple-choice">
+            <label><input type="radio" name="image_claim_true_real" value="It is True"> It is True</label>
+            <label><input type="radio" name="image_claim_true_real" value="It is not True"> It is not True</label>
+        </div>
+    </div>
+
+    <div id="feel-true-question" style="display:none; margin-top:40px;">
+        <p><strong>Regardless of whether you think the claim of the post is literally true, to what extent do you think the post represents something that feels true about the world?</strong></p>
+        {% if show_slider %}
+            <div class="slider-container">
+                <span class="slider-label-left">Does not feel true</span>
+                <input type="range" name="image_feelstrue_real" min="0" max="100" oninput="updateFeelTrueLabel(this)">
+                <span class="slider-label-right">Feels true</span>
+                <p id="feeltrue-description" class="slider-result"></p>
+            </div>
+        {% else %}
+            <div class="multiple-choice">
+                <label><input type="radio" name="image_feelstrue_binary" value="Does not feel true"> Does not feel true</label>
+                <label><input type="radio" name="image_feelstrue_binary" value="Feels true"> Feels true</label>
+            </div>
+        {% endif %}
+    </div>
+
+
+<div class="question" id="follow-up-question_doesnot" style="display:none;">
+    <p><strong>What do you think it means if something “does not feel true”?</strong></p>
+    <textarea name="image_feelsnottrue_followup" rows="4" cols="50" oninput="markFeelsNotTrueAnswered()"></textarea>
+</div>
+
+<div class="d-flex justify-content-end m-5">
+    <button class="btn btn-success shadow" type="submit" id="submitButton">➔</button>
+</div>
+</form>
+
+<style>
+/* Container for image and marker */
+.image-container {
+    position: relative;
+    max-width: 600px;
+    margin: 20px auto 40px;
+    text-align: center;
+}
+#clickable-image {
+    width: 100%;
+    cursor: crosshair;
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+#click-marker {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: rgba(220, 53, 69, 0.85); /* Bootstrap's red */
+    border-radius: 50%;
+    pointer-events: none;
+    border: 2px solid white;
+    display: none;
+}
+
+/* Question styling */
+.question {
+    margin-bottom: 30px;
+}
+.multiple-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.multiple-choice label {
+    flex: 1 1 30%;
+    cursor: pointer;
+}
+.multiple-choice input[type="radio"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1.5px solid #ced4da;
+    border-radius: 5px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Sliders */
+.slider-container {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto 50px;
+}
+.slider-label-left,
+.slider-label-right {
+    position: absolute;
+    top: -20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    user-select: none;
+}
+.slider-label-left {
+    left: 0;
+}
+.slider-label-right {
+    right: 0;
+}
+input[type=range] {
+    width: 100%;
+    height: 18px;
+    background: #eee;
+    border-radius: 10px;
+    outline: none;
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=range]:hover {
+    background: #ddd;
+}
+input[type=range]::-webkit-slider-thumb,
+input[type=range]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: #28a745;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 2px rgba(0,0,0,0.4);
+}
+.slider-result {
+    margin-top: 8px;
+    font-size: 1rem;
+    color: #333;
+    text-align: center;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.d-flex.justify-content-end.m-5 {
+    display: flex;
+    justify-content: flex-end;
+    margin: 3rem 0;
+}
+.btn-success.shadow {
+    background-color: #28a745;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(40,167,69,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-success.shadow:hover {
+    background-color: #218838;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: #444;
+}
+
+/* Claim options */
+.claim-option {
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.claim-option input {
+    margin-right: 8px;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const img = document.getElementById("clickable-image");
+    const marker = document.getElementById("click-marker");
+    const inputX = document.getElementById("click_x_real");
+    const inputY = document.getElementById("click_y_real");
+    const followUpFeelsTrue = document.getElementById('follow-up-question');
+    const followUpDoesNotFeelTrue = document.getElementById('follow-up-question_doesnot');
+
+    img.addEventListener("click", function (event) {
+        const rect = img.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        // Calculate click position as percentage of displayed image size
+        const xPercent = (x / img.clientWidth) * 100;
+        const yPercent = (y / img.clientHeight) * 100;
+
+        inputX.value = xPercent.toFixed(2);
+        inputY.value = yPercent.toFixed(2);
+
+        // Position marker centered on click
+        const markerX = x - marker.offsetWidth / 2;
+        const markerY = y - marker.offsetHeight / 2;
+
+        marker.style.left = markerX + "px";
+        marker.style.top = markerY + "px";
+        marker.style.display = "block";
+    });
+
+    const showOwnClaim = {% if show_own_claim_real %}true{% else %}false{% endif %};
+    const textarea = document.getElementById('claim-response');
+    const interpretationsSection = document.getElementById('interpretations-section');
+
+    window.submitClaim = function (button) {
+        const claimText = textarea.value.trim();
+        if (!claimText) return;
+
+        const existingOptions = document.querySelectorAll('input[name="image_claim_real"]');
+        for (const option of existingOptions) {
+            if (option.value.trim() === claimText) {
+                alert('This claim option already exists.');
+                return;
+            }
+        }
+
+        if (showOwnClaim) {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'image_claim_real';
+            input.value = claimText;
+            input.onclick = function () {
+                updateClaimText(this);
+                document.getElementById('claim-truth-section').style.display = 'block';
+                document.getElementById('feel-true-question').style.display = 'block';
+            };
+
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(' ' + claimText));
+            label.appendChild(document.createElement('br'));
+            interpretationsSection.appendChild(label);
+        }
+
+        interpretationsSection.style.display = 'block';
+        textarea.disabled = true;
+        button.disabled = true;
+        interpretationsSection.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.updateClaimText = function (radio) {
+        let selectedText = radio.parentElement.textContent.trim();
+        if (selectedText.endsWith('.')) {
+            selectedText = selectedText.slice(0, -1);
+        }
+        document.getElementById('selected-claim-text').textContent = selectedText;
+    };
+
+    window.updateConfidence = function (input) {
+        const confidence = parseInt(input.value);
+        const percentage = (confidence / 10) * 100;
+        document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
+    };
+
+    // No longer using image_feelstrue_answered or image_feelsnottrue_answered for logic
+
+    window.updateFeelTrueLabel = function (input) {
+        const description = document.getElementById('feeltrue-description');
+        description.textContent = input.value;
+
+        if (parseInt(input.value) < 50) {
+            followUpDoesNotFeelTrue.style.display = 'block';
+        } else {
+            followUpDoesNotFeelTrue.style.display = 'none';
+        }
+
+        // Never show the feels true follow-up
+        followUpFeelsTrue.style.display = 'none';
+    };
+
+    const binaryRadios = document.getElementsByName('image_feelstrue_binary');
+    Array.from(binaryRadios).forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            if (this.value === "Does not feel true") {
+                followUpDoesNotFeelTrue.style.display = 'block';
+            } else {
+                followUpDoesNotFeelTrue.style.display = 'none';
+            }
+            followUpFeelsTrue.style.display = 'none';
+        });
+    });
+
+    // Removed checkIfAlreadyAnswered function because it's no longer used
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,56 @@
+<script>
+    const allTrends = [
+        { name: "The Ukrainians", tweetCount: "38.6K Tweets" },
+        { name: "Experts", tweetCount: "37.1K Tweets" },
+        { name: "Alex Jones", tweetCount: "6,881 Tweets" },
+        { name: "Jerome Powell", tweetCount: "16.4K Tweets" },
+        { name: "$BECKOS", tweetCount: "3,434 Tweets" },
+        { name: "#GeForceSummer", tweetCount: "5,450 Tweets" },
+        { name: "Madden", tweetCount: "16.4K Tweets" },
+        { name: "Lions", tweetCount: "37.5K Tweets" },
+        { name: "John Redcorn", tweetCount: "8,711 Tweets" },
+        { name: "Duran", tweetCount: "18.1K Tweets" },
+        { name: "sabrina", tweetCount: "42.1K Tweets" },
+        { name: "DefJam", tweetCount: "7,886 Tweets" },
+        { name: "Glasgow", tweetCount: "7,659 Tweets" },
+        { name: "Slim Jim", tweetCount: "1,363 Tweets" },
+        { name: "Violet", tweetCount: "28.6K Tweets" },
+        { name: "Cold War", tweetCount: "9,674 Tweets" },
+        { name: "Nepal", tweetCount: "7,730 Tweets" },
+        { name: "Drake", tweetCount: "34.1K Tweets" }
+        // Add more topics as needed
+    ];
+
+    function shuffleAndDisplayTrends() {
+        // Shuffle the array
+        const shuffled = allTrends.sort(() => 0.5 - Math.random());
+
+        // Pick first 7 items
+        const selected = shuffled.slice(0, 7);
+
+        const container = document.getElementById("trendContainer");
+        container.innerHTML = ""; // Clear previous content
+
+        selected.forEach(topic => {
+            container.innerHTML += `
+                <p class="mt-2 mb-0"><b>${topic.name}</b></p>
+                ${topic.tweetCount ? `<small class="text-secondary">${topic.tweetCount}</small>` : ''}
+            `;
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", shuffleAndDisplayTrends);
+</script>
+
+<div class="d-flex justify-content-start">
+    <div class="col col-10 mx-3">
+        <div class="card border-0 mt-3 px-3 rounded-5">
+            <div class="card-header border-0 bg-white mt-3 rounded-5">
+                <h4><b>Trends for you</b></h4>
+            </div>
+            <div class="card-body bg-white rounded-5" id="trendContainer">
+                <!-- Trends will be injected here by JS -->
+            </div>
+        </div>
+    </div>
+</div>

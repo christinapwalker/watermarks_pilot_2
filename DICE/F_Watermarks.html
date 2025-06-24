@@ -1,0 +1,382 @@
+{% extends "global/Page.html" %}
+
+{% block content %}
+
+
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #222;
+    line-height: 1.5;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+  }
+
+  .survey-container {
+    max-width: 1400px;
+    margin: 30px auto 60px auto;
+    background: white;
+    padding: 30px 40px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.08);
+    border-radius: 6px;
+  }
+
+  .survey-container label:first-of-type {
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+
+  img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    display: block;
+    margin: auto;
+  }
+
+  input[type="radio"] {
+    transform: scale(1.3);
+    margin: 0.5rem;
+    cursor: pointer;
+  }
+
+  /* MATRIX TABLE STYLES */
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+  }
+
+  .matrix-table th,
+  .matrix-table td {
+    border: 1px solid #ddd;
+    padding: 10px 8px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: #333;
+  }
+
+  .matrix-table th {
+    font-weight: 600;
+    background: #f1f1f1;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .matrix-table .question-column {
+    text-align: left;
+    font-weight: 600;
+    width: 30%;
+    color: #222;
+  }
+
+  .matrix-table td label.mobile-label {
+    display: none;
+  }
+
+  .matrix-table input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  /* RESPONSIVE: STACK MATRIX TABLE ON MOBILE */
+  @media (max-width: 700px) {
+    .matrix-table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .matrix-table {
+      min-width: 600px; /* adjust this if needed */
+      table-layout: fixed;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      font-size: 0.85rem;
+      padding: 8px;
+    }
+
+    .matrix-table td label.mobile-label {
+      display: none !important;
+    }
+
+    /* Likert column headers vertical on mobile */
+    .matrix-table th:not(:first-child) {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      text-align: left;
+      padding: 5px;
+      font-size: 0.75rem;
+      height: 100px;
+      vertical-align: bottom;
+    }
+  }
+
+  /* GENERAL TABLE STYLES OVERRIDE */
+  table:not(.matrix-table) {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 18px;
+    margin-bottom: 40px;
+    table-layout: fixed;
+    background-color: #fff;
+  }
+
+  th, td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px;
+    border: none;
+  }
+
+  th {
+    font-weight: bold;
+    font-size: 0.95rem;
+  }
+
+  td {
+    background-color: #f7f7f7;
+    border-radius: 8px;
+  }
+
+  td:first-child,
+  th:first-child {
+    width: 60%;
+  }
+
+  td:not(:first-child),
+  th:not(:first-child) {
+    width: 12%;
+  }
+
+  /* SMALL SCREEN FONT & PADDING */
+  @media (max-width: 768px) {
+    th, td {
+      font-size: 0.85rem;
+      padding: 8px;
+    }
+  }
+
+
+
+
+</style>
+
+
+<div class="survey-container">
+    <label>    <strong>
+        You previously saw the following post that contained an image with
+        {% if player.watermark_condition == "cr_watermark" %}
+            a visible watermark.
+        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+            a label.
+        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+            a visible watermark and additional information below.
+        {% else %}
+            no watermark or label.
+        {% endif %}
+    </strong></label>
+
+
+
+<!-- Screenshot at the top, with click listener and marker -->
+<!--<div style="position: relative; display: block; margin: 20px auto; max-width: 100%; text-align: center;">-->
+<!--    <img src="{{ player.screenshot_treatment }}" id="treatment-image" alt="Screenshot"-->
+<!--         style="width: 100%; max-width: 600px; cursor: crosshair; display: block;">-->
+<!--</div>-->
+
+<div class="image-container">
+    <img src="{{ player.screenshot_treatment }}" id="treatment-image" alt="Screenshot" />
+    <div id="click-marker"></div>
+</div>
+
+
+
+
+<form method="post">
+  <!-- Instruction Text -->
+        <label><strong>Please indicate your level of agreement with the following statements regarding the
+    {% if player.watermark_condition == "cr_watermark" %}
+      watermark
+    {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+      label
+    {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+      watermark and information
+    {% else %}
+      watermark or label
+    {% endif %}
+    you saw on the previous social media page:</strong></label>
+
+
+  <!-- Likert Scale Table -->
+    <div class="matrix-table-wrapper">
+  <table class="matrix-table">
+    <tr>
+      <th></th>
+      <th>Not at all</th>
+      <th>Slightly</th>
+      <th>Moderately</th>
+      <th>Very</th>
+      <th>Extremely</th>
+    </tr>
+
+    <tr>
+      <td class="question-column">
+        The
+        {% if player.watermark_condition == "cr_watermark" %}
+          watermark
+        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+          label
+        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+          watermark and information
+        {% else %}
+          watermark or label
+        {% endif %}
+        is clear.
+      </td>
+      {% for choice in form.clarity_watermarks %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr>
+      <td class="question-column">
+        The
+        {% if player.watermark_condition == "cr_watermark" %}
+          watermark
+        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+          label
+        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+          watermark and information
+        {% else %}
+          watermark or label
+        {% endif %}
+        is informative.
+      </td>
+      {% for choice in form.informative_watermarks %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr>
+      <td class="question-column">
+        The
+        {% if player.watermark_condition == "cr_watermark" %}
+          watermark
+        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+          label
+        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+          watermark and information
+        {% else %}
+          watermark or label
+        {% endif %}
+        is trustworthy.
+      </td>
+      {% for choice in form.trustworthy_watermarks %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+
+    <tr>
+      <td class="question-column">
+        The
+        {% if player.watermark_condition == "cr_watermark" %}
+          watermark
+        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+          label
+        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+          watermark and information
+        {% else %}
+          watermark or label
+        {% endif %}
+        is biased.
+      </td>
+      {% for choice in form.biased_watermarks %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+  </table>
+</div>
+
+
+
+<div class="form-group">
+  <label for="creates_watermarks"><strong>Who do you believe creates the
+    {% if player.watermark_condition == "cr_watermark" %}watermark{%
+    elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}label{%
+    elif player.watermark_condition == "cr_watermark_plus_label" %}watermark and information{%
+    else %}watermark or label{% endif %} in the post above?</strong>
+  </label>
+
+  <div><input type="radio" name="creates_watermarks" value="The social media platform" onclick="toggleOtherTextbox(false)"> The social media platform</div>
+  <div><input type="radio" name="creates_watermarks" value="Other social media users" onclick="toggleOtherTextbox(false)"> Other social media users</div>
+  <div><input type="radio" name="creates_watermarks" value="Journalists" onclick="toggleOtherTextbox(false)"> Journalists</div>
+  <div><input type="radio" name="creates_watermarks" value="Activists" onclick="toggleOtherTextbox(false)"> Activists</div>
+  <div><input type="radio" name="creates_watermarks" value="The user who posted the content" onclick="toggleOtherTextbox(false)"> The user who posted the content</div>
+  <div><input type="radio" name="creates_watermarks" value="The AI Developer" onclick="toggleOtherTextbox(false)"> The AI Developer</div>
+  <div><input type="radio" name="creates_watermarks" value="Government Politicians" onclick="toggleOtherTextbox(false)"> Government/Politicians</div>
+  <div><input type="radio" name="creates_watermarks" value="Non-profit organizations" onclick="toggleOtherTextbox(false)"> Non-profit organizations</div>
+  <div><input type="radio" name="creates_watermarks" value="International organizations" onclick="toggleOtherTextbox(false)"> International organizations</div>
+  <div><input type="radio" name="creates_watermarks" value="Fact-checkers" onclick="toggleOtherTextbox(false)"> Fact-checkers</div>
+  <div><input type="radio" name="creates_watermarks" value="Other" onclick="toggleOtherTextbox(true)"> Other (please specify):</div>
+
+  <div id="otherTextbox" style="display: none; margin-top: 8px;">
+    <input type="text" name="creates_watermarks_other" id="creates_watermarks_other" placeholder="Please specify..." />
+  </div>
+</div>
+
+
+
+
+
+
+
+  <div class="d-flex justify-content-end m-5">
+    <button class="btn btn-success shadow" type="submit" id="submitButton">
+      ➔
+    </button>
+  </div>
+</form>
+
+<script>
+// Toggle visibility of the "Other" textbox
+function toggleOtherTextbox(show) {
+    const textbox = document.getElementById('otherTextbox');
+    textbox.style.display = show ? 'block' : 'none';
+}
+
+// Show textbox on page load if "Other" is selected
+document.addEventListener('DOMContentLoaded', function () {
+    const selected = document.querySelector('input[name="creates_watermarks"]:checked');
+    if (selected && selected.value === 'Other') {
+        toggleOtherTextbox(true);
+    }
+});
+
+// Form submission validation for "Other" option
+document.querySelector('form').addEventListener('submit', function (e) {
+    const selected = document.querySelector('input[name="creates_watermarks"]:checked');
+    const otherInput = document.getElementById('creates_watermarks_other');
+
+    if (selected && selected.value === 'Other') {
+        if (!otherInput.value.trim()) {
+            alert('Please specify your answer for "Other".');
+            e.preventDefault(); // stop submission
+        } else {
+            // Set the value of the radio button to the custom input
+            selected.value = otherInput.value.trim();
+        }
+    }
+});
+</script>
+
+
+
+
+{% endblock %}

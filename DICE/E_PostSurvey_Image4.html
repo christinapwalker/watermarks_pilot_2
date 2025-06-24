@@ -1,0 +1,95 @@
+<!--Delete?-->
+<!--{{ block title }}-->
+<!--&lt;!&ndash; Title content here &ndash;&gt;-->
+<!--{{ endblock }}-->
+
+<!--{{ block content }}-->
+<!--<img src="{{ image_path }}" width="500px" alt="Image"/>-->
+
+<!--<style>-->
+<!--    /* CSS to style the slider and labels */-->
+<!--    .slider-container {-->
+<!--        position: relative;-->
+<!--        width: 90%; /* Adjust width of slider container */-->
+<!--        margin: auto;-->
+<!--        margin-bottom: 50px; /* Add margin bottom to separate sliders */-->
+<!--    }-->
+
+<!--    .slider-label-left,-->
+<!--    .slider-label-right {-->
+<!--        position: absolute; /* Changed to absolute */-->
+<!--        top: -20px; /* Adjust vertical position to place it above the slider */-->
+<!--        font-size: 12px; /* Adjust font size of labels */-->
+<!--    }-->
+
+<!--    .slider-label-left {-->
+<!--        left: 0;-->
+<!--        padding-right: 10px; /* Add padding to the right to separate from the slider */-->
+<!--    }-->
+
+<!--    .slider-label-right {-->
+<!--        right: 0;-->
+<!--        padding-left: 10px; /* Add more padding to the left to move it further right */-->
+<!--    }-->
+
+<!--    input[type=range] {-->
+<!--        width: calc(100% - 20px); /* Adjust width of slider minus padding from both sides */-->
+<!--        height: 20px; /* Adjust height of slider */-->
+<!--        -webkit-appearance: none;-->
+<!--        appearance: none;-->
+<!--        background: #ddd;-->
+<!--        outline: none;-->
+<!--        opacity: 0.7;-->
+<!--        transition: opacity .15s ease-in-out;-->
+<!--        position: relative;-->
+<!--        margin: 0;-->
+<!--        padding: 0 10px; /* Add padding to the slider */-->
+<!--    }-->
+
+<!--    input[type=range]:hover {-->
+<!--        opacity: 1;-->
+<!--    }-->
+
+<!--    input[type=range]::-webkit-slider-thumb {-->
+<!--        -webkit-appearance: none;-->
+<!--        appearance: none;-->
+<!--        width: 25px;-->
+<!--        height: 25px;-->
+<!--        background: #4CAF50;-->
+<!--        cursor: pointer;-->
+<!--    }-->
+
+<!--    input[type=range]::-moz-range-thumb {-->
+<!--        width: 25px;-->
+<!--        height: 25px;-->
+<!--        background: #4CAF50;-->
+<!--        cursor: pointer;-->
+<!--    }-->
+
+<!--    .slider-result {-->
+<!--        margin-top: 10px; /* Adjust margin top for description */-->
+<!--        text-align: center;-->
+<!--    }-->
+<!--</style>-->
+
+<!--<p style="margin-bottom: 40px; margin-top: 50px;">Move the slider below to indicate your confidence level:</p>-->
+
+<!--<div class="slider-container">-->
+<!--    <span class="slider-label-left">0% Confidence</span>-->
+<!--    <input type="range" name="confidence_4" min="0" max="100" oninput="updateConfidence(this)">-->
+<!--    <span class="slider-label-right">100% Confidence</span>-->
+<!--    <p id="description-confidence" class="slider-result"></p>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    let descriptionConfidence = document.getElementById('description-confidence');-->
+
+<!--    function updateConfidence(input) {-->
+<!--        let confidence_4 = parseInt(input.value);-->
+<!--        descriptionConfidence.innerText = `Your confidence level: ${confidence_4}%`;-->
+<!--    }-->
+<!--</script>-->
+
+<!--{{ next_button }}-->
+
+<!--{{ endblock }}-->

@@ -1,0 +1,101 @@
+<!--Delete?-->
+<!--{% extends "global/Page.html" %}-->
+
+<!--{% block title %}-->
+<!--    Post Survey Slider-->
+<!--{% endblock %}-->
+
+<!--{% block content %}-->
+<!--<div class="container">-->
+<!--    {% if screenshot_url %}-->
+<!--        <img src="{{ screenshot_url }}" alt="Treatment" style="max-width: 100%; height: auto;">-->
+<!--    {% else %}-->
+<!--        <p>No screenshot available</p>-->
+<!--    {% endif %}-->
+
+<!--    <style>-->
+<!--        .slider-container {-->
+<!--            position: relative;-->
+<!--            width: 90%;-->
+<!--            margin: auto;-->
+<!--            margin-bottom: 50px;-->
+<!--        }-->
+
+<!--        .slider-label-left,-->
+<!--        .slider-label-right {-->
+<!--            position: absolute;-->
+<!--            top: -20px;-->
+<!--            font-size: 12px;-->
+<!--        }-->
+
+<!--        .slider-label-left {-->
+<!--            left: 0;-->
+<!--            padding-right: 10px;-->
+<!--        }-->
+
+<!--        .slider-label-right {-->
+<!--            right: 0;-->
+<!--            padding-left: 10px;-->
+<!--        }-->
+
+<!--        input[type=range] {-->
+<!--            width: calc(100% - 20px);-->
+<!--            height: 20px;-->
+<!--            -webkit-appearance: none;-->
+<!--            appearance: none;-->
+<!--            background: #ddd;-->
+<!--            outline: none;-->
+<!--            opacity: 0.7;-->
+<!--            transition: opacity .15s ease-in-out;-->
+<!--            position: relative;-->
+<!--            margin: 0;-->
+<!--            padding: 0 10px;-->
+<!--        }-->
+
+<!--        input[type=range]:hover {-->
+<!--            opacity: 1;-->
+<!--        }-->
+
+<!--        input[type=range]::-webkit-slider-thumb {-->
+<!--            -webkit-appearance: none;-->
+<!--            appearance: none;-->
+<!--            width: 25px;-->
+<!--            height: 25px;-->
+<!--            background: #4CAF50;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        input[type=range]::-moz-range-thumb {-->
+<!--            width: 25px;-->
+<!--            height: 25px;-->
+<!--            background: #4CAF50;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        .slider-result {-->
+<!--            margin-top: 10px;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--    </style>-->
+
+<!--    <p style="margin-bottom: 40px; margin-top: 50px;">Move the slider below to indicate your confidence level:</p>-->
+
+<!--    <div class="slider-container">-->
+<!--        <span class="slider-label-left">0% Confidence</span>-->
+<!--        <input type="range" name="confidence" min="0" max="100" oninput="updateConfidence(this)">-->
+<!--        <span class="slider-label-right">100% Confidence</span>-->
+<!--        <p id="description-confidence" class="slider-result"></p>-->
+<!--    </div>-->
+
+<!--    <script>-->
+<!--        let descriptionConfidence = document.getElementById('description-confidence');-->
+
+<!--        function updateConfidence(input) {-->
+<!--            let confidence = parseInt(input.value);-->
+<!--            descriptionConfidence.innerText = `Your confidence level: ${confidence}%`;-->
+<!--        }-->
+<!--    </script>-->
+
+<!--    {{ next_button }}-->
+<!--</div>-->
+<!--{% endblock %}-->

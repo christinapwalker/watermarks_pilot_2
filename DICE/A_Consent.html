@@ -1,0 +1,269 @@
+{{ block scripts }}
+<script>
+    // Function to check if consent is given
+    function checkConsent() {
+        var consentYes = document.getElementById('consentYes');
+        var consentNo = document.getElementById('consentNo');
+        var submitButton = document.getElementById('submitButton');
+        var messageDiv = document.getElementById('messageDiv');
+
+        if (consentYes.checked) {
+            submitButton.disabled = false;
+            messageDiv.innerHTML = '';
+        } else if (consentNo.checked) {
+            submitButton.disabled = true;
+            messageDiv.innerHTML = 'You must consent to start the survey.';
+        } else {
+            submitButton.disabled = true;
+            messageDiv.innerHTML = '';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var consentRadios = document.querySelectorAll('input[name="consent"]');
+        consentRadios.forEach(function (radio) {
+            radio.addEventListener('click', checkConsent);
+        });
+
+        // Initially disable submit button
+        document.getElementById('submitButton').disabled = true;
+    });
+</script>
+{{ endblock }}
+
+{{ block content }}
+
+<!-- Responsive Meta Tag -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #222;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    width: 90%;
+    max-width: 1400px;
+    margin: 3rem auto 4rem;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-weight: 600;
+    color: #222;
+  }
+
+  h1 {
+  font-size: 2rem; /* was 1.75rem */
+  line-height: 1.4;
+}
+
+  p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  p strong {
+    font-weight: 600;
+  }
+
+  ul {
+    margin-left: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  ul li {
+    margin-bottom: 0.3rem;
+  }
+
+  .consent-options {
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-check {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-check input[type="radio"] {
+    margin-right: 0.5rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    cursor: pointer;
+  }
+
+  .form-check label {
+    cursor: pointer;
+  }
+
+  #submitButton {
+    background-color: #137cbd;
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(19,124,189,0.5);
+    transition: background-color 0.3s ease;
+  }
+
+  #submitButton:disabled {
+    background-color: #a3c3db;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  #submitButton:hover:not(:disabled) {
+    background-color: #0f6bb8;
+  }
+
+  #messageDiv {
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #d9534f; /* Bootstrap danger red */
+  }
+
+  /* Delete or comment out this section */
+@media (max-width: 1000px) {
+  .form-check {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+
+
+
+    h1 {
+      font-size: 1.4rem;
+      text-align: left;
+    }
+
+    #submitButton {
+      width: 100%;
+      font-size: 1rem;
+      padding: 0.75rem;
+    }
+
+    .form-check {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .form-check label {
+      margin-top: 0.3rem;
+    }
+  }
+
+</style>
+
+<div class="container" role="main" aria-labelledby="consentTitle">
+
+  <h1 id="consentTitle" tabindex="0" style="text-align:center; margin-bottom: 2rem;">
+    RESEARCH PARTICIPANT INFORMATION FORM<br>
+    User Engagement with Social Media Posts<br>
+    Principal Investigators: Kaylyn Jackson Schiff, Daniel Schiff, JP Messina, Natalia Bueno<br>
+    Department of Political Science, Emory University
+  </h1>
+
+  <p><strong>Key Information</strong></p>
+  <p>Please take time to review this information carefully. You are being asked to participate or be a part of a research study. Your participation is voluntary which means that you may choose not to participate at any time. Please read this form and ask any questions before you agree to be in the study. If you decide to take part in the study, you will be asked to indicate your consent. Be sure to understand what you will do and any possible risks or benefits.</p>
+
+  <p>The researchers hope to learn more about how people interact with posts on social media and your beliefs about them. You are being asked to participate because we are interested on how you interact with posts online. Although we are including this description of the general nature of the study, some research requires that the full purpose of the study not be explained before you participate. We will give you a full explanation at the end of the study in a debriefing form.</p>
+
+  <p><strong>What is the purpose of this study?</strong></p>
+  <p>You are being asked to participate in this study to help us learn more about how people view artificial intelligence online.</p>
+
+  <p>This study is only intended for people who are 18 years of age or older. <strong>Do not complete the study if you are not legally considered an adult.</strong></p>
+
+  <p><strong>What will I do if I choose to be in this study?</strong></p>
+  <p>If you choose to participate, you will be shown information and asked to answer survey questions. You may receive one of several different versions of certain information and survey questions. You can stop the survey at any time.</p>
+
+  <p>While the data will be de-identified so others beyond the researchers cannot trace your responses back to you, we will ask you to include some identifying information in the survey.</p>
+
+  <p>Specifically, we will collect and use the following types of Personal Data:</p>
+  <ul>
+    <li>Prolific ID Number</li>
+    <li>Age, Annual Income, Education Level, Race, Ethnicity, Gender, Political Ideology</li>
+    <li>Social media usage, Beliefs about Social Media Platforms</li>
+    <li>Familiarity and Engagement with Social Media Regulations</li>
+    <li>Confidence in Social Media Platforms</li>
+  </ul>
+
+  <p>You will also be taken to a page that resembles a social media platform. This is not a real social media platform and is not connected to your personal accounts in any way. Any actions you take on this platform (e.g., liking, retweeting) will not be made public on your social media accounts. You will see a variety of posts on this page and can interact with them as you wish. Your answers will be collected through OTree and securely stored by the study’s principal investigator at Purdue University.</p>
+
+  <p>Potential participants may accept or decline to participate below. Additionally, at the conclusion of the survey a second consent document will be presented with more detail on the aim and structure of the survey. You will have the opportunity to decline the inclusion of your data again after receiving this information at the end of the survey.</p>
+
+  <p><strong>How long will I be in the study?</strong></p>
+  <p>We expect that the survey will take about 5-10 minutes. You will be asked to read information, look at a social media platform, and answer multiple-select and multiple-choice questions. The study team plans to keep answers for this study to answer research questions. We will keep this information until we are done with the study, approximately one year from now and for at least five years after we are finished. We may share the anonymous data and findings with other researchers or in research papers or presentations, and in an online academic repository.</p>
+
+  <p>The survey has been pilot tested to determine the average time it takes to complete it if the respondent fully reads and answers each question. Marked deviation from this average time could result in rejection of your completed survey.</p>
+
+  <p><strong>Are there any potential benefits?</strong></p>
+  <p>It is unlikely that there will be many direct benefits to you from participating. Having more information from the answers in this research study might help us or other researchers understand more about interactions with posts on social media. However, we will provide you with information on how to better understand content that you see, which may help you become more aware in the future.</p>
+
+  <p><strong>Will I receive payment or other incentive?</strong></p>
+  <p>You will receive compensation in the amount of $1 for the 5-minute survey (corresponding to a rate of $12.00/hour) for your participation in the study. After completing the survey, you will be compensated according to the policies set by Prolific. According to the rules of the Internal Revenue Service (IRS), payments that are made to you as a result of your participation in a study may be considered taxable income.</p>
+
+  <p>After completing the survey, you will be provided with the compensation agreed between you and the market research panel for which you are a member. According to the rules of the Internal Revenue Service (IRS), payments that are made to you as a result of your participation in a study may be considered taxable income.</p>
+
+  <p><strong>Will information about me and my participation be kept confidential?</strong></p>
+  <p>The project’s research records may be reviewed by the US DHHS Office for Human Research Protections and by departments at Purdue University responsible for regulatory and research oversight.</p>
+
+  <p>Your participation in this study will not identify you personally and at no time will the research team be able to identify you. After collecting the survey responses for this study, the data will be stored in the principal investigator’s password protected cloud storage where only members of the research team will have access to it. At the completion of the study, the results of the study will be published in an academic journal and the anonymous data will then be stored in an online, public data repository indefinitely.</p>
+
+  <p><strong>What are my rights if I take part in this study?</strong></p>
+  <p>You do not have to participate in this research project. If you agree to participate, you may withdraw your participation at any time without penalty. You can withdraw from the study simply by exiting the web browser and not completing the survey. Financial compensation is contingent on survey completion. To opt out of participation or withdraw your consent after survey completion, please notify a member of the research team. The names and contact information for the investigators are listed below.</p>
+
+  <p><strong>Who can I contact if I have questions about the study?</strong></p>
+  <p>If you have questions, comments, or concerns about this research project, you can talk to one of the researchers. Please contact Dr. Kaylyn Jackson Schiff, Dr. Daniel Schiff (+1 765-494-4161) or Dr. Natália Bueno (+1 404-727-6566).</p>
+
+  <p>If you have questions about your rights while taking part in the study or have concerns about the treatment of research participants, please call the Human Research Protection Program at (765) 494-5942, email (irb@purdue.edu) or write to: Human Research Protection Program - Purdue University Ernest C. Young Hall, Room 1010 155 S. Grant St. West Lafayette, IN 47907-2114. To report anonymously via Purdue’s Hotline see www.purdue.edu/hotline</p>
+
+  <p>You can also contact the Institutional Review Board at Emory University, located at 1599 Clifton Road NE - 4th Floor, Atlanta, GA 30322, telephone number (404) 727-3889 or email (irb@emory.edu).</p>
+
+  <p><strong>Documentation of Informed Consent</strong></p>
+
+  <p>I have been informed that the collection, processing, and use of my data is on a voluntary basis and furthermore that I can cancel the survey at any time without giving reasons.</p>
+
+  <p>I have read and understood the information about the study. I affirm that my participation is voluntary.</p>
+
+  <p>I understand that my data will be stored with the Principal Investigator’s approved Purdue and OTree servers during the study period. I understand that Emory researchers will have access to my data during the study period. I declare that I consent to the recording of study data and its use in anonymous form for scientific purposes, including publication in scientific journals, which will take place as part of the study.</p>
+
+  <form method="post" action="" novalidate>
+    <div class="consent-options">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="consent" value="yes" id="consentYes" required>
+        <label class="form-check-label" for="consentYes">
+          I acknowledge that I have read and consent to the information above.
+        </label>
+      </div>
+
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="consent" value="no" id="consentNo" required>
+        <label class="form-check-label" for="consentNo">
+          I do not consent to this study.
+        </label>
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <button id="submitButton" type="submit">Start Survey</button>
+    </div>
+
+    <div id="messageDiv" role="alert" aria-live="assertive"></div>
+  </form>
+</div>
+
+{{ endblock }}

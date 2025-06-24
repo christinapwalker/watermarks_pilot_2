@@ -1,0 +1,10 @@
+{% extends "global/Page.html" %}
+
+{% block content %}
+<script>
+    window.onload = function() {
+        window.location.href = "{{ redirect_url }}";
+    }
+</script>
+<p>Loading next section...</p>
+{% endblock %}

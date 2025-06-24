@@ -1,0 +1,231 @@
+{% block title %}
+    <!-- Your Page Title -->
+<!--    Demographics-->
+{% endblock %}
+
+{% block content %}
+
+<form method="post">
+
+<style>
+  /* Reset and base styles */
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #222;
+    line-height: 1.5;
+    background-color: #f9f9f9;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Centered container, like Qualtrics content area */
+  .survey-container {
+    max-width: 1400px;
+    margin: 30px auto 60px auto;
+    background: white;
+    padding: 30px 40px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.08);
+    border-radius: 6px;
+  }
+
+  /* Headings / instructions */
+  p {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  /* Slider styles */
+  .slider-container {
+    margin: 20px 0 40px;
+  }
+  .slider-label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: block;
+    font-size: 1.1rem;
+  }
+  .slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 14px;
+    border-radius: 7px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .slider:hover {
+    opacity: 1;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #337ab7;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
+    transition: background 0.3s ease;
+  }
+  .slider::-webkit-slider-thumb:hover {
+    background: #286090;
+  }
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #337ab7;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
+  }
+
+  .slider-value {
+    margin-top: 10px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+    color: #444;
+  }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  .slider-labels span {
+    width: 13%;
+    text-align: center;
+  }
+
+  /* Error messages */
+  .error-message {
+    color: #d9534f;
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 18px;
+    margin-bottom: 40px;
+  }
+  th, td {
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: #333;
+  }
+  th {
+    font-weight: 600;
+    background: #f1f1f1;
+    border-bottom: 2px solid #ddd;
+  }
+  .question-column {
+    width: 30%;
+    text-align: left;
+    font-weight: 600;
+    color: #222;
+  }
+
+  /* Submit button container */
+  .submit-container {
+    text-align: right;
+  }
+  button#submitButton {
+    background-color: #337ab7;
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(51, 122, 183, 0.4);
+    transition: background-color 0.3s ease;
+  }
+  button#submitButton:hover {
+    background-color: #286090;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 800px) {
+    .survey-container {
+      margin: 15px;
+      padding: 20px;
+    }
+    .slider-labels span {
+      font-size: 0.8rem;
+    }
+    th, td {
+      font-size: 0.85rem;
+      padding: 8px 6px;
+    }
+    button#submitButton {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.2rem;
+    }
+    .submit-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .question-column {
+      width: 100% !important;
+      display: block !important;
+      margin-bottom: 8px !important;
+      padding-left: 0 !important;
+      position: relative !important;
+    }
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+    tr {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      display: none;
+    }
+    td {
+      text-align: left !important;
+      padding-left: 0 !important;
+      position: relative !important;
+    }
+    /* Remove data-label from answer cells to avoid duplicate labels */
+    td:not(.question-column):before {
+      content: none !important;
+    }
+    /* Stack answer options vertically (optional, comment this out if you want horizontal) */
+    td:not(.question-column) {
+      display: block;
+      margin-bottom: 8px;
+    }
+    /* Style radio inputs inline with their labels */
+    td input[type="radio"] {
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+  }
+</style>
+
+    {{ formfields }}
+
+       <div class="d-flex justify-content-end m-5">
+    <button class="btn btn-success shadow" type="submit" id="submitButton">
+      ➔
+    </button>
+  </div>
+
+</form>
+
+{% endblock %}

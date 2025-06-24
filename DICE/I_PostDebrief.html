@@ -1,0 +1,268 @@
+{% block content %}
+<form method="post">
+
+    <style>
+/* Container for image and marker */
+.image-container {
+    position: relative;
+    max-width: 600px;
+    margin: 20px auto 40px;
+    text-align: center;
+}
+#clickable-image {
+    width: 100%;
+    cursor: crosshair;
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+#click-marker {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: rgba(220, 53, 69, 0.85); /* Bootstrap's red */
+    border-radius: 50%;
+    pointer-events: none;
+    border: 2px solid white;
+    display: none;
+}
+
+/* Question styling */
+.question {
+    margin-bottom: 30px;
+}
+.multiple-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.multiple-choice label {
+    flex: 1 1 30%;
+    cursor: pointer;
+}
+.multiple-choice input[type="radio"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1.5px solid #ced4da;
+    border-radius: 5px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Sliders */
+.slider-container {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto 50px;
+}
+.slider-label-left,
+.slider-label-right {
+    position: absolute;
+    top: -20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    user-select: none;
+}
+.slider-label-left {
+    left: 0;
+}
+.slider-label-right {
+    right: 0;
+}
+input[type=range] {
+    width: 100%;
+    height: 18px;
+    background: #eee;
+    border-radius: 10px;
+    outline: none;
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=range]:hover {
+    background: #ddd;
+}
+input[type=range]::-webkit-slider-thumb,
+input[type=range]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: #28a745;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 2px rgba(0,0,0,0.4);
+}
+.slider-result {
+    margin-top: 8px;
+    font-size: 1rem;
+    color: #333;
+    text-align: center;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.d-flex.justify-content-end.m-5 {
+    display: flex;
+    justify-content: flex-end;
+    margin: 3rem 0;
+}
+.btn-success.shadow {
+    background-color: #28a745;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(40,167,69,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-success.shadow:hover {
+    background-color: #218838;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: #444;
+}
+
+/* Claim options */
+.claim-option {
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.claim-option input {
+    margin-right: 8px;
+}
+</style>
+
+    <div style="margin-bottom: 50px; font-size: 1.5rem">
+        {{ formfield 'study_topic' }}
+    </div>
+
+    <p style="margin-bottom: 40px; font-size: 1.5rem">
+        Move the slider below to indicate to what extent you believe participating in the study will influence your political preferences:
+    </p>
+
+    <div class="slider-container">
+        <span class="slider-label-left">Not at All Influential</span>
+        <input type="range" name="ethics_influence_political_prefs" min="1" max="5" step="1" oninput="updateinfluence_politics(this)">
+        <span class="slider-label-right">Extremely Influential</span>
+        <p id="description-influence_politics" class="slider-result"></p>
+        {{ formfield_errors 'ethics_influence_political_prefs' }}
+    </div>
+
+    <p style="margin-bottom: 40px; margin-top: 50px; font-size: 1.5rem">
+        Move the slider below to indicate to what extent this study helped you understand watermarks or labels for identifying AI-generated content:
+    </p>
+
+    <div class="slider-container">
+        <span class="slider-label-left">Not at All</span>
+        <input type="range" name="benefits_understanding_watermarks" min="1" max="5" step="1" oninput="updatebenefits_understanding_watermarks(this)">
+        <span class="slider-label-right">Extremely</span>
+        <p id="description-benefits_understanding_watermarks" class="slider-result"></p>
+        {{ formfield_errors 'benefits_understanding_watermarks' }}
+    </div>
+
+    <div class="d-flex justify-content-end m-5">
+        <button class="btn btn-success shadow" type="submit" id="submitButton">
+            ➔
+        </button>
+    </div>
+</form>
+
+
+
+
+<script>
+    let descriptioninfluence_politics = document.getElementById('description-influence_politics');
+    let descriptionbenefits_understanding_watermarks = document.getElementById('description-benefits_understanding_watermarks');
+
+    function updatebenefits_understanding_watermarks(input) {
+        const labels = {
+            1: "Not at all",
+            2: "Slightly",
+            3: "Moderately",
+            4: "Very",
+            5: "Extremely"
+        };
+        const value = parseInt(input.value);
+        descriptionbenefits_understanding_watermarks.innerText = labels[value];
+    }
+
+    function updateinfluence_politics(input) {
+        const labels = {
+            1: "Not at all influential",
+            2: "Slightly influential",
+            3: "Moderately influential",
+            4: "Very influential",
+            5: "Extremely influential"
+        };
+        const value = parseInt(input.value);
+        descriptioninfluence_politics.innerText = labels[value];
+    }
+
+    // Optional: initialize descriptions on page load
+    window.onload = function() {
+        const slider1 = document.querySelector('input[name="influence_politics"]');
+        if (slider1) updateinfluence_politics(slider1);
+        const slider2 = document.querySelector('input[name="benefits_understanding_watermarks"]');
+        if (slider2) updatebenefits_understanding_watermarks(slider2);
+    };
+</script>
+
+<!--<div class="container">-->
+<!--    <div class="row justify-content-center mt-5">-->
+<!--        <div class="col-sm-10 col-md-10 col-lg-8">-->
+<!--            <div class="card rounded mt-3 shadow-lg">-->
+<!--                <div class="card-body">-->
+<!--                    <h1 class="display-4">Thank you!</h1>-->
+<!--                    <p class="lead">Your participation is greatly appreciated.</p>-->
+
+<!--                    <table class="table mt-5 mb-5 table-responsive">-->
+
+<!--                    </table>-->
+<!--                    <p class="text-center text-secondary mb-4">-->
+<!--                        {% if session.prolific_completion_url == 'NA' %}-->
+<!--                        <button class="btn btn-success shadow">-->
+<!--                            Click here to complete the survey-->
+<!--                        </button>-->
+<!--                        {% else %}-->
+<!--                        <a class="btn btn-success shadow" href="{{ session.prolific_completion_url }}" role="button">-->
+<!--                            Click here to complete the survey-->
+<!--                        </a>-->
+<!--                        {% endif %}-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+{% endblock %}

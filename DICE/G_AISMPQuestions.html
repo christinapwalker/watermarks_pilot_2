@@ -1,0 +1,484 @@
+{% block title %}
+
+{% endblock %}
+
+{% block content %}
+<style>
+  /* Reset and base styles */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+  line-height: 1.5;
+  background-color: #f9f9f9;
+  padding: 0;
+  margin: 0;
+}
+
+/* Centered container, like Qualtrics content area */
+.survey-container {
+  max-width: 1400px;
+  margin: 30px auto 60px auto;
+  background: white;
+  padding: 30px 40px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.08);
+  border-radius: 6px;
+}
+
+/* Headings / instructions */
+p {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Slider styles */
+.slider-container {
+  font-size: 1.3rem;
+  margin: 20px 0 40px;
+}
+.slider-label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  font-size: 1.1rem;
+}
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 14px;
+  border-radius: 7px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+.slider:hover {
+  opacity: 1;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #337ab7;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
+  transition: background 0.3s ease;
+}
+.slider::-webkit-slider-thumb:hover {
+  background: #286090;
+}
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #337ab7;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
+}
+
+.slider-value {
+  margin-top: 10px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  color: #444;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #666;
+}
+.slider-labels span {
+  width: 13%;
+  text-align: center;
+}
+
+/* Error messages */
+.error-message {
+  color: #d9534f;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Tables general */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 18px;
+  margin-bottom: 40px;
+}
+th, td {
+  padding: 12px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.95rem;
+  color: #333;
+}
+th {
+  font-weight: 600;
+  background: #f1f1f1;
+  border-bottom: 2px solid #ddd;
+}
+.question-column {
+  width: 30%;
+  text-align: left;
+  font-weight: 600;
+  color: #222;
+}
+
+/* Submit button container */
+.submit-container {
+  text-align: right;
+}
+button#submitButton {
+  background-color: #337ab7;
+  border: none;
+  color: white;
+  padding: 12px 25px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(51, 122, 183, 0.4);
+  transition: background-color 0.3s ease;
+}
+button#submitButton:hover {
+  background-color: #286090;
+}
+
+/* Responsive adjustments */
+@media (max-width: 800px) {
+  .survey-container {
+    margin: 15px;
+    padding: 20px;
+  }
+  .slider-labels span {
+    font-size: 0.8rem;
+  }
+  th, td {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+  }
+  button#submitButton {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.2rem;
+  }
+  .submit-container {
+    text-align: center;
+    margin-top: 20px;
+  }
+}
+
+/* ----- MATRIX TABLE SPECIFIC STYLES ----- */
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+}
+.matrix-table th,
+.matrix-table td {
+  border: 1px solid #ddd;
+  padding: 10px 8px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.95rem;
+  color: #333;
+}
+.matrix-table .question-column {
+  text-align: left;
+  font-weight: 600;
+  width: 30%;
+  color: #222;
+}
+
+/* Hide radio labels on desktop (since headers label the columns) */
+.matrix-table td label.mobile-label {
+  display: none;
+}
+
+/* Radio inputs - size and margin */
+.matrix-table input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* MOBILE - Below 700px, stack rows vertically and show radio labels */
+@media (max-width: 700px) {
+  .matrix-table,
+  .matrix-table thead,
+  .matrix-table tbody,
+  .matrix-table tr,
+  .matrix-table th,
+  .matrix-table td {
+    display: block;
+  }
+  .matrix-table thead tr {
+    /* Hide header row on mobile */
+    display: none;
+  }
+  .matrix-table tr {
+    margin-bottom: 25px;
+    border: none;
+    padding: 0;
+  }
+  .matrix-table td.question-column {
+    font-weight: 700;
+    padding-bottom: 10px;
+    border: none;
+  }
+  .matrix-table td {
+    border: none;
+    padding: 8px 0;
+    text-align: left;
+  }
+  .matrix-table td:not(.question-column) {
+    display: flex;
+    align-items: center;
+  }
+  /* Show the label next to each radio on mobile */
+  .matrix-table td label.mobile-label {
+    display: inline;
+    margin-left: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #222;
+    cursor: pointer;
+  }
+  .matrix-table input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* MOBILE SLIDER IMPROVEMENTS */
+@media (max-width: 700px) {
+  /* Make sure slider container fills full content width inside .survey-container */
+  .slider-container {
+    width: 130%;
+    box-sizing: border-box;
+    /*margin: 10px 0 50px;  !* your existing vertical margins *!*/
+    padding-left: 0;
+    padding-right: 0;
+
+  }
+
+  /* Make sure slider fills full width of its container */
+  .slider {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+  }
+}
+
+</style>
+
+
+<div class="qualtrics-container">
+  <form method="post">
+    <div class="form-group">
+      <label for="llm_familiarity">
+        <strong>Before today, how familiar were you with large language models (LLMs) or AI chatbots like ChatGPT, Gemini, or Claude?</strong>
+      </label>
+      <div>
+        <input type="radio" id="llm_have_not_heard" name="llm_familiarity" value="Have not heard about them">
+        <label for="llm_have_not_heard">Have not heard about them</label>
+      </div>
+      <div>
+        <input type="radio" id="llm_a_little" name="llm_familiarity" value="Have heard a little about them but have not tried them out">
+        <label for="llm_a_little">Have heard a little about them but have not tried them out</label>
+      </div>
+      <div>
+        <input type="radio" id="llm_tried" name="llm_familiarity" value="Have heard about them and have tried them out">
+        <label for="llm_tried">Have heard about them and have tried them out</label>
+      </div>
+      <div>
+        <input type="radio" id="llm_sometimes" name="llm_familiarity" value="Use them sometimes in my work or personal life">
+        <label for="llm_sometimes">Use them sometimes in my work or personal life</label>
+      </div>
+      <div>
+        <input type="radio" id="llm_frequently" name="llm_familiarity" value="Use them frequently in my work or personal life">
+        <label for="llm_frequently">Use them frequently in my work or personal life</label>
+      </div>
+    </div>
+
+    <!-- Instruction Text -->
+    <p><b>How much, if at all, do you trust the information you get from the following sources:</b></p>
+
+    <!-- Likert Scale -->
+    <table>
+      <tr>
+        <th></th>
+        <th>A lot</th>
+        <th>Some</th>
+        <th>Not too much</th>
+        <th>Not at all</th>
+        <th>No opinion</th>
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_twitter_posttreatment.label }}</td>
+        {% for choice in form.trust_twitter_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+
+      <tr>
+        <td class="question-column">{{ form.trust_instagram_posttreatment.label }}</td>
+        {% for choice in form.trust_instagram_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_nationalnews_posttreatment.label }}</td>
+        {% for choice in form.trust_nationalnews_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_localnews_posttreatment.label }}</td>
+        {% for choice in form.trust_localnews_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_friendsfamily_posttreatment.label }}</td>
+        {% for choice in form.trust_friendsfamily_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_pinterest_posttreatment.label }}</td>
+        {% for choice in form.trust_pinterest_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_linkedin_posttreatment.label }}</td>
+        {% for choice in form.trust_linkedin_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_facebook_posttreatment.label }}</td>
+        {% for choice in form.trust_facebook_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_youtube_posttreatment.label }}</td>
+        {% for choice in form.trust_youtube_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_tiktok_posttreatment.label }}</td>
+        {% for choice in form.trust_tiktok_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_bluesky_posttreatment.label }}</td>
+        {% for choice in form.trust_bluesky_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_truthsocial_posttreatment.label }}</td>
+        {% for choice in form.trust_truthsocial_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.trust_acquaintances_posttreatment.label }}</td>
+        {% for choice in form.trust_acquaintances_posttreatment %}
+          <td data-label="">{{ choice|safe }}</td>
+        {% endfor %}
+      </tr>
+    </table>
+
+    <!-- Instruction Text -->
+    <p><b>Please indicate your level of agreement with the following statements regarding social media platforms:</b></p>
+
+    <!-- Likert Scale -->
+    <table>
+      <tr>
+        <th></th>
+        <th>Strongly Disagree</th>
+        <th>Disagree</th>
+        <th>Neither Agree Nor Disagree</th>
+        <th>Agree</th>
+        <th>Strongly Agree</th>
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.smp_entertaining_post.label }}</td>
+        {% for choice in form.smp_entertaining_post %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.smp_accuracy_post.label }}</td>
+        {% for choice in form.smp_accuracy_post %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.smp_enjoyment_post.label }}</td>
+        {% for choice in form.smp_enjoyment_post %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.smp_community_post.label }}</td>
+        {% for choice in form.smp_community_post %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.smp_news_post.label }}</td>
+        {% for choice in form.smp_news_post %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+    </table>
+
+    <!-- Instruction Text -->
+    <p><b>Please indicate your level of agreement with the following statements regarding artificial intelligence:</b></p>
+
+    <!-- Likert Scale -->
+    <table>
+      <tr>
+        <th></th>
+        <th>A lot</th>
+        <th>Some</th>
+        <th>Not too much</th>
+        <th>Not at all</th>
+        <th>Do not use</th>
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.benefits_ai.label }}</td>
+        {% for choice in form.benefits_ai %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td class="question-column">{{ form.distinguish_ability.label }}</td>
+        {% for choice in form.distinguish_ability %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+    </table>
+
+  <div class="d-flex justify-content-end m-5">
+    <button class="btn btn-success shadow" type="submit" id="submitButton">
+      ➔
+    </button>
+  </div>
+  </form>
+</div>
+{% endblock %}

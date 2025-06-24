@@ -1,0 +1,77 @@
+{% extends "global/Page.html" %}
+
+{% block content %}
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+  }
+
+  .qualtrics-container {
+    max-width: 1000px;
+    width: 90%;
+    margin: 40px auto 60px auto;
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.08);
+    font-size: 1.2rem;
+    color: #222;
+    line-height: 1.6;
+  }
+
+  #submitButton {
+    background-color: #337ab7;
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(51, 122, 183, 0.4);
+    transition: background-color 0.3s ease;
+  }
+
+  #submitButton:hover {
+    background-color: #286090;
+  }
+
+  .submit-container {
+    text-align: right;
+    margin-top: 40px;
+  }
+
+  @media (max-width: 600px) {
+    .qualtrics-container {
+      padding: 20px;
+    }
+
+    #submitButton {
+      width: 100%;
+      font-size: 1.1rem;
+      padding: 14px;
+    }
+
+    .submit-container {
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="qualtrics-container">
+  <p>
+    On the next page, you will see posts on a social media platform.
+    Please interact with the posts on this platform (liking, reposting, or replying)
+    as you would on your own personal feed.
+  </p>
+
+  <div class="submit-container">
+    <button class="btn btn-success shadow" type="submit" id="submitButton">
+      ➔
+    </button>
+  </div>
+</div>
+{% endblock %}

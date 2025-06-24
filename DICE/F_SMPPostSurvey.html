@@ -1,0 +1,61 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Post-Survey Questions
+{% endblock %}
+
+{% block content %}
+
+    Please answer the following information.
+
+    {% formfields %}
+
+    {% next_button %}
+
+{% endblock %}
+{% block scripts %}
+    <script>
+    </script>
+{% endblock %}
+
+{% extends "global/Page.html" %}
+
+{% block content %}
+<table class="table">
+  {% for platform in PLATFORMS %}
+  <tr>
+    <th>{{ platform }}</th>
+    {% for choice in form.frequency_smps %}
+    <td>{{ choice }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
+
+{% block content %}
+<table class="table">
+  {% for source in SOURCES %}
+  <tr>
+    <th>{{ source }}</th>
+    {% for choice in form.trust_smps %}
+    <td>{{ choice }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
+
+{% block content %}
+<table class="table">
+  {% for question in SMPTRUST_QUESTIONS %}
+  <tr>
+    <th>{{ question }}</th>
+    {% for choice in form.online_accuracy %}
+    <td>{{ choice }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,292 @@
+{{ block scripts }}
+<!-- This script block contains JavaScript code to handle consent for the survey -->
+<style>
+  /* If the field is a textarea or input text box */
+  #id_understand_AI, /* assuming the rendered input has this id */
+  input[name="understand_AI"],
+  textarea[name="understand_AI"] {
+      font-size: 1.5rem;       /* larger text */
+    padding: 10px 15px;          /* more padding */
+    border: 2px solid #007bff;   /* blue border */
+    border-radius: 8px;          /* rounded corners */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);  /* subtle glow */
+    width: 100%;                 /* full width */
+    max-width: 600px;            /* limit max width */
+    display: block;
+    margin: 10px auto 20px auto; /* center and spacing */
+  }
+
+  /* Optionally add focus effect */
+  #id_understand_AI:focus,
+  input[name="understand_AI"]:focus,
+  textarea[name="understand_AI"]:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 12px rgba(0, 86, 179, 0.7);
+    outline: none;
+  }
+  body {
+  /*background: linear-gradient(135deg, #e0f7fa, #ffffff);*/
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+/*.card {*/
+/*  max-width: 700px;*/
+/*  margin: 40px auto;*/
+/*  border-radius: 15px;*/
+/*  box-shadow: 0 8px 20px rgba(0,0,0,0.1);*/
+/*  background-color: #fff;*/
+/*}*/
+
+h1, h2, h3 {
+  font-weight: 600;
+  /*color: #0056b3;*/
+  margin-bottom: 1rem;
+}
+
+h1.display-4 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+ul {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  list-style-type: disc;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover, a:focus {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+#treatment-image {
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+}
+
+.form-check-label {
+    font-size: 1.5rem;
+}
+
+#messageDiv {
+  color: #d9534f;  /* Bootstrap danger red */
+  font-weight: 600;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/*button#submitButton {*/
+/*  background-color: #007bff;*/
+/*  border: none;*/
+/*  padding: 12px 30px;*/
+/*  font-size: 1.125rem;*/
+/*  border-radius: 6px;*/
+/*  color: white;*/
+/*  cursor: pointer;*/
+/*  transition: background-color 0.3s ease;*/
+/*  display: block;*/
+/*  margin: 20px auto 0;*/
+/*  min-width: 180px;*/
+/*}*/
+
+button#submitButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+table.table {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .card {
+    margin: 20px 15px;
+  }
+}
+
+  .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-check {
+  margin-bottom: 0.8rem;
+}
+
+.form-check-label {
+  font-size: 1.5rem;
+}
+
+
+</style>
+
+<script>
+    // Function to check if consent is given
+    function checkConsentdebrief() {
+        // Get references to the consent radio buttons, submit button, and message div
+        var consentdebriefYes = document.getElementById('consentdebriefYes');
+        var consentdebriefNo = document.getElementById('consentdebriefNo');
+        var submitButton = document.getElementById('submitButton');
+        var messageDiv = document.getElementById('messageDiv');
+
+        // Check if Yes is selected
+        if (consentdebriefYes.checked) {
+            // If consent is given, enable the submit button and hide the message
+            submitButton.disabled = false;
+            messageDiv.innerHTML = '';
+            // Check if No is selected
+        } else if (consentdebriefNo.checked) {
+            // If consent is not given, disable the submit button and show the message
+            submitButton.disabled = true;
+            messageDiv.innerHTML = 'You must consent to continue the survey.';
+        }
+    }
+
+    // Event listener for radio button click
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all consent radio buttons
+        var consentRadios = document.querySelectorAll('input[name="consentdebrief"]');
+        // Add event listener to each consent radio button
+        consentRadios.forEach(function (radio) {
+            radio.addEventListener('click', checkConsentdebrief);
+        });
+    });
+</script>
+{{ endblock }}
+
+{{ block global_styles  }}
+<!-- This block includes global style sheets -->
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{{ endblock }}
+
+
+{{ block content }}
+<!-- This block contains HTML content for the main page -->
+    <!-- Body with a background gradient -->
+<!--<body class="bg-light.bg-gradient">-->
+
+<div class="card mt-5 shadow-lg p-4">
+    <div class="card-body">
+        <!-- Centered Heading -->
+        <div class="text=center">
+            <h1 class="display-4 text-center fs-6">
+                <p>RESEARCH PARTICIPANT POST-SESSION CONSENT FORM<br>
+                User Engagement with Social Media Posts<br>
+                Dr. Kaylyn Jackson Schiff<br>
+                Department of Political Science, Purdue University</p>
+            </h1>
+
+        </div>
+
+        <p class="lead">
+<!--            <Large>-->
+                <p>Thank you for participating in this study. This study involved deception.   This means that we did not provide you with the complete description of the purpose of the study and some of the methods or instruments used had a different purpose than how we described them. Deception is used in research when knowledge of the purpose of the study or certain aspects of the study may bias participant responses. Deception involves either false information—a “cover story” -- or omission of certain information. The purpose of this form is to explain the true purpose of the study and/or provide information that had been omitted. You also will be asked permission to use the information we obtained from you during your participation.</p><br>
+
+                <p> You were told that the study was about your opinions on social media. <strong>Our research actually focuses on deepfakes.</strong> Deepfakes are inauthentic content (including video, audio, and visual content) created and/or altered by generative machine learning models or other artificial intelligence (AI) techniques. We are interested in whether putting labels or watermarks on deepfakes can improve individuals’ ability to distinguish between AI-generated and authentic content.<br></p>
+
+                <p> To obtain unbiased or natural reactions, we had to give you some false information during the study. In particular, the post below that you saw during the study is in fact AI-generated. </p>
+
+                <div style="display: flex; justify-content: center; margin: 20px auto;">
+    <img src="{{ image_screenshot_nowatermark }}" id="treatment-image" alt="Screenshot"
+         style="max-width: 100%; width: 100%; max-width: 600px; cursor: crosshair;">
+</div>
+
+                <p> <strong> THE IMAGE IN THIS POST IS AI-GENERATED.</strong> <br> </p>
+
+                <p> This was necessary for us to better understand natural reactions to deepfakes. When designing this study, we took care to minimize any possible risks or discomforts that might be related to the deception. <br> </p>
+
+                <p> To make sure you understand this message, please type out the following sentence below: <strong>The image about {{ disclaimer }} is AI-generated.</strong></p>
+
+                {{ formfield 'understand_AI' }}
+
+
+
+                <p> <strong>Additional information about deepfakes:</strong> : A deepfake is a highly realistic but fake image, video, or audio recording of a person saying or doing something that they never actually said or did.  Some tips for recognizing deepfakes generated with AI include looking for:</p>
+                <ul>
+                    <li>Missing or extra fingers or hands that are deformed in some way</li>
+                    <li>Small details in faces that are distorted</li>
+                    <li>Misspelled text in the images</li>
+                    <li>Inconsistent reflections</li>
+                </ul>
+
+                <p> <strong>Additional resources about deepfakes:</strong><br> </p>
+
+                <ul>
+<li>
+  <a href="https://apnews.com/article/one-tech-tip-spotting-deepfakes-ai-8f7403c7e5a738488d74cf2326382d8c" target="_blank" rel="noopener noreferrer">
+    AP News: How to spot AI-generated deepfake images
+  </a>
+</li>
+
+<li>
+
+  <a href="https://hivemoderation.com/ai-generated-content-detection" target="_blank" rel="noopener noreferrer">
+    Download the Hive Moderation AI-generated content detection browser extension
+  </a>
+</li>
+
+                </ul>
+
+                <p>Now that you understand the true nature of our study, you have the chance to refuse the use of the data we collected from you for research purposes. You are free to ask us not to use your data in our study analysis. If you decline to let us use your data, you will still receive compensation just as you would if we use your data in our analysis. This is entirely voluntary, but we hope to analyze as much data as possible to better understand solutions to the problem of disinformation due to deepfakes.</p>
+
+                <p>Because this experiment is ongoing, we request that you not share the true nature and purpose of this experiment with others who might potentially participate in our study.</p>
+
+                <p><strong>Who can I contact if I have questions about the study?</strong></p>
+
+                <p>If you have questions, comments or concerns about this research project, you can talk to one of the researchers.  Please contact Dr. Kaylyn Jackson Schiff (+1 765-494-4161), the principal investigator.
+
+If you have questions about your rights while taking part in the study or have concerns about the treatment of research participants, please call the Human Research Protection Program at (765) 494-5942, email (irb@purdue.edu)or write to:
+Human Research Protection Program - Purdue University
+Ernest C. Young Hall, Room 1010
+155 S. Grant St.,
+West Lafayette, IN 47907-2114
+
+
+</p>
+
+                <p><strong>Documentation of Informed Consent</strong></p>
+
+<table class="table mt-5 mb-5 table-responsive">
+    <tbody>
+        <tr>
+            <th scope="row"> </th>
+            <td>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="consentdebrief" id="consentdebriefYes" value="yes" required>
+                    <label class="form-check-label" for="consentdebriefYes">
+                        I have had the opportunity to read this consent form and have the research study more fully explained, including the need for and use of deception.
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="consentdebrief" id="consentdebriefNo" value="no" required>
+                    <label class="form-check-label" for="consentdebriefNo">
+                        No, I do not give permission for the researchers to use my anonymous survey responses. Please discard the data you obtained from me.
+                    </label>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+    <div class="d-flex justify-content-end m-5">
+        <button class="btn btn-success shadow" type="submit" id="submitButton">
+            ➔
+        </button>
+    </div>
+
+{{ endblock }}

@@ -1,0 +1,129 @@
+{% block content %}
+<form method="post">
+  <style>
+    .qualtrics-container {
+      max-width: none;
+      margin: auto;
+      padding: 1rem;
+    }
+
+    .qualtrics-container label:first-of-type {
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+      table-layout: fixed;
+      background-color: #fff;
+    }
+
+    th, td {
+      text-align: center;
+      vertical-align: middle;
+      padding: 12px;
+      border: none;
+    }
+
+    th {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    td {
+      background-color: #f7f7f7;
+      border-radius: 8px;
+    }
+
+    td:first-child,
+th:first-child {
+  width: 60%;
+}
+
+td:not(:first-child),
+th:not(:first-child) {
+  width: 12%;
+}
+
+    img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+      display: block;
+      margin: auto;
+    }
+
+    input[type="radio"] {
+      transform: scale(1.3);
+      margin: 0.5rem;
+      cursor: pointer;
+    }
+
+    label[for^="moreposts_"] {
+      display: inline-block;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      th, td {
+        font-size: 0.85rem;
+        padding: 8px;
+      }
+    }
+  </style>
+
+  <div class="qualtrics-container">
+    <label><strong>For each post below, please indicate whether you would like to see more posts like that.</strong></label>
+
+    <table>
+      <thead>
+        <tr>
+          <th> </th>
+          <th>Would like to see more</th>
+          <th>No opinion</th>
+          <th>Would not like to see more</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for option in image_options %}
+        <tr>
+          <td>
+            <img src="{{ option }}" alt="Option {{ forloop.counter }}">
+          </td>
+          <td>
+            <input type="radio"
+                   id="moreposts_{{ forloop.counter }}_like"
+                   name="moreposts_image_check_{{ forloop.counter }}"
+                   value="like">
+            <label for="moreposts_{{ forloop.counter }}_like"></label>
+          </td>
+          <td>
+            <input type="radio"
+                   id="moreposts_{{ forloop.counter }}_neutral"
+                   name="moreposts_image_check_{{ forloop.counter }}"
+                   value="neutral">
+            <label for="moreposts_{{ forloop.counter }}_neutral"></label>
+          </td>
+          <td>
+            <input type="radio"
+                   id="moreposts_{{ forloop.counter }}_dislike"
+                   name="moreposts_image_check_{{ forloop.counter }}"
+                   value="dislike">
+            <label for="moreposts_{{ forloop.counter }}_dislike"></label>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-end mt-4">
+      <button class="btn btn-success shadow" type="submit" id="submitButton">➔</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

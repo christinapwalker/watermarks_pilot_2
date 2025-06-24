@@ -1,0 +1,442 @@
+{% extends "global/Page.html" %}
+
+{% block content %}
+<style>
+  /* Reset and base styles */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+  line-height: 1.5;
+  background-color: #f9f9f9;
+  padding: 0;
+  margin: 0;
+}
+
+/* Centered container, like Qualtrics content area */
+.survey-container {
+  max-width: 1400px;
+  margin: 30px auto 60px auto;
+  background: white;
+  padding: 30px 40px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.08);
+  border-radius: 6px;
+}
+
+/* Headings / instructions */
+p {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Slider styles */
+.slider-container {
+  font-size: 1.3rem;
+  margin: 20px 0 40px;
+}
+.slider-label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+  font-size: 1.1rem;
+}
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 14px;
+  border-radius: 7px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+.slider:hover {
+  opacity: 1;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #337ab7;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
+  transition: background 0.3s ease;
+}
+.slider::-webkit-slider-thumb:hover {
+  background: #286090;
+}
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #337ab7;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
+}
+
+.slider-value {
+  margin-top: 10px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  color: #444;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #666;
+}
+.slider-labels span {
+  width: 13%;
+  text-align: center;
+}
+
+/* Error messages */
+.error-message {
+  color: #d9534f;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Tables general */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 18px;
+  margin-bottom: 40px;
+}
+th, td {
+  padding: 12px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.95rem;
+  color: #333;
+}
+th {
+  font-weight: 600;
+  background: #f1f1f1;
+  border-bottom: 2px solid #ddd;
+}
+.question-column {
+  width: 30%;
+  text-align: left;
+  font-weight: 600;
+  color: #222;
+}
+
+/* Submit button container */
+.submit-container {
+  text-align: right;
+}
+button#submitButton {
+  background-color: #337ab7;
+  border: none;
+  color: white;
+  padding: 12px 25px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(51, 122, 183, 0.4);
+  transition: background-color 0.3s ease;
+}
+button#submitButton:hover {
+  background-color: #286090;
+}
+
+/* Responsive adjustments */
+@media (max-width: 800px) {
+  .survey-container {
+    margin: 15px;
+    padding: 20px;
+  }
+  .slider-labels span {
+    font-size: 0.8rem;
+  }
+  th, td {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+  }
+  button#submitButton {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.2rem;
+  }
+  .submit-container {
+    text-align: center;
+    margin-top: 20px;
+  }
+}
+
+/* ----- MATRIX TABLE SPECIFIC STYLES ----- */
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+}
+.matrix-table th,
+.matrix-table td {
+  border: 1px solid #ddd;
+  padding: 10px 8px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.95rem;
+  color: #333;
+}
+.matrix-table .question-column {
+  text-align: left;
+  font-weight: 600;
+  width: 30%;
+  color: #222;
+}
+
+/* Hide radio labels on desktop (since headers label the columns) */
+.matrix-table td label.mobile-label {
+  display: none;
+}
+
+/* Radio inputs - size and margin */
+.matrix-table input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* MOBILE - Below 700px, stack rows vertically and show radio labels */
+@media (max-width: 700px) {
+  .matrix-table,
+  .matrix-table thead,
+  .matrix-table tbody,
+  .matrix-table tr,
+  .matrix-table th,
+  .matrix-table td {
+    display: block;
+  }
+  .matrix-table thead tr {
+    /* Hide header row on mobile */
+    display: none;
+  }
+  .matrix-table tr {
+    margin-bottom: 25px;
+    border: none;
+    padding: 0;
+  }
+  .matrix-table td.question-column {
+    font-weight: 700;
+    padding-bottom: 10px;
+    border: none;
+  }
+  .matrix-table td {
+    border: none;
+    padding: 8px 0;
+    text-align: left;
+  }
+  .matrix-table td:not(.question-column) {
+    display: flex;
+    align-items: center;
+  }
+  /* Show the label next to each radio on mobile */
+  .matrix-table td label.mobile-label {
+    display: inline;
+    margin-left: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #222;
+    cursor: pointer;
+  }
+  .matrix-table input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* MOBILE SLIDER IMPROVEMENTS */
+@media (max-width: 700px) {
+  /* Make sure slider container fills full content width inside .survey-container */
+  .slider-container {
+    width: 130%;
+    box-sizing: border-box;
+    /*margin: 10px 0 50px;  !* your existing vertical margins *!*/
+    padding-left: 0;
+    padding-right: 0;
+
+  }
+
+  /* Make sure slider fills full width of its container */
+  .slider {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+  }
+}
+
+</style>
+
+
+
+<form method="post">
+  <!-- Party ID Slider Question -->
+  <div class="slider-container">
+    <label class="slider-label">{{ form.party_id.label }}</label>
+    <input type="range" id="party_id_slider" name="party_id" min="1" max="7" value="4" class="slider" step="1" oninput="updateSliderValue(this.value)">
+    <div class="slider-labels">
+      <span>Strong<br>Democrat</span>
+      <span>Democrat</span>
+      <span>Lean<br>Democrat</span>
+      <span>Independent</span>
+      <span>Lean<br>Republican</span>
+      <span>Republican</span>
+      <span>Strong<br>Republican</span>
+    </div>
+
+    <div id="slider_value" class="slider-value">Independent</div>
+    <div class="error-message">{{ formfield_errors 'party_id' }}</div>
+  </div>
+
+  <!-- Instruction Text -->
+  <p style="  font-size: 1.5rem"><b>Thinking about social networking sites, how often do you visit or use the following?</b></p>
+
+  <!-- Likert Scale for specific platforms -->
+  <table>
+    <tr>
+      <th></th>
+      <th>Several times a day</th>
+      <th>About once a day</th>
+      <th>A few days a week</th>
+      <th>Every few weeks</th>
+      <th>Less often</th>
+        <th>Never</th>
+        <th>Don't know</th>
+    </tr>
+<tr>
+  <td class="question-column">{{ form.use_twitter.label }}</td>
+  {% for choice in form.use_twitter %}
+    <td data-label="">{{ choice|safe }}</td>
+  {% endfor %}
+</tr>
+
+    <tr>
+      <td class="question-column">{{ form.use_instagram.label }}</td>
+      {% for choice in form.use_instagram %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.use_pinterest.label }}</td>
+      {% for choice in form.use_pinterest %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.use_linkedin.label }}</td>
+      {% for choice in form.use_linkedin %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.use_facebook.label }}</td>
+      {% for choice in form.use_facebook %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.use_youtube.label }}</td>
+      {% for choice in form.use_youtube %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.use_tiktok.label }}</td>
+      {% for choice in form.use_tiktok %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.use_bluesky.label }}</td>
+      {% for choice in form.use_bluesky %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.use_truthsocial.label }}</td>
+      {% for choice in form.use_truthsocial %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+  </table>
+
+
+  <!-- Instruction Text -->
+  <p style="  font-size: 1.5rem"><b>Please indicate your level of agreement with the following statements regarding social media platforms:</b></p>
+
+  <!-- Likert Scale -->
+  <table>
+    <tr>
+      <th></th>
+      <th>Strongly Disagree</th>
+      <th>Disagree</th>
+      <th>Neither Agree Nor Disagree</th>
+      <th>Agree</th>
+      <th>Strongly Agree</th>
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.smp_entertaining_pre.label }}</td>
+      {% for choice in form.smp_entertaining_pre %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.smp_accuracy_pre.label }}</td>
+       {% for choice in form.smp_accuracy_pre %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.smp_enjoyment_pre.label }}</td>
+      {% for choice in form.smp_enjoyment_pre %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.smp_community_pre.label }}</td>
+      {% for choice in form.smp_community_pre %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column"> {{ form.smp_news_pre.label }}</td>
+      {% for choice in form.smp_news_pre %}
+      <td data-label="">{{ choice|safe }}</td>
+      {% endfor %}
+    </tr>
+  </table>
+
+
+  <div class="d-flex justify-content-end m-5">
+    <button class="btn btn-success shadow" type="submit" id="submitButton">
+      ➔
+    </button>
+  </div>
+</form>
+
+<script>
+  function updateSliderValue(value) {
+    const labels = [
+      'Strong Democrat',
+      'Democrat',
+      'Lean Democrat',
+      'Independent',
+      'Lean Republican',
+      'Republican',
+      'Strong Republican'
+    ];
+    document.getElementById('slider_value').innerText = labels[value - 1];
+  }
+</script>
+{% endblock %}

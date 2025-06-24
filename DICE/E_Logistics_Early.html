@@ -1,0 +1,285 @@
+{% block title %}
+<!-- Your Page Title -->
+{% endblock %}
+
+{% block content %}
+<style>
+  /* Container for the form - center and responsive max width */
+  form {
+  width: 100%;
+  max-width: none;
+  margin: 20px auto;
+  padding: 20px 25px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+
+  /* Intro paragraph styling */
+  form > p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #333;
+  }
+
+  /* Each question container */
+  .form-group {
+    margin-bottom: 28px;
+  }
+
+  /* Question label styling */
+  .form-group > label {
+    display: block;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: #222;
+  }
+
+  /* Container for radio/checkbox options */
+.options-container {
+  display: block;  /* no flex */
+  gap: 12px; /* gap doesn’t work with block but you can add margin */
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 12px; /* space between options */
+  min-width: 140px; /* keep this or adjust as needed */
+}
+
+
+  /* Input radios and checkboxes */
+  input[type="radio"],
+  input[type="checkbox"] {
+    margin-right: 10px;
+    cursor: pointer;
+  }
+
+  /* Labels for options */
+  .option label {
+    font-weight: 400;
+    font-size: 0.95rem;
+    color: #444;
+    user-select: none;
+  }
+
+  /* For watermark images with selectable borders */
+  #follow-up-question div {
+    flex: 1 1 48%;
+    margin-bottom: 16px;
+  }
+
+  #follow-up-question div label {
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  #follow-up-question div img {
+    max-width: none;
+    height: auto;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  /* Submit button container */
+  .submit-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+
+  button[type="submit"] {
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+    transition: background-color 0.25s ease;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #1a5fd9;
+  }
+</style>
+
+<form method="post">
+
+  <p>
+    Previously in the survey, we showed you a page with a feed from a simulated social media platform. We next have a few questions about that feed that you saw.
+  </p>
+
+  <!-- Question 1 -->
+  <div class="form-group">
+    <label>How many images did you see on the previous simulated social media page?</label>
+    <div class="options-container">
+      {% for i in range(11) %}
+      <div class="option">
+        <input type="radio" id="all_images_{{i}}" name="all_images" value="{{i}}">
+        <label for="all_images_{{i}}">{{i}}</label>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Question 2 -->
+  <div class="form-group">
+    <label>Did the images load quickly enough for you on the previous social media page?</label>
+    <div class="options-container">
+      <div class="option">
+        <input type="radio" id="loading_yes" name="loading" value="1">
+        <label for="loading_yes">Yes</label>
+      </div>
+      <div class="option">
+        <input type="radio" id="loading_no" name="loading" value="2">
+        <label for="loading_no">No</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question 3 -->
+  <div class="form-group">
+    <label>Were you able to interact with the posts (like, repost, or reply) on the previous social media page?</label>
+    <div class="options-container">
+      <div class="option">
+        <input type="radio" id="interaction_yes" name="interaction" value="1">
+        <label for="interaction_yes">Yes, I tried and was able to interact.</label>
+      </div>
+      <div class="option">
+        <input type="radio" id="interaction_no" name="interaction" value="2">
+        <label for="interaction_no">No, I tried but could not interact.</label>
+      </div>
+      <div class="option">
+        <input type="radio" id="interaction_didnottry" name="interaction" value="3">
+        <label for="interaction_didnottry">I did not try to interact.</label>
+      </div>
+      <div class="option">
+        <input type="radio" id="interaction_unsure" name="interaction" value="4">
+        <label for="interaction_unsure">Not Sure/Don't Remember</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question 4 -->
+  <div class="form-group">
+    <label>In your opinion, how many of the images on the previous social media page contained political content?</label>
+    <div class="options-container">
+      {% for i in range(11) %}
+      <div class="option">
+        <input type="radio" id="political_content_{{i}}" name="political_content" value="{{i}}">
+        <label for="political_content_{{i}}">{{i}}</label>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Question 5 -->
+  <div class="form-group">
+    <label>Before today, how familiar were you with watermarks or warning labels on social media?</label>
+    <div class="options-container">
+      <div class="option">
+        <input type="radio" id="watermark_familiarity_very" name="watermark_familiarity" value="1">
+        <label for="watermark_familiarity_very">Very Familiar</label>
+      </div>
+      <div class="option">
+        <input type="radio" id="watermark_familiarity_somewhat" name="watermark_familiarity" value="2">
+        <label for="watermark_familiarity_somewhat">Somewhat Familiar</label>
+      </div>
+      <div class="option">
+        <input type="radio" id="watermark_familiarity_not" name="watermark_familiarity" value="3">
+        <label for="watermark_familiarity_not">Not Familiar At All</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question 6 -->
+  <div class="form-group">
+    <label>If you recall, did any of the images on the previous social media page have a watermark, label, or content warning?</label>
+    <div class="options-container">
+      <div class="option">
+        <input type="radio" name="watermark_manipulation_check" value="1" id="wm_yes" onclick="toggleFollowUp(true)">
+        <label for="wm_yes">Yes</label>
+      </div>
+      <div class="option">
+        <input type="radio" name="watermark_manipulation_check" value="2" id="wm_no" onclick="toggleFollowUp(false)">
+        <label for="wm_no">No</label>
+      </div>
+      <div class="option">
+        <input type="radio" name="watermark_manipulation_check" value="3" id="wm_not_sure" onclick="toggleFollowUp(false)">
+        <label for="wm_not_sure">Not Sure</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Follow-up watermark images -->
+  <div class="form-group" id="follow-up-question" style="display:none;">
+  <label>If you recall, which image(s) had a watermark, label, or content warning?</label>
+  {{ formfield_errors 'watermark_image_check' }}
+  <div class="options-container" style="gap: 15px;">
+    {% for option in image_options %}
+    <div>
+      <!-- Remove [] from the name -->
+      <input type="checkbox"
+             class="watermark-checkbox"
+             id="watermark_image_check_{{ forloop.counter }}"
+             value="{{ forloop.counter }}">
+      <label for="watermark_image_check_{{ forloop.counter }}">
+        <img src="{{ option }}" alt="Option {{ forloop.counter }}">
+      </label>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Hidden input to store all checked values as JSON string -->
+  <input type="hidden" name="watermark_image_check" id="watermark_image_check_input" value="{{ player.watermark_image_check|default:'' }}">
+</div>
+
+  <div class="submit-container">
+    <button type="submit" id="submitButton" aria-label="Submit survey responses">
+      ➔
+    </button>
+  </div>
+</form>
+
+<script>
+  const checkboxes = document.querySelectorAll('.watermark-checkbox');
+  const hiddenInput = document.getElementById('watermark_image_check_input');
+
+  function updateHiddenInput() {
+    const checkedValues = Array.from(checkboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
+    hiddenInput.value = JSON.stringify(checkedValues);
+  }
+
+  // Initialize checkboxes from hidden input value on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      const saved = JSON.parse(hiddenInput.value);
+      if (Array.isArray(saved)) {
+        checkboxes.forEach(cb => {
+          cb.checked = saved.includes(cb.value);
+        });
+      }
+    } catch(e) {
+      // ignore JSON parse errors
+    }
+    updateHiddenInput();
+  });
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', updateHiddenInput);
+  });
+</script>
+
+{% endblock %}

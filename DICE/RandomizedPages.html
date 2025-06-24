@@ -1,0 +1,346 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+    <h2>Step {{ participant.vars.current_page_index|add:"1" }} of 3</h2>
+
+    {% if current_page == 'D_ItemCountQuestions' %}
+        {{ block title }}
+<!--    Your Page Title-->
+{{ endblock }}
+
+{{ block content }}
+
+<style>
+    /* CSS to style the slider and labels */
+    .slider-container {
+        position: relative;
+        width: 90%; /* Adjust width of slider container */
+        margin: auto;
+        margin-bottom: 50px; /* Add margin bottom to separate sliders */
+    }
+
+    .slider-label-left,
+    .slider-label-right {
+        position: absolute; /* Changed to absolute */
+        top: -20px; /* Adjust vertical position to place it above the slider */
+        font-size: 12px; /* Adjust font size of labels */
+    }
+
+    .slider-label-left {
+        left: 0;
+        padding-right: 10px; /* Add padding to the right to separate from the slider */
+    }
+
+    .slider-label-right {
+        right: 0;
+        padding-left: 10px; /* Add more padding to the left to move it further right */
+    }
+
+    input[type=range] {
+        width: calc(100% - 20px); /* Adjust width of slider minus padding from both sides */
+        height: 20px; /* Adjust height of slider */
+        -webkit-appearance: none;
+        appearance: none;
+        background: #ddd;
+        outline: none;
+        opacity: 0.7;
+        transition: opacity .15s ease-in-out;
+        position: relative;
+        margin: 0;
+        padding: 0 10px; /* Add padding to the slider */
+    }
+
+    input[type=range]:hover {
+        opacity: 1;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }
+
+    input[type=range]::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }
+
+    .slider-result {
+        margin-top: 10px; /* Adjust margin top for description */
+        text-align: center;
+    }
+</style>
+
+<p style="margin-bottom: 40px;">Move the slider below to indicate how many of the five images on the previous social media page you thought were AI-generated:</p>
+
+<div class="slider-container">
+    <span class="slider-label-left">No Images were AI-generated</span>
+    <input type="range" name="accurate" min="0" max="5" oninput="updateDescription(this)">
+    <span class="slider-label-right">All images were AI-generated</span>
+    <p id="description-aigen" class="slider-result"></p>
+</div>
+
+<p style="margin-bottom: 40px; margin-top: 50px;">Move the slider below to indicate how confident you are in your assessment of whether the images on the previous social media page were AI-generated or not:</p>
+
+<div class="slider-container">
+    <span class="slider-label-left">0% Confidence</span>
+    <input type="range" name="confidence" min="0" max="10" oninput="updateConfidence(this)">
+    <span class="slider-label-right">100% Confidence</span>
+    <p id="description-confidence" class="slider-result"></p>
+</div>
+
+<p style="margin-bottom: 40px; margin-top: 50px;">Move the slider below to indicate how many of the posts on the previous social media page you would share on your personal page:</p>
+
+<div class="slider-container">
+    <span class="slider-label-left">None</span>
+    <input type="range" name="share" min="0" max="5" oninput="updateShare(this)">
+    <span class="slider-label-right">All</span>
+    <p id="description-share" class="slider-result"></p>
+</div>
+<div class="d-flex justify-content-end m-5">
+    <button class="btn btn-success shadow" type="submit" id="submitButton">
+      ➔
+    </button>
+  </div>
+</form>
+
+<script>
+    let descriptionAIGen = document.getElementById('description-aigen');
+    let descriptionConfidence = document.getElementById('description-confidence');
+    let descriptionShare = document.getElementById('description-share');
+
+    function updateDescription(input) {
+        let aiGenerated = parseInt(input.value);
+        if (aiGenerated == 0) {
+            descriptionAIGen.innerText = 'No images were AI-generated.';
+        } if (aiGenerated == 5) {
+            descriptionAIGen.innerText = "All images were AI-generated";
+        }
+        if (aiGenerated == 1) {
+            descriptionAIGen.innerText = "1 image was AI-generated";
+        } else {
+            descriptionAIGen.innerText = `${aiGenerated} images were AI-generated`;
+        }
+    }
+
+    function updateConfidence(input) {
+        let confidence = parseInt(input.value);
+        let percentageConfidence = (confidence / 10) * 100;
+        descriptionConfidence.innerText = `${percentageConfidence}% Confident`;
+    }
+
+    function updateShare(input) {
+        let share = parseInt(input.value);
+        if (share == 1) {
+            descriptionShare.innerText = "1 post";
+        } else descriptionShare.innerText = `${share} posts`;
+    }
+</script>
+
+
+
+{{ endblock }}
+
+
+    {% elif current_page == 'D_DirectQuestions_Image1' %}
+        <form method="post">
+            {% csrf_token %}
+            {{ formfield.player.directquestion1_answer.label_tag }}
+            {{ formfield.player.directquestion1_answer }}
+            <button type="submit">Next</button>
+        </form>
+
+    {% elif current_page == 'D_DirectQuestions_Image2' %}
+        {% extends "global/Page.html" %}
+
+{% block content %}
+<style>
+    /* CSS to style the slider and labels */
+    .slider-container {
+        position: relative;
+        width: 90%; /* Adjust width of slider container */
+        margin: auto;
+        margin-bottom: 50px; /* Add margin bottom to separate sliders */
+    }
+
+    .slider-label-left,
+    .slider-label-right {
+        position: absolute; /* Changed to absolute */
+        top: -20px; /* Adjust vertical position to place it above the slider */
+        font-size: 12px; /* Adjust font size of labels */
+    }
+
+    .slider-label-left {
+        left: 0;
+        padding-right: 10px; /* Add padding to the right to separate from the slider */
+    }
+
+    .slider-label-right {
+        right: 0;
+        padding-left: 10px; /* Add more padding to the left to move it further right */
+    }
+
+    input[type=range] {
+        width: calc(100% - 20px); /* Adjust width of slider minus padding from both sides */
+        height: 20px; /* Adjust height of slider */
+        -webkit-appearance: none;
+        appearance: none;
+        background: #ddd;
+        outline: none;
+        opacity: 0.7;
+        transition: opacity .15s ease-in-out;
+        position: relative;
+        margin: 0;
+        padding: 0 10px; /* Add padding to the slider */
+    }
+
+    input[type=range]:hover {
+        opacity: 1;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }
+
+    input[type=range]::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+    }
+
+    .slider-result {
+        margin-top: 10px; /* Adjust margin top for description */
+        text-align: center;
+    }
+  .question {
+    margin-bottom: 30px;
+  }
+  .multiple-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  .multiple-choice label {
+    flex: 1 1 18%;
+  }
+  .hidden-textbox {
+    display: none;
+  }
+</style>
+
+<form method="post">
+    <div class="question">
+        <p><strong>Based on your own assessment, is the image in the post above AI-generated?</strong></p>
+        <div class="multiple-choice">
+            <label>
+                <input type="radio" name="image_accuracy_2" value="AI-generated"> Yes
+            </label>
+            <label>
+                <input type="radio" name="image_accuracy_2" value="Accurate"> No
+            </label>
+        </div>
+    </div>
+
+    <p style="margin-bottom: 40px;">How confident are you in your assessment about whether the image is AI-generated?</p>
+
+    <div class="slider-container">
+    <span class="slider-label-left">0% Confidence</span>
+    <input type="range" name="confidence" min="0" max="10" oninput="updateConfidence(this)">
+    <span class="slider-label-right">100% Confidence</span>
+    <p id="description-image_confidence_2" class="slider-result"></p>
+</div>
+
+
+    <div class="question">
+        <p><strong>In the post above, please click on the part of the post or image that helped you make your determination about whether the image in the post is AI-generated.</strong></p>
+        <textarea name="image_reason_2" rows="4" cols="50" class="hidden-textbox"></textarea>
+    </div>
+
+
+    <div class="question">
+        <p><strong>Regardless of whether you think the image in the post is AI-generated or not, what <strong><em>claim</em></strong> do you believe the post is making?</strong></p>
+        <textarea name="claim_response_2" rows="4" cols="50"></textarea>
+    </div>
+
+
+    <div class="question">
+        <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
+        <div class="multiple-choice">
+            <label>
+                <input type="radio" name="image_claim_2" value="Option 1"> Option 1
+            </label>
+            <label>
+                <input type="radio" name="image_claim_2" value="Option 2"> Option 2
+            </label>
+            <label>
+                <input type="radio" name="image_claim_2" value="Option 3"> Option 3
+            </label>
+        </div>
+
+        <div class="question">
+        <p><strong>To what extent do you think that [pipe text from option they chose above] is literally true?</strong></p>
+        <div class="multiple-choice">
+            <label>
+                <input type="radio" name="image_claim_true_2" value="It is True"> It is True
+            </label>
+            <label>
+                <input type="radio" name="image_claim_true_2" value="It is not True"> It is not True
+            </label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p><strong> Regardless of whether you think the claim of the post is literally true, to what extent do you think the post represents something that <strong><em>feels true</em></strong> about the world? </strong></p>
+        <div class="multiple-choice">
+            <label>
+                <input type="radio" name="image_claim_feelstrue_2" value="Does not feel true" onclick="toffleFollowUp (false)"> Does not feel true
+            </label>
+            <label>
+                <input type="radio" name="image_claim_feelstrue_2" value="Feels true" onclick="toggleFollowUp (true)"> Feels true
+            </label>
+        </div>
+    </div>
+
+        <div class="question" id="follow-up-question" style="display:none;">
+            <p><strong>What do you think it means if something “feels true”?</strong></p>
+            <textarea name="image_feelstrue_2" rows="4" cols="50"></textarea>
+        </div>
+
+
+    <div class="d-flex justify-content-end m-5">
+        <button class="btn btn-success shadow" type="submit" id="submitButton">
+            ➔
+        </button>
+    </div>
+</form>
+
+<script>
+    let descriptionimage_confidence_2 = document.getElementById('description-image_confidence_2');
+    function updateConfidence(input) {
+        let confidence = parseInt(input.value);
+        let percentageConfidence = (confidence / 10) * 100;
+        descriptionimage_confidence_2.innerText = `${percentageConfidence}% Confident`;
+    }
+    function toggleFollowUp (show) {
+        const followUp = document.getElementById('follow-up-question');
+        followUp.style.display = show ? 'block' : 'none';
+    }
+</script>
+
+
+{{ endblock }}
+
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,92 @@
+<!--   Instruction Text -->
+  <p><b>How much, if at all, do you trust the information you get from the following sources:</b></p>
+
+  <!-- Likert Scale for specific platforms -->
+  <table>
+    <tr>
+      <th></th>
+      <th>A lot</th>
+      <th>Some</th>
+      <th>Not too much</th>
+      <th>Not at all</th>
+      <th>Do not use</th>
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_twitter_pretreatment.label }}</td>
+      {% for choice in form.trust_twitter_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_instagram_pretreatment.label }}</td>
+      {% for choice in form.trust_instagram_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_nationalnews_pretreatment.label }}</td>
+      {% for choice in form.trust_nationalnews_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_localnews_pretreatment.label }}</td>
+      {% for choice in form.trust_localnews_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_friendsfamily_pretreatment.label }}</td>
+      {% for choice in form.trust_friendsfamily_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_pinterest_pretreatment.label }}</td>
+      {% for choice in form.trust_pinterest_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_linkedin_pretreatment.label }}</td>
+      {% for choice in form.trust_linkedin_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_facebook_pretreatment.label }}</td>
+      {% for choice in form.trust_facebook_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_youtube_pretreatment.label }}</td>
+      {% for choice in form.trust_youtube_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_tiktok_pretreatment.label }}</td>
+      {% for choice in form.trust_tiktok_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_bluesky_pretreatment.label }}</td>
+      {% for choice in form.trust_bluesky_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_truthsocial_pretreatment.label }}</td>
+      {% for choice in form.trust_truthsocial_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td class="question-column">{{ form.trust_acquaintances_pretreatment.label }}</td>
+      {% for choice in form.trust_acquaintances_pretreatment %}
+        <td>{{ choice }}</td>
+      {% endfor %}
+    </tr>
+  </table>
