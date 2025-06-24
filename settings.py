@@ -43,6 +43,7 @@ SESSION_CONFIG_DEFAULTS = dict(
     cta_text = '', # 'Post Jobs Free',
     # landing_page = 'https://unisg.qualtrics.com/jfe/form/SV_0DnMoLpM0VxjhrM',
     search_term = '#Yosemite',
+    DEBUG = False,
 )
 
 
