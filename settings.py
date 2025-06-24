@@ -9,6 +9,14 @@ SESSION_CONFIGS = [ # defining a session
     )
 ]
 
+ROOMS = [
+    dict(
+        name='watermark_room_test',          # unique room name (used in URLs)
+        display_name='Watermark Study', # friendly room name shown in admin
+    ),
+]
+
+
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
