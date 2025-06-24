@@ -12,6 +12,11 @@ from . import image_utils
 import pytz
 import json
 
+# from otree.api import (
+#     models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer, Currency as c, currency_range
+# )
+# from django.utils.translation import ugettext_lazy as _
+# from django.template.loader import render_to_string
 
 
 doc = """

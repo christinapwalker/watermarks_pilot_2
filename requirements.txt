@@ -1,14 +1,8 @@
-# oTree-may-not-overwrite-this-file
-
 otree==5.11.2
-psycopg2>=2.8.4
-sentry-sdk>=0.7.9
-
-pandas==1.4.4
-
+psycopg2==2.9.9
+sentry-sdk==1.44.1
+pandas==2.1.1
 requests==2.28.1
 httplib2==0.22.0
-
-Pillow
-
-django-recaptcha
+Pillow==11.2.1
+django-recaptcha==3.0.0
