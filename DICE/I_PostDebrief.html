@@ -230,11 +230,41 @@ input[type=range]::-moz-range-thumb {
 
     // Optional: initialize descriptions on page load
     window.onload = function() {
-        const slider1 = document.querySelector('input[name="influence_politics"]');
+        const slider1 = document.querySelector('input[name="ethics_influence_political_prefs"]');
         if (slider1) updateinfluence_politics(slider1);
         const slider2 = document.querySelector('input[name="benefits_understanding_watermarks"]');
         if (slider2) updatebenefits_understanding_watermarks(slider2);
     };
+    document.querySelector('form').addEventListener('submit', function(event) {
+  // 1. Check study_topic is selected (assuming it's a select or input field)
+  const studyTopic = this.querySelector('[name="study_topic"]');
+  if (!studyTopic || !studyTopic.value.trim()) {
+    alert('Please select a study topic.');
+    event.preventDefault();
+    studyTopic?.focus();
+    return false;
+  }
+
+  // 2. Check sliders have values in the range 1-5 (they always do, but we confirm)
+  const slider1 = this.querySelector('input[name="ethics_influence_political_prefs"]');
+  const slider2 = this.querySelector('input[name="benefits_understanding_watermarks"]');
+
+  if (!slider1 || slider1.value < 1 || slider1.value > 5) {
+    alert('Please move the slider to indicate the influence on political preferences.');
+    slider1?.focus();
+    event.preventDefault();
+    return false;
+  }
+
+  if (!slider2 || slider2.value < 1 || slider2.value > 5) {
+    alert('Please move the slider to indicate how this study helped you understand watermarks.');
+    slider2?.focus();
+    event.preventDefault();
+    return false;
+  }
+
+  // All validations passed, allow submit
+});
 </script>
 
 <!--<div class="container">-->

@@ -228,4 +228,41 @@
 
 </form>
 
+<script>
+document.querySelector('form').addEventListener('submit', function(event) {
+  const form = event.target;
+
+  // 1. Find all radio groups by unique name attribute
+  const radioInputs = form.querySelectorAll('input[type="radio"]');
+  const radioGroups = new Set();
+  radioInputs.forEach(radio => radioGroups.add(radio.name));
+
+  // For each radio group, check that one is selected
+  for (const groupName of radioGroups) {
+    if (!form.querySelector(`input[name="${groupName}"]:checked`)) {
+      alert('Please answer all required questions before submitting.');
+      event.preventDefault();
+      return false;
+    }
+  }
+
+  // 2. Check for any required textareas or text inputs if applicable
+  const requiredTexts = form.querySelectorAll('textarea[required], input[type="text"][required]');
+  for (const input of requiredTexts) {
+    if (!input.value.trim()) {
+      alert('Please fill out all required text fields.');
+      event.preventDefault();
+      return false;
+    }
+  }
+
+  // 3. For sliders, if you want them required, check their values (optional)
+  // Example: ensure slider value is not empty or within expected range
+  // If your sliders are input[type=range], they always have a value, so often no need
+
+  // If all validations pass, form submits normally
+});
+</script>
+
+
 {% endblock %}

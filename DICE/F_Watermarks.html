@@ -29,6 +29,14 @@
     margin-bottom: 1.5rem;
   }
 
+  .matrix-instructions {
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: block;
+  margin: 1.5rem 0;
+}
+
+
   img {
     width: 100%;
     max-width: 100%;
@@ -44,79 +52,80 @@
     cursor: pointer;
   }
 
-  /* MATRIX TABLE STYLES */
+  /* Matrix Table - Universal */
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+  table-layout: fixed; /* ensures equal column widths */
+}
+
+.matrix-table th,
+.matrix-table td {
+  border: 1px solid #ddd;
+  padding: 4px 2px;
+  text-align: center;
+  font-size: 0.75rem;
+  /*word-break: break-word;*/
+  color: #333;
+}
+
+.matrix-table th {
+  background: #f1f1f1;
+  font-weight: 600;
+}
+
+.matrix-table .question-column {
+  width: 35%;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Radio Buttons */
+.matrix-table input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Matrix Wrapper (for scroll if needed) */
+.matrix-table-wrapper {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+
+  @media (max-width: 700px) {
   .matrix-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 40px;
+    table-layout: fixed;
   }
 
   .matrix-table th,
   .matrix-table td {
-    border: 1px solid #ddd;
-    padding: 10px 8px;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 0.95rem;
-    color: #333;
+    font-size: 0.65rem;
+    padding: 4px 2px;
   }
 
-  .matrix-table th {
-    font-weight: 600;
-    background: #f1f1f1;
-    border-bottom: 2px solid #ddd;
+  .matrix-table th:not(:first-child) {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: left;
+    padding: 5px;
+    font-size: 0.6rem;
+    height: 100px;
+    vertical-align: bottom;
   }
 
   .matrix-table .question-column {
-    text-align: left;
-    font-weight: 600;
-    width: 30%;
-    color: #222;
+    font-size: 0.65rem;
+    width: 50%;
+    padding-right: 4px;
   }
+}
 
-  .matrix-table td label.mobile-label {
-    display: none;
-  }
-
-  .matrix-table input[type="radio"] {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-  }
-
-  /* RESPONSIVE: STACK MATRIX TABLE ON MOBILE */
-  @media (max-width: 700px) {
-    .matrix-table-wrapper {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .matrix-table {
-      min-width: 600px; /* adjust this if needed */
-      table-layout: fixed;
-    }
-
-    .matrix-table th,
-    .matrix-table td {
-      font-size: 0.85rem;
-      padding: 8px;
-    }
-
-    .matrix-table td label.mobile-label {
-      display: none !important;
-    }
-
-    /* Likert column headers vertical on mobile */
-    .matrix-table th:not(:first-child) {
-      writing-mode: vertical-rl;
-      transform: rotate(180deg);
-      text-align: left;
-      padding: 5px;
-      font-size: 0.75rem;
-      height: 100px;
-      vertical-align: bottom;
-    }
-  }
 
   /* GENERAL TABLE STYLES OVERRIDE */
   table:not(.matrix-table) {
@@ -201,17 +210,19 @@
 
 <form method="post">
   <!-- Instruction Text -->
-        <label><strong>Please indicate your level of agreement with the following statements regarding the
-    {% if player.watermark_condition == "cr_watermark" %}
-      watermark
-    {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-      label
-    {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-      watermark and information
-    {% else %}
-      watermark or label
-    {% endif %}
-    you saw on the previous social media page:</strong></label>
+    <label class="matrix-instructions">Please indicate your level of agreement with the following statements regarding the
+  {% if player.watermark_condition == "cr_watermark" %}
+    watermark
+  {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+    label
+  {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+    watermark and information
+  {% else %}
+    watermark or label
+  {% endif %}
+  you saw on the previous social media page:
+</label>
+
 
 
   <!-- Likert Scale Table -->
@@ -345,38 +356,78 @@
 </form>
 
 <script>
-// Toggle visibility of the "Other" textbox
-function toggleOtherTextbox(show) {
+  // Toggle visibility of the "Other" textbox
+  function toggleOtherTextbox(show) {
     const textbox = document.getElementById('otherTextbox');
     textbox.style.display = show ? 'block' : 'none';
-}
+  }
 
-// Show textbox on page load if "Other" is selected
-document.addEventListener('DOMContentLoaded', function () {
+  // Show textbox on page load if "Other" is selected
+  document.addEventListener('DOMContentLoaded', function () {
     const selected = document.querySelector('input[name="creates_watermarks"]:checked');
     if (selected && selected.value === 'Other') {
-        toggleOtherTextbox(true);
+      toggleOtherTextbox(true);
     }
-});
+  });
 
-// Form submission validation for "Other" option
-document.querySelector('form').addEventListener('submit', function (e) {
+  // Form submission validation for "Other" option
+  document.querySelector('form').addEventListener('submit', function (e) {
     const selected = document.querySelector('input[name="creates_watermarks"]:checked');
     const otherInput = document.getElementById('creates_watermarks_other');
 
     if (selected && selected.value === 'Other') {
-        if (!otherInput.value.trim()) {
-            alert('Please specify your answer for "Other".');
-            e.preventDefault(); // stop submission
-        } else {
-            // Set the value of the radio button to the custom input
-            selected.value = otherInput.value.trim();
-        }
+      if (!otherInput.value.trim()) {
+        alert('Please specify your answer for "Other".');
+        e.preventDefault(); // stop submission
+      } else {
+        // Set the value of the radio button to the custom input
+        selected.value = otherInput.value.trim();
+      }
     }
-});
-</script>
+  });
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+    // 1. Validate matrix questions (radio groups)
+    // Collect all unique radio group names in the matrix
+    const matrixRadioNames = new Set();
+    // Assuming matrix inputs have names that include _watermarks (adjust if needed)
+    document.querySelectorAll('input[type="radio"]').forEach(input => {
+    if (input.name.includes('_watermarks')) {
+    matrixRadioNames.add(input.name);
+  }
+  });
+
+    for (const groupName of matrixRadioNames) {
+    if (!document.querySelector(`input[name="${groupName}"]:checked`)) {
+    alert('Please answer all the statements about the watermark/label.');
+    event.preventDefault();
+    return false;
+  }
+  }
+
+    // 2. Validate creates_watermarks radio question
+    const createsSelected = document.querySelector('input[name="creates_watermarks"]:checked');
+    if (!createsSelected) {
+    alert('Please select who you believe creates the watermark/label.');
+    event.preventDefault();
+    return false;
+  }
+
+    // 3. If "Other" is selected, validate textbox is not empty
+    if (createsSelected.value === 'Other') {
+    const otherInput = document.getElementById('creates_watermarks_other');
+    if (!otherInput.value.trim()) {
+    alert('Please specify your answer for "Other".');
+    event.preventDefault();
+    return false;
+  }
+  }
+
+    // If all checks pass, form submits normally
+  });
 
 
+  </script>
 
 
-{% endblock %}
+  {% endblock %}

@@ -1,48 +1,34 @@
-{{ block title }}
-<!--    Your Page Title-->
-{{ endblock }}
-
 {{ block content }}
 
 <style>
-    /* CSS to style the slider and labels */
     .slider-container {
-        position: relative;
-        width: 90%; /* Adjust width of slider container */
-        margin: auto;
-        margin-bottom: 50px; /* Add margin bottom to separate sliders */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        width: 100%;
+        max-width: 600px;
+        margin: 40px auto;
     }
 
     .slider-label-left,
     .slider-label-right {
-        position: absolute; /* Changed to absolute */
-        top: -32px; /* Adjust vertical position to place it above the slider */
-        font-size: 12px; /* Adjust font size of labels */
-    }
-
-    .slider-label-left {
-        left: 0;
-        padding-right: 10px; /* Add padding to the right to separate from the slider */
-
-    }
-
-    .slider-label-right {
-        right: 0;
-        padding-left: 10px; /* Add more padding to the left to move it further right */
+        font-size: 12px;
+        width: 100px;
+        text-align: center;
+        word-wrap: break-word;
     }
 
     input[type=range] {
-        width: calc(100% - 20px); /* Adjust width of slider minus padding from both sides */
-        height: 20px; /* Adjust height of slider */
+        flex: 1;
+        height: 20px;
         -webkit-appearance: none;
         appearance: none;
         background: #ddd;
         outline: none;
         opacity: 0.7;
         transition: opacity .15s ease-in-out;
-        position: relative;
         margin: 0;
-        padding: 0 10px; /* Add padding to the slider */
     }
 
     input[type=range]:hover {
@@ -56,6 +42,7 @@
         height: 25px;
         background: #4CAF50;
         cursor: pointer;
+        border-radius: 50%;
     }
 
     input[type=range]::-moz-range-thumb {
@@ -63,11 +50,20 @@
         height: 25px;
         background: #4CAF50;
         cursor: pointer;
+        border-radius: 50%;
     }
 
     .slider-result {
-        margin-top: 10px; /* Adjust margin top for description */
         text-align: center;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 400px) {
+        .slider-label-left,
+        .slider-label-right {
+            font-size: 10px;
+            width: 80px;
+        }
     }
 </style>
 
@@ -76,38 +72,36 @@
 <div class="slider-container">
     <span class="slider-label-left">No Images were <br> AI-generated</span>
     <input type="range" min="0" max="5" oninput="updateAccurate(this)">
-    <input type="hidden" name="accurate_all" id="accurate_all_input">
     <span class="slider-label-right">All images were <br> AI-generated</span>
-    <p id="description-aigen" class="slider-result"></p>
 </div>
+<input type="hidden" name="accurate_all" id="accurate_all_input">
+<p id="description-aigen" class="slider-result"></p>
 
 <p style="margin-bottom: 40px; margin-top: 50px;">Move the slider below to indicate how confident you are in your assessment of whether the images on the previous social media page were AI-generated or not:</p>
 
 <div class="slider-container">
     <span class="slider-label-left">0% Confidence</span>
     <input type="range" min="0" max="10" oninput="updateConfidence(this)">
-    <input type="hidden" name="confidence_accurate" id="confidence_input">
     <span class="slider-label-right">100% Confidence</span>
-    <p id="description-confidence" class="slider-result"></p>
 </div>
+<input type="hidden" name="confidence_accurate" id="confidence_input">
+<p id="description-confidence" class="slider-result"></p>
 
 <p style="margin-bottom: 40px; margin-top: 50px;">Move the slider below to indicate how many of the posts on the previous social media page you would share on your personal page:</p>
-
 
 <div class="slider-container">
     <span class="slider-label-left">None</span>
     <input type="range" min="0" max="5" oninput="updateShare(this)">
-    <input type="hidden" name="share" id="share_input">
     <span class="slider-label-right">All</span>
-    <p id="description-share" class="slider-result"></p>
 </div>
+<input type="hidden" name="share" id="share_input">
+<p id="description-share" class="slider-result"></p>
 
 <div class="d-flex justify-content-end m-5">
     <button class="btn btn-success shadow" type="submit" id="submitButton">
       ➔
     </button>
-  </div>
-</form>
+</div>
 
 <script>
     function updateAccurate(input) {
@@ -131,8 +125,31 @@
         const display = document.getElementById('description-share');
         display.innerText = share === 1 ? "1 post" : `${share} posts`;
     }
+    document.querySelector('form').addEventListener('submit', function(event) {
+  const accurate = document.getElementById('accurate_all_input').value;
+  const confidence = document.getElementById('confidence_input').value;
+  const share = document.getElementById('share_input').value;
+
+  // If any hidden input is empty or not set, block submission
+  if (accurate === '') {
+    alert('Please move the first slider to indicate how many images were AI-generated.');
+    event.preventDefault();
+    return false;
+  }
+
+  if (confidence === '') {
+    alert('Please move the confidence slider to indicate how confident you are.');
+    event.preventDefault();
+    return false;
+  }
+
+  if (share === '') {
+    alert('Please move the last slider to indicate how many posts you would share.');
+    event.preventDefault();
+    return false;
+  }
+});
+
 </script>
-
-
 
 {{ endblock }}

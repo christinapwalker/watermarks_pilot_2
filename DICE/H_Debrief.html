@@ -132,41 +132,38 @@ table.table {
   font-size: 1.5rem;
 }
 
+label[for="id_understand_AI"] {
+  font-size: 1.5rem;  /* match the paragraph font size */
+  font-weight: 600;   /* optional, to emphasize */
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
 
 </style>
 
 <script>
-    // Function to check if consent is given
-    function checkConsentdebrief() {
-        // Get references to the consent radio buttons, submit button, and message div
-        var consentdebriefYes = document.getElementById('consentdebriefYes');
-        var consentdebriefNo = document.getElementById('consentdebriefNo');
-        var submitButton = document.getElementById('submitButton');
-        var messageDiv = document.getElementById('messageDiv');
+/* --- unlock as soon as one of the radios is chosen --- */
+function toggleSubmitDebrief() {
+  const chosen = document.querySelector('input[name="consentdebrief"]:checked');
+  document.getElementById('submitButton').disabled = !chosen;   // enable if one picked
+  document.getElementById('messageDiv').textContent = chosen ? '' : 'Please make a selection to continue.';
+}
 
-        // Check if Yes is selected
-        if (consentdebriefYes.checked) {
-            // If consent is given, enable the submit button and hide the message
-            submitButton.disabled = false;
-            messageDiv.innerHTML = '';
-            // Check if No is selected
-        } else if (consentdebriefNo.checked) {
-            // If consent is not given, disable the submit button and show the message
-            submitButton.disabled = true;
-            messageDiv.innerHTML = 'You must consent to continue the survey.';
-        }
-    }
+document.addEventListener('DOMContentLoaded', () => {
+  // disable at start
+  document.getElementById('submitButton').disabled = true;
 
-    // Event listener for radio button click
-    document.addEventListener('DOMContentLoaded', function () {
-        // Get all consent radio buttons
-        var consentRadios = document.querySelectorAll('input[name="consentdebrief"]');
-        // Add event listener to each consent radio button
-        consentRadios.forEach(function (radio) {
-            radio.addEventListener('click', checkConsentdebrief);
-        });
-    });
+  // watch both radios
+  document.querySelectorAll('input[name="consentdebrief"]').forEach(radio => {
+    radio.addEventListener('click', toggleSubmitDebrief);
+  });
+
+  // in case something is pre‑selected on reload
+  toggleSubmitDebrief();
+});
 </script>
+
 {{ endblock }}
 
 {{ block global_styles  }}
@@ -185,11 +182,13 @@ table.table {
         <!-- Centered Heading -->
         <div class="text=center">
             <h1 class="display-4 text-center fs-6">
-                <p>RESEARCH PARTICIPANT POST-SESSION CONSENT FORM<br>
-                User Engagement with Social Media Posts<br>
-                Dr. Kaylyn Jackson Schiff<br>
-                Department of Political Science, Purdue University</p>
+              RESEARCH PARTICIPANT POST-SESSION CONSENT FORM
             </h1>
+            <p class="text-center fs-6">
+              User Engagement with Social Media Posts<br>
+              Dr. Kaylyn Jackson Schiff<br>
+              Department of Political Science, Purdue University
+            </p>
 
         </div>
 

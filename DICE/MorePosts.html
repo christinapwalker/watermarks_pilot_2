@@ -41,7 +41,7 @@
 
     td:first-child,
 th:first-child {
-  width: 60%;
+  width: 45%;
 }
 
 td:not(:first-child),
@@ -72,7 +72,7 @@ th:not(:first-child) {
     @media (max-width: 768px) {
       th, td {
         font-size: 0.85rem;
-        padding: 8px;
+        padding: 4px;
       }
     }
   </style>
@@ -126,4 +126,26 @@ th:not(:first-child) {
     </div>
   </div>
 </form>
+
+<script>
+  document.querySelector('form').addEventListener('submit', function(event) {
+    // Get all radio group names dynamically based on the inputs in the form
+    const radioGroups = new Set();
+    const radios = document.querySelectorAll('input[type="radio"][name^="moreposts_image_check_"]');
+    radios.forEach(radio => radioGroups.add(radio.name));
+
+    // Check each radio group for a checked input
+    for (const groupName of radioGroups) {
+      const checked = document.querySelector(`input[name="${groupName}"]:checked`);
+      if (!checked) {
+        alert('Please answer all questions by selecting an option for each post.');
+        event.preventDefault();
+        return false;
+      }
+    }
+
+    // If all groups have an answer, form submits normally
+  });
+</script>
+
 {% endblock %}

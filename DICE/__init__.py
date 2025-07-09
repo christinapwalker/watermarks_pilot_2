@@ -56,8 +56,7 @@ class Player(BasePlayer):
     moreposts_image_check_4 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
     moreposts_image_check_5 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
 
-
-    saw_own_claim_real = models.BooleanField(default=False)  # NEW: To save if own claim was shown
+    saw_own_claim_real = models.BooleanField()
     show_own_claim_ai = models.BooleanField()
     shown_claims_ai = models.LongStringField(blank=True)
     image_feelstrue_followup = models.LongStringField(blank=True, null=True)
@@ -118,7 +117,8 @@ class Player(BasePlayer):
             (6, 'Republican'),
             (7, 'Strong Republican')
         ],
-        widget=widgets.RadioSelectHorizontal
+        widget=widgets.RadioSelectHorizontal,
+        required=True
     )
 
     # AI/SMP questions pre-treatment:
@@ -220,8 +220,8 @@ class Player(BasePlayer):
     image_claim_true_ai = models.StringField(
         label="To what extent do you think that [pipe text from option they chose above] is literally true?",
         choices=[
-            ('It is True', 'It is True'),
-            ('It is not True', 'It is not True'),
+            ('It is true', 'It is true'),
+            ('It is not true', 'It is not true'),
         ],
         widget=widgets.RadioSelect,
         blank=True,
@@ -288,7 +288,7 @@ class Player(BasePlayer):
         blank=True  # claim choices are dynamically added, so don't predefine choices
     )
     image_claim_true_real = models.StringField(
-        choices=[['It is True', 'It is True'], ['It is not True', 'It is not True']],
+        choices=[['It is true', 'It is true'], ['It is not true', 'It is not true']],
         widget=widgets.RadioSelect,
         label="To what extent is the claim true?"
     )
@@ -730,7 +730,7 @@ class Player(BasePlayer):
             (1, 'Yes, I tried and was able to interact.'),
             (2, 'No, I tried but could not interact.'),
             (3, 'I did not try to interact.'),
-            (4, "Not Sure/Don't Remember")
+            (4, "Not sure/Don't remember")
         ],
         widget=widgets.RadioSelect
     )
@@ -751,9 +751,9 @@ class Player(BasePlayer):
     # )
     watermark_familiarity = models.IntegerField(
         choices=[
-            (1, 'Very Familiar'),
-            (2, 'Somewhat Familiar'),
-            (3, 'Not Familiar At All'),
+            (1, 'Very familiar'),
+            (2, 'Somewhat familiar'),
+            (3, 'Not familiar at all'),
         ],
         widget=widgets.RadioSelect
     )
@@ -767,7 +767,7 @@ class Player(BasePlayer):
         choices=[
             (1, 'Yes'),
             (2, 'No'),
-            (3, 'Not Sure')
+            (3, 'Not sure')
         ],
         widget=widgets.RadioSelect
     )
@@ -1264,7 +1264,7 @@ class D_DirectQuestions_Real_First(Page):
     form_fields = [
         'click_x_real',
         'click_y_real',
-        'image_feelstrue_followup',  # make sure these exist in Player
+        'image_feelstrue_followup',
         'image_feelsnottrue_followup',
         'image_claim_real',
         'image_feelstrue_real',
@@ -1431,7 +1431,8 @@ class D_DirectQuestions_Real_Second_FeelTrue(Page):
         )
     @staticmethod
     def vars_for_template(player):
-        row_data = json.loads(player.feed_condition_row)[0]
+        row_data = json.loads(player.control_feed_condition_row)[0]
+
 
         claims = [
             row_data[f'Claim {i}'] for i in range(1, 6)
@@ -1455,7 +1456,7 @@ class D_DirectQuestions_Real_Second_DoesNotFeelTrue(Page):
         )
     @staticmethod
     def vars_for_template(player):
-        row_data = json.loads(player.feed_condition_row)[0]
+        row_data = json.loads(player.control_feed_condition_row)[0]
         claims = [
             row_data[f'Claim {i}'] for i in range(1, 6)
             if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])

@@ -169,7 +169,7 @@
       </div>
       <div class="option">
         <input type="radio" id="interaction_unsure" name="interaction" value="4">
-        <label for="interaction_unsure">Not Sure/Don't Remember</label>
+        <label for="interaction_unsure">Not sure/Don't remember</label>
       </div>
     </div>
   </div>
@@ -197,15 +197,15 @@
     <div class="options-container">
       <div class="option">
         <input type="radio" id="watermark_familiarity_very" name="watermark_familiarity" value="1">
-        <label for="watermark_familiarity_very">Very Familiar</label>
+        <label for="watermark_familiarity_very">Very familiar</label>
       </div>
       <div class="option">
         <input type="radio" id="watermark_familiarity_somewhat" name="watermark_familiarity" value="2">
-        <label for="watermark_familiarity_somewhat">Somewhat Familiar</label>
+        <label for="watermark_familiarity_somewhat">Somewhat familiar</label>
       </div>
       <div class="option">
         <input type="radio" id="watermark_familiarity_not" name="watermark_familiarity" value="3">
-        <label for="watermark_familiarity_not">Not Familiar At All</label>
+        <label for="watermark_familiarity_not">Not familiar at all</label>
       </div>
     </div>
   </div>
@@ -226,7 +226,7 @@
       </div>
       <div class="option">
         <input type="radio" name="watermark_manipulation_check" value="3" id="wm_not_sure" onclick="toggleFollowUp(false)">
-        <label for="wm_not_sure">Not Sure</label>
+        <label for="wm_not_sure">Not sure</label>
       </div>
     </div>
   </div>
@@ -259,6 +259,50 @@
 </form>
 
 <script>
+
+  document.querySelector('form').addEventListener('submit', function(event) {
+    // Helper to check if a radio group has a checked input
+    function isRadioGroupChecked(name) {
+      return document.querySelector(`input[name="${name}"]:checked`) !== null;
+    }
+
+    // Helper to check if any checkboxes in a container are checked
+    function isCheckboxChecked(name) {
+      return document.querySelector(`input[name="${name}"]:checked`) !== null;
+    }
+
+    // Validate required radios:
+    const requiredRadioGroups = [
+      'all_images',
+      'loading',
+      'interaction',
+      'political_content',
+      'watermark_familiarity',
+      'watermark_manipulation_check'
+    ];
+
+    for (const groupName of requiredRadioGroups) {
+      if (!isRadioGroupChecked(groupName)) {
+        alert(`Please answer the question: "${document.querySelector(`input[name="${groupName}"]`).closest('.form-group').querySelector('label').innerText}"`);
+        event.preventDefault();
+        return false;
+      }
+    }
+
+    // If follow-up watermark images are shown, require at least one checked
+    const followUp = document.getElementById('follow-up-question');
+    if (followUp && followUp.style.display !== 'none') {
+      if (!isCheckboxChecked('watermark_image_check')) {
+        alert('Please select at least one image that had a watermark, label, or content warning.');
+        event.preventDefault();
+        return false;
+      }
+    }
+
+    // If all validations pass, form submits normally
+  });
+
+
   function toggleFollowUp(show) {
     const followUpDiv = document.getElementById("follow-up-question");
     followUpDiv.style.display = show ? "block" : "none";
@@ -275,6 +319,47 @@
         if (img) img.style.border = '3px solid #2c7be5';
       });
     });
+  });
+    document.querySelector('form').addEventListener('submit', function(event) {
+    // Helper to check if a radio group has a checked input
+    function isRadioGroupChecked(name) {
+      return document.querySelector(`input[name="${name}"]:checked`) !== null;
+    }
+
+    // Helper to check if any checkboxes in a container are checked
+    function isCheckboxChecked(name) {
+      return document.querySelector(`input[name="${name}"]:checked`) !== null;
+    }
+
+    // Validate required radios:
+    const requiredRadioGroups = [
+      'all_images',
+      'loading',
+      'interaction',
+      'political_content',
+      'watermark_familiarity',
+      'watermark_manipulation_check'
+    ];
+
+    for (const groupName of requiredRadioGroups) {
+      if (!isRadioGroupChecked(groupName)) {
+        alert(`Please answer the question: "${document.querySelector(`input[name="${groupName}"]`).closest('.form-group').querySelector('label').innerText}"`);
+        event.preventDefault();
+        return false;
+      }
+    }
+
+    // If follow-up watermark images are shown, require at least one checked
+    const followUp = document.getElementById('follow-up-question');
+    if (followUp && followUp.style.display !== 'none') {
+      if (!isCheckboxChecked('watermark_image_check')) {
+        alert('Please select at least one image that had a watermark, label, or content warning.');
+        event.preventDefault();
+        return false;
+      }
+    }
+
+    // If all validations pass, form submits normally
   });
 </script>
 

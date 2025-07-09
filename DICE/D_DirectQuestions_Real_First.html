@@ -13,7 +13,12 @@
     <input type="hidden" id="click_y_real" name="click_y_real" />
     <input type="hidden" id="image_feelstrue_answered" name="image_feelstrue_answered" value="False" />
     <input type="hidden" id="image_feelsnottrue_answered" name="image_feelsnottrue_answered" value="False" />
-    <input type="hidden" name="saw_own_claim_real" id="saw_own_claim_real" value="{% if show_own_claim_real %}True{% else %}False{% endif %}" />
+    {% if show_own_claim_real %}
+    <input type="hidden" name="saw_own_claim_real" value="1">
+{% else %}
+    <input type="hidden" name="saw_own_claim_real" value="0">
+{% endif %}
+
 
     <div class="question">
         <p><strong>Based on your own assessment, is the image in the post above AI-generated?</strong></p>
@@ -27,7 +32,7 @@
 
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="confidence" min="0" max="10" oninput="updateConfidence(this)">
+        <input type="range" name="image_confidence_real" min="0" max="10" oninput="updateConfidence(this)">
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_real" class="slider-result"></p>
     </div>
@@ -59,8 +64,8 @@
     <div id="claim-truth-section" style="display:none;">
         <p><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></p>
         <div class="multiple-choice">
-            <label><input type="radio" name="image_claim_true_real" value="It is True"> It is True</label>
-            <label><input type="radio" name="image_claim_true_real" value="It is not True"> It is not True</label>
+            <label><input type="radio" name="image_claim_true_real" value="It is true"> It is true</label>
+            <label><input type="radio" name="image_claim_true_real" value="It is not true"> It is not true</label>
         </div>
     </div>
 
@@ -386,6 +391,117 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+document.querySelector('form').addEventListener('submit', function(event) {
+    // Helper to check if element is visible
+    function isVisible(el) {
+        return el && el.offsetParent !== null;
+    }
+
+    // 1. Check image click coordinates are set
+    const clickX = document.getElementById('click_x_real').value;
+    const clickY = document.getElementById('click_y_real').value;
+    if (!clickX || !clickY) {
+        alert('Please click on the image to indicate your selection.');
+        event.preventDefault();
+        return false;
+    }
+
+    // 2. Check radio: image_accuracy_real
+    const accuracyRadios = document.getElementsByName('image_accuracy_real');
+    if (!Array.from(accuracyRadios).some(r => r.checked)) {
+        alert('Please select whether you think the image is AI-generated.');
+        event.preventDefault();
+        return false;
+    }
+
+    // 3. Check slider: image_confidence_real (if visible)
+    const confidenceSlider = document.querySelector('input[name="image_confidence_real"]');
+    if (confidenceSlider && isVisible(confidenceSlider)) {
+        if (confidenceSlider.value === '' || confidenceSlider.value === null) {
+            alert('Please indicate your confidence by moving the slider.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 4. Check claim textarea submitted and filled (if visible and enabled)
+    const claimTextarea = document.getElementById('claim-response');
+    const claimSubmitButton = claimTextarea ? claimTextarea.nextElementSibling : null;
+    if (claimTextarea && isVisible(claimTextarea) && !claimTextarea.disabled) {
+        if (claimTextarea.value.trim() === '') {
+            alert('Please type your claim and submit it before continuing.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 5. Check claim radio: image_claim_real (if interpretations section visible)
+    const interpretationsSection = document.getElementById('interpretations-section');
+    if (interpretationsSection && isVisible(interpretationsSection)) {
+        const claimRadios = document.getElementsByName('image_claim_real');
+        if (!Array.from(claimRadios).some(r => r.checked)) {
+            alert('Please select a claim that best represents the post and image.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 6. Check claim truth radio: image_claim_true_real (if visible)
+    const claimTruthSection = document.getElementById('claim-truth-section');
+    if (claimTruthSection && isVisible(claimTruthSection)) {
+        const claimTrueRadios = document.getElementsByName('image_claim_true_real');
+        if (!Array.from(claimTrueRadios).some(r => r.checked)) {
+            alert('Please indicate to what extent you think the claim is literally true.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 7. Check feel true slider OR binary radios (if visible)
+    const feelTrueQuestion = document.getElementById('feel-true-question');
+    if (feelTrueQuestion && isVisible(feelTrueQuestion)) {
+        const feelTrueSlider = document.querySelector('input[name="image_feelstrue_real"]');
+        const feelTrueBinaryRadios = document.getElementsByName('image_feelstrue_binary_real');
+
+        if (feelTrueSlider && isVisible(feelTrueSlider)) {
+            if (feelTrueSlider.value === '' || feelTrueSlider.value === null) {
+                alert('Please move the slider to indicate how much the post feels true.');
+                event.preventDefault();
+                return false;
+            }
+        } else if (feelTrueBinaryRadios.length > 0) {
+            if (!Array.from(feelTrueBinaryRadios).some(r => r.checked)) {
+                alert('Please select whether the post feels true or does not feel true.');
+                event.preventDefault();
+                return false;
+            }
+        }
+    }
+
+    // 8. Check follow-up textarea if visible and must be filled
+    const followUpTrue = document.getElementById('follow-up-question');
+    if (followUpTrue && isVisible(followUpTrue)) {
+        const ta = followUpTrue.querySelector('textarea');
+        if (ta && ta.value.trim() === '') {
+            alert('Please explain what you think it means if something “feels true”.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    const followUpNotTrue = document.getElementById('follow-up-question_doesnot');
+    if (followUpNotTrue && isVisible(followUpNotTrue)) {
+        const ta = followUpNotTrue.querySelector('textarea');
+        if (ta && ta.value.trim() === '') {
+            alert('Please explain what you think it means if something “does not feel true”.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // Passed all validations - allow form submit
+});
+
 </script>
 
 {% endblock %}

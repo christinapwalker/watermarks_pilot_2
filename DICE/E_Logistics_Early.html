@@ -125,7 +125,7 @@
     <div class="options-container">
       {% for i in range(11) %}
       <div class="option">
-        <input type="radio" id="all_images_{{i}}" name="all_images" value="{{i}}">
+        <input type="radio" id="all_images_{{i}}" name="all_images" value="{{i}}" required>
         <label for="all_images_{{i}}">{{i}}</label>
       </div>
       {% endfor %}
@@ -137,7 +137,7 @@
     <label>Did the images load quickly enough for you on the previous social media page?</label>
     <div class="options-container">
       <div class="option">
-        <input type="radio" id="loading_yes" name="loading" value="1">
+        <input type="radio" id="loading_yes" name="loading" value="1" required>
         <label for="loading_yes">Yes</label>
       </div>
       <div class="option">
@@ -152,7 +152,7 @@
     <label>Were you able to interact with the posts (like, repost, or reply) on the previous social media page?</label>
     <div class="options-container">
       <div class="option">
-        <input type="radio" id="interaction_yes" name="interaction" value="1">
+        <input type="radio" id="interaction_yes" name="interaction" value="1" required>
         <label for="interaction_yes">Yes, I tried and was able to interact.</label>
       </div>
       <div class="option">
@@ -165,7 +165,7 @@
       </div>
       <div class="option">
         <input type="radio" id="interaction_unsure" name="interaction" value="4">
-        <label for="interaction_unsure">Not Sure/Don't Remember</label>
+        <label for="interaction_unsure">Not sure/Don't remember</label>
       </div>
     </div>
   </div>
@@ -176,7 +176,7 @@
     <div class="options-container">
       {% for i in range(11) %}
       <div class="option">
-        <input type="radio" id="political_content_{{i}}" name="political_content" value="{{i}}">
+        <input type="radio" id="political_content_{{i}}" name="political_content" value="{{i}}" required>
         <label for="political_content_{{i}}">{{i}}</label>
       </div>
       {% endfor %}
@@ -188,16 +188,16 @@
     <label>Before today, how familiar were you with watermarks or warning labels on social media?</label>
     <div class="options-container">
       <div class="option">
-        <input type="radio" id="watermark_familiarity_very" name="watermark_familiarity" value="1">
-        <label for="watermark_familiarity_very">Very Familiar</label>
+        <input type="radio" id="watermark_familiarity_very" name="watermark_familiarity" value="1" required>
+        <label for="watermark_familiarity_very">Very familiar</label>
       </div>
       <div class="option">
         <input type="radio" id="watermark_familiarity_somewhat" name="watermark_familiarity" value="2">
-        <label for="watermark_familiarity_somewhat">Somewhat Familiar</label>
+        <label for="watermark_familiarity_somewhat">Somewhat familiar</label>
       </div>
       <div class="option">
         <input type="radio" id="watermark_familiarity_not" name="watermark_familiarity" value="3">
-        <label for="watermark_familiarity_not">Not Familiar At All</label>
+        <label for="watermark_familiarity_not">Not familiar at all</label>
       </div>
     </div>
   </div>
@@ -207,7 +207,7 @@
     <label>If you recall, did any of the images on the previous social media page have a watermark, label, or content warning?</label>
     <div class="options-container">
       <div class="option">
-        <input type="radio" name="watermark_manipulation_check" value="1" id="wm_yes" onclick="toggleFollowUp(true)">
+        <input type="radio" name="watermark_manipulation_check" value="1" id="wm_yes" onclick="toggleFollowUp(true)" required>
         <label for="wm_yes">Yes</label>
       </div>
       <div class="option">
@@ -216,7 +216,7 @@
       </div>
       <div class="option">
         <input type="radio" name="watermark_manipulation_check" value="3" id="wm_not_sure" onclick="toggleFollowUp(false)">
-        <label for="wm_not_sure">Not Sure</label>
+        <label for="wm_not_sure">Not sure</label>
       </div>
     </div>
   </div>
@@ -242,7 +242,10 @@
 
   <!-- Hidden input to store all checked values as JSON string -->
   <input type="hidden" name="watermark_image_check" id="watermark_image_check_input"
-       value="{% if player.watermark_image_check %}{{ player.watermark_image_check }}{% else %}{% endif %}">
+       value="{% if player.field_maybe_none('watermark_image_check') %}
+    <p>You selected: {{ player.watermark_image_check }}</p>
+{% endif %}
+">
 </div>
 
   <div class="submit-container">
@@ -280,6 +283,19 @@
 
   checkboxes.forEach(cb => {
     cb.addEventListener('change', updateHiddenInput);
+  });
+    document.querySelector('form').addEventListener('submit', function(e) {
+    const isFollowUpShown = document.getElementById('follow-up-question').style.display !== 'none';
+
+    if (isFollowUpShown) {
+      const anyChecked = Array.from(document.querySelectorAll('.watermark-checkbox')).some(cb => cb.checked);
+
+      if (!anyChecked) {
+        e.preventDefault(); // stop submission
+        alert("Please select at least one image that had a watermark.");
+        return false;
+      }
+    }
   });
 </script>
 

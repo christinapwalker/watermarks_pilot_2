@@ -59,7 +59,7 @@
         <p><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></p>
         <div class="multiple-choice">
             <label>
-                <input type="radio" name="image_claim_true_ai" value="It is True"> It is True
+                <input type="radio" name="image_claim_true_ai" value="It is true"> It is true
             </label>
             <label>
                 <input type="radio" name="image_claim_true_ai" value="It is not True"> It is not True
@@ -380,6 +380,105 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Removed checkIfAlreadyAnswered function because it's no longer used
 });
+document.querySelector('form').addEventListener('submit', function(event) {
+    function isVisible(el) {
+        return el && el.offsetParent !== null;
+    }
+
+    // 1) Check user clicked on image (hidden inputs)
+    const clickX = document.getElementById('click_x_ai').value;
+    const clickY = document.getElementById('click_y_ai').value;
+    if (!clickX || !clickY) {
+        alert('Please click on the image to indicate the part that helped you decide.');
+        event.preventDefault();
+        return false;
+    }
+
+    // 2) Check image_accuracy_ai radio group
+    const accuracyRadios = document.getElementsByName('image_accuracy_ai');
+    if (!Array.from(accuracyRadios).some(r => r.checked)) {
+        alert('Please indicate whether the image is AI-generated.');
+        event.preventDefault();
+        return false;
+    }
+
+    // 3) Check confidence slider if visible
+    const confidenceSlider = document.querySelector('input[name="confidence"]');
+    if (confidenceSlider && isVisible(confidenceSlider) && confidenceSlider.value === '') {
+        alert('Please indicate your confidence using the slider.');
+        event.preventDefault();
+        return false;
+    }
+
+    // 4) Check claim textarea filled and submitted (disabled)
+    const claimTextarea = document.getElementById('claim-response');
+    if (claimTextarea && isVisible(claimTextarea)) {
+        if (!claimTextarea.disabled && claimTextarea.value.trim() === '') {
+            alert('Please enter your claim and submit it before proceeding.');
+            event.preventDefault();
+            return false;
+        }
+        const submitClaimBtn = claimTextarea.nextElementSibling;
+        if (submitClaimBtn && !submitClaimBtn.disabled) {
+            alert('Please submit your claim before proceeding.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 5) Check claim choices (image_claim_ai) if visible
+    const interpretations = document.getElementById('interpretations-section');
+    if (interpretations && isVisible(interpretations)) {
+        const claimRadios = document.getElementsByName('image_claim_ai');
+        if (!Array.from(claimRadios).some(r => r.checked)) {
+            alert('Please select the claim that best represents the post and image.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 6) Check claim truth radios (image_claim_true_ai) if visible
+    const claimTruth = document.getElementById('claim-truth-section');
+    if (claimTruth && isVisible(claimTruth)) {
+        const claimTruthRadios = document.getElementsByName('image_claim_true_ai');
+        if (!Array.from(claimTruthRadios).some(r => r.checked)) {
+            alert('Please indicate to what extent you think the claim is literally true.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 7) Check feel-true question (slider or binary radios) if visible
+    const feelTrue = document.getElementById('feel-true-question');
+    if (feelTrue && isVisible(feelTrue)) {
+        const feelTrueSlider = document.querySelector('input[name="image_feelstrue"]');
+        const feelTrueBinary = document.getElementsByName('image_feelstrue_binary');
+        if (feelTrueSlider && isVisible(feelTrueSlider) && feelTrueSlider.value === '') {
+            alert('Please indicate how much the post feels true using the slider.');
+            event.preventDefault();
+            return false;
+        }
+        if (feelTrueBinary.length > 0 && !Array.from(feelTrueBinary).some(r => r.checked)) {
+            alert('Please select whether the post feels true or does not feel true.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // 8) Check follow-up "does not feel true" textarea if visible
+    const followUpDoesNot = document.getElementById('follow-up-question_doesnot');
+    if (followUpDoesNot && isVisible(followUpDoesNot)) {
+        const ta = followUpDoesNot.querySelector('textarea');
+        if (ta && ta.value.trim() === '') {
+            alert('Please explain what you think it means if something “does not feel true”.');
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // If all checks pass, form submits normally
+});
+
 </script>
 
 
