@@ -26,13 +26,14 @@
 
     <p style="margin-bottom: 40px;">How confident are you in your assessment about whether the image is AI-generated?</p>
 
-    <div class="slider-container">
-        <span class="slider-label-left">0% Confidence</span>
-<input type="range" name="image_confidence_ai" min="0" max="10" value="0" oninput="updateConfidence(this)">
-<input type="range" name="image_feelstrue_ai" min="0" max="100" value="0" oninput="updateFeelTrueLabel(this)">
-        <span class="slider-label-right">100% Confidence</span>
-        <p id="description-image_confidence_ai" class="slider-result"></p>
-    </div>
+<div class="slider-container">
+    <span class="slider-label-left">0% Confidence</span>
+    <input type="range" name="image_confidence_ai" min="0" max="10" value="0" oninput="updateConfidence(this)">
+    <span class="slider-label-right">100% Confidence</span>
+    <p id="description-image_confidence_ai" class="slider-result"></p>
+</div>
+
+
 
     <p><strong>In the post above, please click on the part of the post or image that helped you make your determination about whether the image is AI-generated. A red dot will appear to confirm your selection.</strong></p>
 
