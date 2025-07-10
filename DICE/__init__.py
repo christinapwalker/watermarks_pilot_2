@@ -237,7 +237,8 @@ class Player(BasePlayer):
     image_feelstrue_binary_real = models.StringField(
         choices=[['Feels true', 'Feels true'], ['Does not feel true', 'Does not feel true']],
         widget=widgets.RadioSelect,
-        label="Does the claim feel true?"
+        label="Does the claim feel true?",
+        blank=True
     )
     # image_feelstrue_ai = models.IntegerField(
     #     label="What do you think it means if something 'feels true'?",

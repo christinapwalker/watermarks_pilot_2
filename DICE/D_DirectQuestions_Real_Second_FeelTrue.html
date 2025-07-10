@@ -25,7 +25,7 @@
     <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="image_confidence_real" min="0" max="10" oninput="updateConfidence(this)" />
+        <input type="range" name="image_confidence_real" min="0" max="10" value ="0" oninput="updateConfidence(this)" />
         {{ formfield_errors 'image_confidence_real' }}
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_real" class="slider-result"></p>
