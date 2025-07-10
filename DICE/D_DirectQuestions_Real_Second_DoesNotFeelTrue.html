@@ -252,34 +252,33 @@ input[type=range]::-moz-range-thumb {
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // CLICKABLE IMAGE + MARKER
     const img = document.getElementById("clickable-image");
     const marker = document.getElementById("click-marker");
     const inputX = document.getElementById("click_x_real");
     const inputY = document.getElementById("click_y_real");
-    const followUpFeelsTrue = document.getElementById('follow-up-question');
-    const followUpDoesNotFeelTrue = document.getElementById('follow-up-question_doesnot');
 
     img.addEventListener("click", function (event) {
         const rect = img.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // Calculate click position as percentage of displayed image size
-        const xPercent = (x / img.clientWidth) * 100;
-        const yPercent = (y / img.clientHeight) * 100;
+        const xPercent = (x / img.width) * 100;
+        const yPercent = (y / img.height) * 100;
 
         inputX.value = xPercent.toFixed(2);
         inputY.value = yPercent.toFixed(2);
 
-        // Position marker centered on click
-        const markerX = x - marker.offsetWidth / 2;
-        const markerY = y - marker.offsetHeight / 2;
+        // position marker
+        const markerX = (xPercent / 100) * img.width - (marker.offsetWidth / 2);
+        const markerY = (yPercent / 100) * img.height - (marker.offsetHeight / 2);
 
         marker.style.left = markerX + "px";
         marker.style.top = markerY + "px";
         marker.style.display = "block";
     });
 
+    // SHOW OWN CLAIM OPTION IF ENABLED
     const showOwnClaim = {% if show_own_claim_real %}true{% else %}false{% endif %};
     const textarea = document.getElementById('claim-response');
     const interpretationsSection = document.getElementById('interpretations-section');
@@ -298,6 +297,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (showOwnClaim) {
             const label = document.createElement('label');
+            label.className = 'claim-option';
+
             const input = document.createElement('input');
             input.type = 'radio';
             input.name = 'image_claim_real';
@@ -334,133 +335,148 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
     };
 
-    // No longer using image_feelstrue_answered or image_feelsnottrue_answered for logic
-
     window.updateFeelTrueLabel = function (input) {
         const description = document.getElementById('feeltrue-description');
         description.textContent = input.value;
 
-        if (parseInt(input.value) < 50) {
+        const followUpFeelsTrue = document.getElementById('follow-up-question');
+        const followUpDoesNotFeelTrue = document.getElementById('follow-up-question_doesnot');
+
+        if (parseInt(input.value) >= 50) {
+            followUpFeelsTrue.style.display = 'block';
+            followUpDoesNotFeelTrue.style.display = 'none';
+        } else if (parseInt(input.value) < 50) {
+            followUpFeelsTrue.style.display = 'none';
             followUpDoesNotFeelTrue.style.display = 'block';
         } else {
+            followUpFeelsTrue.style.display = 'none';
             followUpDoesNotFeelTrue.style.display = 'none';
         }
-
-        // Never show the feels true follow-up
-        followUpFeelsTrue.style.display = 'none';
     };
 
+    window.markFeelsTrueAnswered = function () {
+        document.getElementById('image_feelstrue_answered').value = 'True';
+    };
+    window.markFeelsNotTrueAnswered = function () {
+        document.getElementById('image_feelsnottrue_answered').value = 'True';
+    };
+
+    // Handle binary radio buttons for "feels true" / "does not feel true"
     const binaryRadios = document.getElementsByName('image_feelstrue_binary');
     Array.from(binaryRadios).forEach(function (radio) {
         radio.addEventListener('change', function () {
-            if (this.value === "Does not feel true") {
-                followUpDoesNotFeelTrue.style.display = 'block';
-            } else {
+            const followUpFeelsTrue = document.getElementById('follow-up-question');
+            const followUpDoesNotFeelTrue = document.getElementById('follow-up-question_doesnot');
+
+            if (this.value === "Feels true") {
+                followUpFeelsTrue.style.display = 'block';
                 followUpDoesNotFeelTrue.style.display = 'none';
+            } else if (this.value === "Does not feel true") {
+                followUpFeelsTrue.style.display = 'none';
+                followUpDoesNotFeelTrue.style.display = 'block';
             }
-            followUpFeelsTrue.style.display = 'none';
         });
     });
 
-    // Removed checkIfAlreadyAnswered function because it's no longer used
+    // FORM SUBMIT VALIDATION
+    document.querySelector('form').addEventListener('submit', function (event) {
+        function isVisible(el) {
+            return el && el.offsetParent !== null;
+        }
+
+        const clickX = document.getElementById('click_x_real').value;
+        const clickY = document.getElementById('click_y_real').value;
+        if (!clickX || !clickY) {
+            alert('Please click on the image to indicate your selection.');
+            event.preventDefault();
+            return false;
+        }
+
+        const accuracyRadios = document.getElementsByName('image_accuracy_real');
+        if (!Array.from(accuracyRadios).some(r => r.checked)) {
+            alert('Please select whether you think the image is AI-generated.');
+            event.preventDefault();
+            return false;
+        }
+
+        const confidenceSlider = document.querySelector('input[name="image_confidence_real"]');
+        if (confidenceSlider && isVisible(confidenceSlider)) {
+            if (confidenceSlider.value === '' || confidenceSlider.value === null) {
+                alert('Please indicate your confidence by moving the slider.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        if (textarea && isVisible(textarea) && !textarea.disabled) {
+            if (textarea.value.trim() === '') {
+                alert('Please type your claim and submit it before continuing.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        if (interpretationsSection && isVisible(interpretationsSection)) {
+            const claimRadios = document.getElementsByName('image_claim_real');
+            if (!Array.from(claimRadios).some(r => r.checked)) {
+                alert('Please select a claim that best represents the post and image.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const claimTruthSection = document.getElementById('claim-truth-section');
+        if (claimTruthSection && isVisible(claimTruthSection)) {
+            const claimTrueRadios = document.getElementsByName('image_claim_true_real');
+            if (!Array.from(claimTrueRadios).some(r => r.checked)) {
+                alert('Please indicate to what extent you think the claim is literally true.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const feelTrueQuestion = document.getElementById('feel-true-question');
+        if (feelTrueQuestion && isVisible(feelTrueQuestion)) {
+            const feelTrueSlider = document.querySelector('input[name="image_feelstrue_real"]');
+            const feelTrueBinaryRadios = document.getElementsByName('image_feelstrue_binary');
+
+            if (feelTrueSlider && isVisible(feelTrueSlider)) {
+                if (feelTrueSlider.value === '' || feelTrueSlider.value === null) {
+                    alert('Please move the slider to indicate how much the post feels true.');
+                    event.preventDefault();
+                    return false;
+                }
+            } else if (feelTrueBinaryRadios.length > 0) {
+                if (!Array.from(feelTrueBinaryRadios).some(r => r.checked)) {
+                    alert('Please select whether the post feels true or does not feel true.');
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        const followUpTrue = document.getElementById('follow-up-question');
+        if (followUpTrue && isVisible(followUpTrue)) {
+            const ta = followUpTrue.querySelector('textarea');
+            if (ta && ta.value.trim() === '') {
+                alert('Please explain what you think it means if something “feels true”.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const followUpNotTrue = document.getElementById('follow-up-question_doesnot');
+        if (followUpNotTrue && isVisible(followUpNotTrue)) {
+            const ta = followUpNotTrue.querySelector('textarea');
+            if (ta && ta.value.trim() === '') {
+                alert('Please explain what you think it means if something “does not feel true”.');
+                event.preventDefault();
+                return false;
+            }
+        }
+    });
+
 });
-document.querySelector('form').addEventListener('submit', function(event) {
-    function isVisible(el) {
-        return el && el.offsetParent !== null;
-    }
-
-    // 1) Require click on image (coordinates filled)
-    const clickX = document.getElementById('click_x_real').value;
-    const clickY = document.getElementById('click_y_real').value;
-    if (!clickX || !clickY) {
-        alert('Please click on the image to indicate the part that helped you decide.');
-        event.preventDefault();
-        return false;
-    }
-
-    // 2) Require answer to "is image AI-generated?" radios
-    const accuracyRadios = document.getElementsByName('image_accuracy_real');
-    if (!Array.from(accuracyRadios).some(r => r.checked)) {
-        alert('Please select whether the image is AI-generated.');
-        event.preventDefault();
-        return false;
-    }
-
-    // 3) Require confidence slider value if visible
-    const confidenceSlider = document.querySelector('input[name="confidence"]');
-    if (confidenceSlider && isVisible(confidenceSlider) && confidenceSlider.value === '') {
-        alert('Please indicate your confidence using the slider.');
-        event.preventDefault();
-        return false;
-    }
-
-    // 4) Require claim textarea filled and submitted
-    const claimTextarea = document.getElementById('claim-response');
-    if (claimTextarea && isVisible(claimTextarea)) {
-        if (!claimTextarea.disabled && claimTextarea.value.trim() === '') {
-            alert('Please type your claim and submit it before proceeding.');
-            event.preventDefault();
-            return false;
-        }
-        const submitClaimBtn = claimTextarea.nextElementSibling;
-        if (submitClaimBtn && !submitClaimBtn.disabled) {
-            alert('Please submit your claim before proceeding.');
-            event.preventDefault();
-            return false;
-        }
-    }
-
-    // 5) Require claim choice radio if interpretations visible
-    const interpretations = document.getElementById('interpretations-section');
-    if (interpretations && isVisible(interpretations)) {
-        const claimRadios = document.getElementsByName('image_claim_real');
-        if (!Array.from(claimRadios).some(r => r.checked)) {
-            alert('Please select the claim that best represents the post and image.');
-            event.preventDefault();
-            return false;
-        }
-    }
-
-    // 6) Require claim truth radios if visible
-    const claimTruth = document.getElementById('claim-truth-section');
-    if (claimTruth && isVisible(claimTruth)) {
-        const claimTruthRadios = document.getElementsByName('image_claim_true_real');
-        if (!Array.from(claimTruthRadios).some(r => r.checked)) {
-            alert('Please indicate whether you think the claim is literally true.');
-            event.preventDefault();
-            return false;
-        }
-    }
-
-    // 7) Require feel-true input if visible (slider or binary radios)
-    const feelTrue = document.getElementById('feel-true-question');
-    if (feelTrue && isVisible(feelTrue)) {
-        const feelTrueSlider = document.querySelector('input[name="image_feelstrue_real"]');
-        const feelTrueBinary = document.getElementsByName('image_feelstrue_binary');
-        if (feelTrueSlider && isVisible(feelTrueSlider) && feelTrueSlider.value === '') {
-            alert('Please indicate how much the post feels true using the slider.');
-            event.preventDefault();
-            return false;
-        }
-        if (feelTrueBinary.length > 0 && !Array.from(feelTrueBinary).some(r => r.checked)) {
-            alert('Please select whether the post feels true or does not feel true.');
-            event.preventDefault();
-            return false;
-        }
-    }
-
-    // 8) Require follow-up "does not feel true" textarea if visible
-    const followUpDoesNot = document.getElementById('follow-up-question_doesnot');
-    if (followUpDoesNot && isVisible(followUpDoesNot)) {
-        const ta = followUpDoesNot.querySelector('textarea');
-        if (ta && ta.value.trim() === '') {
-            alert('Please explain what you think it means if something “does not feel true”.');
-            event.preventDefault();
-            return false;
-        }
-    }
-});
-
 </script>
 
 {% endblock %}

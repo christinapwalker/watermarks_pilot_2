@@ -365,6 +365,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('image_feelsnottrue_answered').value = 'True';
     };
 
+    // Handle binary radio buttons for "feels true" / "does not feel true"
     const binaryRadios = document.getElementsByName('image_feelstrue_binary');
     Array.from(binaryRadios).forEach(function (radio) {
         radio.addEventListener('change', function () {
@@ -380,7 +381,107 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    // FORM SUBMIT VALIDATION
+    document.querySelector('form').addEventListener('submit', function (event) {
+        function isVisible(el) {
+            return el && el.offsetParent !== null;
+        }
+
+        const clickX = document.getElementById('click_x_real').value;
+        const clickY = document.getElementById('click_y_real').value;
+        if (!clickX || !clickY) {
+            alert('Please click on the image to indicate your selection.');
+            event.preventDefault();
+            return false;
+        }
+
+        const accuracyRadios = document.getElementsByName('image_accuracy_real');
+        if (!Array.from(accuracyRadios).some(r => r.checked)) {
+            alert('Please select whether you think the image is AI-generated.');
+            event.preventDefault();
+            return false;
+        }
+
+        const confidenceSlider = document.querySelector('input[name="image_confidence_real"]');
+        if (confidenceSlider && isVisible(confidenceSlider)) {
+            if (confidenceSlider.value === '' || confidenceSlider.value === null) {
+                alert('Please indicate your confidence by moving the slider.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        if (textarea && isVisible(textarea) && !textarea.disabled) {
+            if (textarea.value.trim() === '') {
+                alert('Please type your claim and submit it before continuing.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        if (interpretationsSection && isVisible(interpretationsSection)) {
+            const claimRadios = document.getElementsByName('image_claim_real');
+            if (!Array.from(claimRadios).some(r => r.checked)) {
+                alert('Please select a claim that best represents the post and image.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const claimTruthSection = document.getElementById('claim-truth-section');
+        if (claimTruthSection && isVisible(claimTruthSection)) {
+            const claimTrueRadios = document.getElementsByName('image_claim_true_real');
+            if (!Array.from(claimTrueRadios).some(r => r.checked)) {
+                alert('Please indicate to what extent you think the claim is literally true.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const feelTrueQuestion = document.getElementById('feel-true-question');
+        if (feelTrueQuestion && isVisible(feelTrueQuestion)) {
+            const feelTrueSlider = document.querySelector('input[name="image_feelstrue_real"]');
+            const feelTrueBinaryRadios = document.getElementsByName('image_feelstrue_binary');
+
+            if (feelTrueSlider && isVisible(feelTrueSlider)) {
+                if (feelTrueSlider.value === '' || feelTrueSlider.value === null) {
+                    alert('Please move the slider to indicate how much the post feels true.');
+                    event.preventDefault();
+                    return false;
+                }
+            } else if (feelTrueBinaryRadios.length > 0) {
+                if (!Array.from(feelTrueBinaryRadios).some(r => r.checked)) {
+                    alert('Please select whether the post feels true or does not feel true.');
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }
+
+        const followUpTrue = document.getElementById('follow-up-question');
+        if (followUpTrue && isVisible(followUpTrue)) {
+            const ta = followUpTrue.querySelector('textarea');
+            if (ta && ta.value.trim() === '') {
+                alert('Please explain what you think it means if something “feels true”.');
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        const followUpNotTrue = document.getElementById('follow-up-question_doesnot');
+        if (followUpNotTrue && isVisible(followUpNotTrue)) {
+            const ta = followUpNotTrue.querySelector('textarea');
+            if (ta && ta.value.trim() === '') {
+                alert('Please explain what you think it means if something “does not feel true”.');
+                event.preventDefault();
+                return false;
+            }
+        }
+    });
+
 });
 </script>
+
 
 {% endblock %}
