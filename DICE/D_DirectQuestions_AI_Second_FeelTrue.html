@@ -38,7 +38,7 @@
         <p><strong>Regardless of whether you think the image in the post is AI-generated or not, what <em>claim</em> do you believe the post is making?</strong></p>
         <textarea id="claim-response" name="claim_response_ai" rows="4" cols="50"></textarea>
         <br>
-        <button type="button" onclick="submitClaim(this)">Submit Claim</button>
+        <button id="submit-claim-btn" type="button" onclick="submitClaim(this)">Submit Claim</button>
     </div>
 
     <div id="interpretations-section" style="display:none;">
@@ -426,7 +426,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 event.preventDefault();
                 return;
             }
-            const submitClaimBtn = textarea.nextElementSibling;
+            const submitClaimBtn = document.getElementById('submit-claim-btn');
             if (submitClaimBtn && !submitClaimBtn.disabled) {
                 alert('Please submit your claim before continuing.');
                 event.preventDefault();
