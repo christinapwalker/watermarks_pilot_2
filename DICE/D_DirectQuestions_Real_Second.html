@@ -26,7 +26,7 @@
 
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="confidence" min="0" max="10" oninput="updateConfidence(this)">
+        <input type="range" name="confidence" min="0" max="10" value="5" oninput="updateConfidence(this)">
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_real" class="slider-result"></p>
     </div>
@@ -252,6 +252,29 @@ input[type=range]::-moz-range-thumb {
 .claim-option input {
     margin-right: 8px;
 }
+  /* Submit button container */
+  .submit-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+
+  button[type="submit"] {
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+    transition: background-color 0.25s ease;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #1a5fd9;
+  }
 </style>
 
 <script>

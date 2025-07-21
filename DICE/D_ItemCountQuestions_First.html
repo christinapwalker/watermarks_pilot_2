@@ -8,8 +8,8 @@
     .slider-container {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 10px;
+        justify-content: center;
+        gap: 16px;
         width: 100%;
         max-width: 600px;
         margin: 40px auto;
@@ -20,17 +20,22 @@
         font-size: 12px;
         width: 100px;
         text-align: center;
-        word-wrap: break-word;
+        white-space: normal;
+    }
+
+    .slider-label-left br,
+    .slider-label-right br {
+        display: none; /* Avoids inconsistent vertical spacing */
     }
 
     input[type=range] {
-        flex: 1;
+        flex-grow: 1;
         height: 20px;
         -webkit-appearance: none;
         appearance: none;
         background: #ddd;
         outline: none;
-        opacity: 0.7;
+        opacity: 0.85;
         transition: opacity .15s ease-in-out;
         margin: 0;
     }
@@ -44,7 +49,7 @@
         appearance: none;
         width: 25px;
         height: 25px;
-        background: #4CAF50;
+        background: #007bff;
         cursor: pointer;
         border-radius: 50%;
     }
@@ -52,7 +57,7 @@
     input[type=range]::-moz-range-thumb {
         width: 25px;
         height: 25px;
-        background: #4CAF50;
+        background: #007bff;
         cursor: pointer;
         border-radius: 50%;
     }
@@ -62,7 +67,6 @@
         margin-top: 10px;
     }
 
-    /* Optional: Ensure spacing consistency on very small screens */
     @media (max-width: 400px) {
         .slider-label-left,
         .slider-label-right {
@@ -70,12 +74,36 @@
             width: 80px;
         }
     }
+    /* Submit button container */
+  .submit-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+
+  button[type="submit"] {
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+    transition: background-color 0.25s ease;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #1a5fd9;
+  }
 </style>
+
 
 
 <form method="post" id="sliderForm">
 
-<p style="margin-bottom: 40px;">Move the slider below to indicate how many of the five images on the previous social media page you thought were AI-generated:</p>
+<p style="margin-bottom: 40px;"><strong>Move the slider below to indicate how many of the five images on the previous social media page you thought were AI-generated:</strong></p>
 
 <div class="slider-container">
     <span class="slider-label-left">No Images were <br> AI-generated</span>
@@ -85,8 +113,8 @@
 <input type="hidden" name="accurate_all" id="accurate_all_input">
 <p id="description-aigen" class="slider-result"></p>
 
-<p style="margin-bottom: 40px; margin-top: 50px;">
-    Move the slider below to indicate how confident you are in your assessment of whether the images on the previous social media page were AI-generated or not:
+<p style="margin-bottom: 40px; margin-top: 50px;"><strong>
+    Move the slider below to indicate how confident you are in your assessment of whether the images on the previous social media page were AI-generated or not: </strong>
 </p>
 
 <div class="slider-container">
@@ -98,8 +126,8 @@
 <p id="description-confidence" class="slider-result"></p>
 
 
-<p style="margin-bottom: 40px; margin-top: 50px;">
-    Move the slider below to indicate how many of the posts on the previous social media page you would share on your personal page:
+<p style="margin-bottom: 40px; margin-top: 50px;"><strong>
+    Move the slider below to indicate how many of the posts on the previous social media page you would share on your personal page: </strong>
 </p>
 
 <div class="slider-container">
@@ -111,8 +139,8 @@
 <p id="description-share" class="slider-result"></p>
 
 
-<div class="d-flex justify-content-end m-5">
-    <button class="btn btn-success shadow" type="submit" id="submitButton">
+  <div class="submit-container">
+    <button type="submit" id="submitButton" aria-label="Submit survey responses">
       ➔
     </button>
   </div>

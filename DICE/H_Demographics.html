@@ -5,116 +5,103 @@
 
 {% block content %}
 
-<form method="post">
+<div class="survey-container">
+  <form method="post">
+
 
 <style>
-  /* Reset and base styles */
+  /* ===== Base Styles ===== */
   body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     color: #222;
-    line-height: 1.5;
     background-color: #f9f9f9;
-    padding: 0;
     margin: 0;
+    padding: 0;
   }
 
-  /* Centered container, like Qualtrics content area */
   .survey-container {
-    max-width: 1400px;
-    margin: 30px auto 60px auto;
+    max-width: 700px;
+    margin: 40px auto;
     background: white;
     padding: 30px 40px;
-    box-shadow: 0 0 12px rgba(0,0,0,0.08);
     border-radius: 6px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
   }
 
-  /* Headings / instructions */
   p {
     font-size: 1.3rem;
     font-weight: 600;
     margin-bottom: 1rem;
   }
 
-  /* Slider styles */
+  /* ===== Slider ===== */
   .slider-container {
-    margin: 20px 0 40px;
+    position: relative;
+    width: 100%;
+    margin-bottom: 60px;
   }
-  .slider-label {
-    font-weight: 600;
-    margin-bottom: 10px;
-    display: block;
-    font-size: 1.1rem;
-  }
+
   .slider {
-    -webkit-appearance: none;
     width: 100%;
     height: 14px;
+    background: #ddd;
     border-radius: 7px;
-    background: #d3d3d3;
-    outline: none;
-    opacity: 0.85;
-    transition: opacity 0.2s;
-  }
-  .slider:hover {
-    opacity: 1;
-  }
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
+    margin-bottom: 40px;
     appearance: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #337ab7;
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
-    transition: background 0.3s ease;
-  }
-  .slider::-webkit-slider-thumb:hover {
-    background: #286090;
-  }
-  .slider::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #337ab7;
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(51, 122, 183, 0.6);
+    outline: none;
   }
 
+  /* ===== Rotated Labels ===== */
+  .slider-labels {
+    position: relative;
+    height: 80px;
+    width: 100%;
+    user-select: none;
+  }
+
+  .slider-labels span {
+    position: absolute;
+    top: 0;
+    transform: rotate(60deg) translateY(6px);
+    transform-origin: top center;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* Position each label centered over its tick */
+  .slider-labels span:nth-child(1) { left: 0%; }
+  .slider-labels span:nth-child(2) { left: 16.666%; }
+  .slider-labels span:nth-child(3) { left: 33.333%; }
+  .slider-labels span:nth-child(4) { left: 50%; }
+  .slider-labels span:nth-child(5) { left: 66.666%; }
+  .slider-labels span:nth-child(6) { left: 83.333%; }
+  .slider-labels span:nth-child(7) { left: 90%; }
+
+  /* ===== Slider Value Display ===== */
   .slider-value {
-    margin-top: 10px;
+    text-align: center;
     font-size: 1.3rem;
     font-weight: 600;
-    text-align: center;
     color: #444;
+    margin-top: -20px;
   }
+  .question-label {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #222;
+}
 
-  .slider-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: #666;
-  }
-  .slider-labels span {
-    width: 13%;
-    text-align: center;
-  }
 
-  /* Error messages */
-  .error-message {
-    color: #d9534f;
-    font-size: 0.9rem;
-    margin-top: 4px;
-  }
 
-  /* Tables */
+  /* ===== Table Styles ===== */
   table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 18px;
     margin-bottom: 40px;
   }
+
   th, td {
     padding: 12px;
     text-align: center;
@@ -122,111 +109,229 @@
     font-size: 0.95rem;
     color: #333;
   }
+
   th {
     font-weight: 600;
     background: #f1f1f1;
     border-bottom: 2px solid #ddd;
   }
+
+  /* Question Column */
   .question-column {
-    width: 30%;
+    width: 20%;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
     text-align: left;
     font-weight: 600;
     color: #222;
   }
 
+  /* ----- Matrix Table Specific Styles ----- */
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+    table-layout: auto;
+  }
+
+  .matrix-table th,
+  .matrix-table td {
+    border: 1px solid #ddd;
+    padding: 10px 8px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: #333;
+  }
+
+  .matrix-table .question-column {
+    max-width: 30%; /* wider for question text */
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    text-align: left;
+    font-weight: 600;
+    color: #222;
+  }
+
+  /* Radio Answer Columns */
+.matrix-table th:not(:first-child),
+.matrix-table td:not(.question-column) {
+  padding: 4px 1px;
+  font-size: 0.7rem;
+  word-break: break-word;
+  text-align: center;
+}
+
+
+  /* Radio Inputs */
+  .matrix-table input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  /* Hide mobile labels on desktop */
+  .matrix-table td label.mobile-label {
+    display: none;
+  }
+
+  /* Wrapper for horizontal scroll on small screens */
+.matrix-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+  .matrix-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+
+
+  /* ===== Responsive ===== */
+  @media (max-width: 700px) {
+  .survey-container {
+    margin: 15px;
+    padding: 20px;
+  }
+
+  .slider-labels span {
+    font-size: 0.6rem;
+  }
+
+  p, .slider-value {
+    font-size: 1rem;
+  }
+
+  .slider-container {
+    padding: 0;
+  }
+
+  .matrix-table th,
+  .matrix-table td {
+    font-size: 0.75rem;
+    padding: 6px;
+  }
+
+  .matrix-table {
+    width: 100%;
+    table-layout: fixed;
+  }
+    .question-label {
+    font-size: 1rem;
+  }
+
+
+  /* Slightly wider question column */
+  .matrix-table .question-column {
+    width: 50%;             /* Give more space for questions */
+    font-size: 0.5rem;
+    padding-left: 1px;
+    padding-right: 1px;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+
+  /* Make radio columns narrow */
+  .matrix-table th:not(:first-child),
+  .matrix-table td:not(.question-column) {
+    max-width: 1px;
+    white-space: normal;
+    /*text-align: center;*/
+    word-break: break-word;
+    padding: 0px 0px;
+    font-size: 0.6rem;
+
+
+  }
+}
+
+/* Only apply bold style to labels with the 'question-label' class */
+.question-label {
+  font-weight: 600;
+  font-size: 1.2rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+
+/* Restore normal weight for inline radio/checkbox labels */
+label:not(.question-label) {
+  font-weight: normal;
+  font-size: 1rem;
+  display: inline;
+}
+
   /* Submit button container */
   .submit-container {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
   }
-  button#submitButton {
-    background-color: #337ab7;
-    border: none;
+
+  button[type="submit"] {
+    background-color: #2c7be5;
     color: white;
-    padding: 12px 25px;
+    border: none;
+    padding: 10px 22px;
     font-size: 1.3rem;
-    font-weight: 600;
+    font-weight: 700;
     border-radius: 5px;
     cursor: pointer;
-    box-shadow: 0 3px 8px rgba(51, 122, 183, 0.4);
-    transition: background-color 0.3s ease;
-  }
-  button#submitButton:hover {
-    background-color: #286090;
+    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+    transition: background-color 0.25s ease;
   }
 
-  /* Responsive adjustments */
-  @media (max-width: 800px) {
-    .survey-container {
-      margin: 15px;
-      padding: 20px;
-    }
-    .slider-labels span {
-      font-size: 0.8rem;
-    }
-    th, td {
-      font-size: 0.85rem;
-      padding: 8px 6px;
-    }
-    button#submitButton {
-      width: 100%;
-      padding: 14px;
-      font-size: 1.2rem;
-    }
-    .submit-container {
-      text-align: center;
-      margin-top: 20px;
-    }
+  button[type="submit"]:hover {
+    background-color: #1a5fd9;
   }
 
-  @media (max-width: 700px) {
-    .question-column {
-      width: 100% !important;
-      display: block !important;
-      margin-bottom: 8px !important;
-      padding-left: 0 !important;
-      position: relative !important;
-    }
-    table, thead, tbody, th, td, tr {
-      display: block;
-    }
-    tr {
-      margin-bottom: 20px;
-      border-bottom: 1px solid #eee;
-    }
-    th {
-      display: none;
-    }
-    td {
-      text-align: left !important;
-      padding-left: 0 !important;
-      position: relative !important;
-    }
-    /* Remove data-label from answer cells to avoid duplicate labels */
-    td:not(.question-column):before {
-      content: none !important;
-    }
-    /* Stack answer options vertically (optional, comment this out if you want horizontal) */
-    td:not(.question-column) {
-      display: block;
-      margin-bottom: 8px;
-    }
-    /* Style radio inputs inline with their labels */
-    td input[type="radio"] {
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-  }
 </style>
 
-    {{ formfields }}
+<label class="question-label" for="age">
+  How old are you?
+</label>
+{{ form.age }}
 
-       <div class="d-flex justify-content-end m-5">
-    <button class="btn btn-success shadow" type="submit" id="submitButton">
-      ➔
-    </button>
-  </div>
+<label class="question-label" for="gender" style="margin-top: 40px;">
+  What is your gender?
+</label>
+{{ form.gender }}
 
-</form>
+<label class="question-label" for="state" style="margin-top: 40px;">
+  What state do you live in?
+</label>
+{{ form.state }}
+
+
+<label class="question-label" for="race" style="margin-top: 40px;">
+  What is your race?
+</label>
+{{ form.race }}
+
+<label class="question-label" for="education" style="margin-top: 40px;">
+What is the highest level of education that you have completed?
+</label>
+{{ form.education }}
+
+<label class="question-label" for="income" style="margin-top: 40px;">
+What is your combined household income?
+</label>
+{{ form.income }}
+
+
+
+<div class="submit-container">
+  <button type="submit" id="submitButton" aria-label="Submit survey responses">
+    ➔
+  </button>
+</div>
+
+  </form>
+</div>
 
 <script>
 document.querySelector('form').addEventListener('submit', function(event) {

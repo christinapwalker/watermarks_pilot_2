@@ -57,14 +57,14 @@ class Player(BasePlayer):
     moreposts_image_check_5 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
 
     saw_own_claim_real = models.BooleanField()
-    show_own_claim_ai = models.BooleanField()
+    saw_own_claim_ai = models.BooleanField()
     shown_claims_ai = models.LongStringField(blank=True)
     image_feelstrue_followup = models.LongStringField(blank=True, null=True)
+
     image_feelsnottrue_followup = models.LongStringField(blank=True, null=True)
     image_feelstrue = models.StringField(blank=True)
-    image_feelsnottrue_answered = models.StringField()
     image_feelsnottrue_answered = models.BooleanField(initial=False)
-    image_feelsnottrue_answered = models.BooleanField(initial=False)
+    image_feelstrue_answered = models.BooleanField(initial=False)
 
     # ad_condition = models.StringField(doc='indicates the ad condition a player is randomly assigned to') delete?
     # Metadata variables:
@@ -193,18 +193,13 @@ class Player(BasePlayer):
     #     label="Please select the number three:")
     #
 
-    # Assessment of Individual Images (Direct Questions):
-    # Image 1
+    # Image 2
     image_accuracy_ai = models.StringField(
-        label="Do you believe the image in the post above is accurate or AI-generated?",
-        choices=[
-            ('Accurate', 'Accurate'),
-            ('AI-generated', 'AI-generated'),
-            ('Unsure', 'Unsure'),
-        ],
+        choices=[['AI-generated', 'Yes'], ['Accurate', 'No']],
         widget=widgets.RadioSelect,
-        blank=True,
+        label="Based on your own assessment, is the image in the post above AI-generated?"
     )
+
     image_claim_ai = models.IntegerField(
         label="Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.",
         choices=[
@@ -240,11 +235,6 @@ class Player(BasePlayer):
         label="Does the claim feel true?",
         blank=True
     )
-    # image_feelstrue_ai = models.IntegerField(
-    #     label="What do you think it means if something 'feels true'?",
-    #     blank = True,
-    #     required = None
-    # )
     image_reason_ai = models.IntegerField(
         label="On the post above, please click on the part that makes you believe the image was {accurate/AI-generated}."
     )
@@ -834,6 +824,7 @@ def creating_session(subsession):
         player.participant.vars['logistics_early'] = random.random() < 0.1
         player.participant.tweets = tweets  # initial full tweets dataframe
 
+
     # Group players by party_id to block treatment assignment
     party_id_groups = defaultdict(list)
     for player in subsession.get_players():
@@ -1120,6 +1111,9 @@ class B_SMPsTrust(Page):
         'smp_news_pre',
     ]
 
+
+
+
     # form_fields = ["party_id", "smp_entertaining_pre", "smp_accuracy_pre", "smp_enjoyment_pre", "smp_community_pre",
     #                "smp_news_pre", "use_twitter", "use_instagram", "use_pinterest", "use_linkedin", "use_facebook",
     #                "use_youtube", "use_tiktok", "use_bluesky", "use_truthsocial"]
@@ -1222,16 +1216,18 @@ class D_DirectQuestions_AI_First(Page):
     form_fields = [
         'click_x_ai',
         'click_y_ai',
-        'image_feelstrue_followup',  # make sure these exist in Player
+        'image_feelstrue_followup',
         'image_feelsnottrue_followup',
         'image_claim_ai',
         'image_accuracy_ai',
         'image_confidence_ai',
         'claim_response_ai',
         'image_claim_true_ai',
+        'saw_own_claim_ai',
         'image_feelstrue_ai',
-        'image_feelstrue_binary_ai',
+        'image_feelstrue_binary_ai'
     ]
+
 
     @staticmethod
     def is_displayed(player):
@@ -1244,19 +1240,23 @@ class D_DirectQuestions_AI_First(Page):
         claims = [row_data[f'Claim {i}'] for i in range(1, 6)
                   if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
 
-        # Randomly decide whether to show their own claim
+        show_slider = random.choice([True, False])
         show_own = random.choice([True, False])
-        player.participant.vars['show_own_claim_ai'] = show_own
-        player.show_own_claim_ai = show_own  # ✅ Save to Player field
 
-        # Save the list of claims shown
+        # Save to player and participant.vars
+        player.saw_own_claim_ai = show_own
+        player.participant.vars['show_own_claim_ai'] = show_own
+        player.participant.vars['show_slider_ai'] = show_slider
+
         player.shown_claims_ai = json.dumps(claims)
 
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
-            show_slider=random.choice([True, False]),
+            show_slider=show_slider,
             show_own_claim_ai=show_own,
+            saw_own_claim_ai=show_own,
         )
+
 
 
 class D_DirectQuestions_Real_First(Page):
@@ -1307,41 +1307,49 @@ class D_DirectQuestions_Real_First(Page):
 
 class D_DirectQuestions_AI_Second_FeelTrue(Page):
     form_model = 'player'
-    form_fields = ['click_x_ai', 'click_y_ai', 'image_claim_ai', 'image_feelstrue_followup', 'image_accuracy_ai',
-                   'image_confidence_ai', 'claim_response_ai', 'image_claim_ai', 'image_claim_true_ai',
-                   'image_feelstrue', 'image_feelstrue_binary_ai', 'image_feelstrue_followup']
+    form_fields = [
+        'click_x_ai', 'click_y_ai', 'image_claim_ai', 'image_feelstrue_followup',
+        'image_accuracy_ai', 'image_confidence_ai', 'claim_response_ai',
+        'image_claim_true_ai', 'image_feelstrue', 'image_feelstrue_binary_ai'
+    ]
 
     @staticmethod
     def is_displayed(player):
+        if player.participant.vars.get('second_question') != 'AI':
+            print("AI_Second_FeelTrue: skipped because second_question != 'AI'")
+            return False
 
-        # feel_true_binary = player.field_maybe_none('image_feelstrue_binary') or ''
-        # feel_true_real = player.field_maybe_none('image_feelstrue_real') or 0
+        first_q = player.participant.vars.get('first_question')
+        if first_q != 'Real':
+            print("AI_Second_FeelTrue: skipped because first_question != 'Real'")
+            return False
 
-        return (
-                player.participant.vars.get('second_question') == 'AI' and
-                # (
-                #         feel_true_binary == 'Feels true' or
-                #         feel_true_real >= 50
-                # ) and
-                (player.field_maybe_none('image_feelstrue_followup') in [None, ''])
-        )
+        if player.field_maybe_none('image_feelstrue_followup') not in [None, '']:
+            print("AI_Second_FeelTrue: skipped because follow-up already answered")
+            return False
+
+        prior_answer = player.field_maybe_none('image_feelsnottrue_followup')
+        if prior_answer and str(prior_answer).strip() != "":
+            print("AI_Second_FeelTrue: showing because image_feelsnottrue_followup was filled")
+            return True
+
+        print("AI_Second_FeelTrue: skipped because image_feelsnottrue_followup was empty")
+        return False
 
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.feed_condition_row)[0]
-
         claims = [
             row_data[f'Claim {i}'] for i in range(1, 6)
             if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
         ]
-
         player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
-
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
             show_slider=random.choice([True, False]),
             show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
         )
+
 
 class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
     form_model = 'player'
@@ -1349,23 +1357,35 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
 
     @staticmethod
     def is_displayed(player):
+        if player.participant.vars.get('second_question') != 'AI':
+            print("AI_Second_DoesNotFeelTrue: skipped because second_question != 'AI'")
+            return False
 
-        return (
-            player.participant.vars.get('second_question') == 'AI' and
+        first_q = player.participant.vars.get('first_question')
+        if first_q != 'Real':
+            print("AI_Second_DoesNotFeelTrue: skipped because first_question != 'Real'")
+            return False
 
-            (player.field_maybe_none('image_feelsnottrue_followup') in [None, ''])
-        )
+        if player.field_maybe_none('image_feelsnottrue_followup') not in [None, '']:
+            print("AI_Second_DoesNotFeelTrue: skipped because follow-up already answered")
+            return False
+
+        prior_answer = player.field_maybe_none('image_feelstrue_followup')
+        if prior_answer and str(prior_answer).strip() != "":
+            print("AI_Second_DoesNotFeelTrue: showing because image_feelstrue_followup was filled")
+            return True
+
+        print("AI_Second_DoesNotFeelTrue: skipped because image_feelstrue_followup was empty")
+        return False
+
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.feed_condition_row)[0]
-
         claims = [
             row_data[f'Claim {i}'] for i in range(1, 6)
             if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
         ]
-
         player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
-
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
             show_slider=random.choice([True, False]),
@@ -1373,52 +1393,16 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
         )
 
 
-# class D_DirectQuestions_Real_Second(Page):
-#     form_model = 'player'
-#     form_fields = [
-#         'click_x_real',
-#         'click_y_real',
-#         'image_feelstrue_followup',       # make sure these exist in Player
-#         'image_feelsnottrue_followup',
-#     ]
-#
-#     @staticmethod
-#     def is_displayed(player):
-#         return player.participant.vars.get('second_question') == 'Real'
-#
-#     @staticmethod
-#     def vars_for_template(player):
-#
-#
-#         row_data_real = json.loads(player.control_feed_condition_row)[0]
-#
-#         claims = [row_data_real[f'Claim {i}'] for i in range(1, 6)
-#                   if f'Claim {i}' in row_data_real and pd.notna(row_data_real[f'Claim {i}'])]
-#
-#         player.participant.vars['show_own_claim_real'] = random.choice([True, False])
-#
-#         return dict(
-#             claim_choices_real=list(enumerate(claims, start=1)),
-#             show_slider_real=random.choice([True, False]),
-#             show_own_claim_real=player.participant.vars['show_own_claim_real'],
-#         )
-
 
 class D_DirectQuestions_Real_Second_FeelTrue(Page):
     form_model = 'player'
     form_fields = [
-        'click_x_real',
-        'click_y_real',
-        'image_feelstrue_followup',  # make sure these exist in Player
-        'image_feelsnottrue_followup',
-        'image_claim_real',
-        'image_accuracy_real',
-        'image_confidence_real',
-        'claim_response_real',
-        'image_claim_true_real',
-        'image_feelstrue_real',
-        'image_feelstrue_binary_real',
+        'click_x_real', 'click_y_real', 'image_feelstrue_followup', 'image_feelsnottrue_followup',
+        'image_claim_real', 'image_accuracy_real', 'image_confidence_real',
+        'claim_response_real', 'image_claim_true_real',
+        'image_feelstrue_real', 'image_feelstrue_binary_real',
     ]
+
     @staticmethod
     def error_message(player, values):
         if values.get('click_x_real') in [None, ''] or values.get('click_y_real') in [None, '']:
@@ -1426,19 +1410,35 @@ class D_DirectQuestions_Real_Second_FeelTrue(Page):
 
     @staticmethod
     def is_displayed(player):
-        return (
-                player.participant.vars.get('second_question') == 'Real' and
-                (player.field_maybe_none('image_feelstrue_real') in [None, ''])
-        )
+        if player.participant.vars.get('second_question') != 'Real':
+            return False
+        if player.participant.vars.get('first_question') != 'AI':
+            return False
+
+        slider_val = player.field_maybe_none('image_feelstrue_ai')
+        binary_val = player.field_maybe_none('image_feelstrue_binary_ai')
+
+        feels_not_true = False
+        if slider_val is not None:
+            try:
+                feels_not_true = int(slider_val) < 50
+            except (ValueError, TypeError):
+                feels_not_true = False
+        elif binary_val == 'Does not feel true':
+            feels_not_true = True
+
+        if feels_not_true:
+            print("Page showing because AI round = does not feel true")
+            return True
+        else:
+            print("Page skipped because AI round != does not feel true")
+            return False
+
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.control_feed_condition_row)[0]
-
-
-        claims = [
-            row_data[f'Claim {i}'] for i in range(1, 6)
-            if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
-        ]
+        claims = [row_data[f'Claim {i}'] for i in range(1, 6)
+                  if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
         player.participant.vars['show_own_claim_real'] = random.choice([True, False])
         return dict(
             claim_choices_real=list(enumerate(claims, start=1)),
@@ -1446,28 +1446,49 @@ class D_DirectQuestions_Real_Second_FeelTrue(Page):
             show_own_claim_real=player.participant.vars['show_own_claim_real'],
         )
 
+
 class D_DirectQuestions_Real_Second_DoesNotFeelTrue(Page):
     form_model = 'player'
     form_fields = ['click_x_real', 'click_y_real', 'image_claim_real', 'image_feelsnottrue_followup']
+
     @staticmethod
     def is_displayed(player):
-        return (
-            player.participant.vars.get('second_question') == 'Real' and
-            (player.field_maybe_none('image_feelsnottrue_followup') in [None, ''])
-        )
+        if player.participant.vars.get('second_question') != 'Real':
+            return False
+        if player.participant.vars.get('first_question') != 'AI':
+            return False
+
+        slider_val = player.field_maybe_none('image_feelstrue_ai')
+        binary_val = player.field_maybe_none('image_feelstrue_binary_ai')
+
+        feels_true = False
+        if slider_val is not None:
+            try:
+                feels_true = int(slider_val) >= 50
+            except (ValueError, TypeError):
+                feels_true = False
+        elif binary_val == 'Feels true':
+            feels_true = True
+
+        if feels_true:
+            print("Real_Second_DoesNotFeelTrue: showing because AI round = feels true")
+            return True
+        else:
+            print("Real_Second_DoesNotFeelTrue: skipped because AI round != feels true")
+            return False
+
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.control_feed_condition_row)[0]
-        claims = [
-            row_data[f'Claim {i}'] for i in range(1, 6)
-            if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
-        ]
+        claims = [row_data[f'Claim {i}'] for i in range(1, 6)
+                  if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
         player.participant.vars['show_own_claim_real'] = random.choice([True, False])
         return dict(
             claim_choices_real=list(enumerate(claims, start=1)),
             show_slider=random.choice([True, False]),
             show_own_claim_real=player.participant.vars['show_own_claim_real'],
         )
+
 class H_Demographics(Page):
     form_model = 'player'
     form_fields = ["age", "gender", "state", "race", "education", "income"]
@@ -1663,10 +1684,10 @@ page_sequence = [
     C_Feed,
     E_Logistics_Early,
     D_ItemCountQuestions_First,         # shows only if itemcount_first = True
-    D_DirectQuestions_AI_First,
     D_DirectQuestions_Real_First,
     D_DirectQuestions_AI_Second_FeelTrue,
     D_DirectQuestions_AI_Second_DoesNotFeelTrue,
+    D_DirectQuestions_AI_First,
     # D_DirectQuestions_Real_Second,
     D_DirectQuestions_Real_Second_DoesNotFeelTrue,
     D_DirectQuestions_Real_Second_FeelTrue,

@@ -139,7 +139,29 @@ label[for="id_understand_AI"] {
   margin-bottom: 0.5rem;
 }
 
+  /* Submit button container */
+  .submit-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
 
+  button[type="submit"] {
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+    transition: background-color 0.25s ease;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #1a5fd9;
+  }
 </style>
 
 <script>
@@ -283,10 +305,10 @@ West Lafayette, IN 47907-2114
     </tbody>
 </table>
 
-    <div class="d-flex justify-content-end m-5">
-        <button class="btn btn-success shadow" type="submit" id="submitButton">
-            ➔
-        </button>
-    </div>
+<div class="submit-container">
+  <button type="submit" id="submitButton" aria-label="Submit survey responses">
+    ➔
+  </button>
+</div>
 
 {{ endblock }}

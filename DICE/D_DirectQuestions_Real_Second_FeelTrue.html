@@ -11,7 +11,6 @@
     <input type="hidden" id="click_x_real" name="click_x_real" />
     <input type="hidden" id="click_y_real" name="click_y_real" />
     <input type="hidden" id="image_feelstrue_answered" name="image_feelstrue_answered" value="False" />
-    <!-- You don't seem to use this one on this page, but leaving for consistency -->
     <input type="hidden" id="image_feelsnottrue_answered" name="image_feelsnottrue_answered" value="False" />
 
     <div class="question">
@@ -25,7 +24,7 @@
     <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="image_confidence_real" min="0" max="10" value ="0" oninput="updateConfidence(this)" />
+        <input type="range" name="image_confidence_real" min="0" max="10" value="5" oninput="updateConfidence(this)" />
         {{ formfield_errors 'image_confidence_real' }}
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_real" class="slider-result"></p>
@@ -48,14 +47,16 @@
                 <input type="radio" name="image_claim_real" value="{{ value }}"
                        onclick="updateClaimText(this);
                                 document.getElementById('claim-truth-section').style.display='block';
-                                document.getElementById('feel-true-question').style.display='block';">
+                                document.getElementById('feel-true-question').style.display='block';
+                                claimWasSubmitted = true;
+                                disableClaimInput();">
                 {{ label }}
             </label><br>
         {% endfor %}
     </div>
 
     <div id="claim-truth-section" style="display:none;">
-        <p><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></p>
+        <p style="margin-top: 40px;"><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></>
         <div class="multiple-choice">
             <label><input type="radio" name="image_claim_true_real" value="It is true"> It is true</label>
             <label><input type="radio" name="image_claim_true_real" value="It is not true"> It is not true</label>
@@ -85,13 +86,15 @@
         <textarea name="image_feelstrue_followup" rows="4" oninput="markFeelsTrueAnswered()" placeholder="Type response here..."></textarea>
     </div>
 
-    <div class="d-flex justify-content-end m-5">
-        <button class="btn btn-success shadow" type="submit" id="submitButton">➔</button>
-    </div>
+    <div class="submit-container">
+    <button type="submit" id="submitButton" aria-label="Submit survey responses">
+      ➔
+    </button>
+  </div>
 </form>
 
 <style>
-/* --- Styles similar to your provided CSS (same as previous) --- */
+/* Your existing styles, unchanged */
 .image-container {
     position: relative;
     max-width: 600px;
@@ -239,11 +242,36 @@ input[type=range]::-moz-range-thumb {
 .claim-option input {
     margin-right: 8px;
 }
+
+  /* Submit button container */
+  .submit-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+
+  button[type="submit"] {
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+    transition: background-color 0.25s ease;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #1a5fd9;
+  }
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Clickable image + marker logic
+    let claimWasSubmitted = false;
+
     const img = document.getElementById("clickable-image");
     const marker = document.getElementById("click-marker");
     const inputX = document.getElementById("click_x_real");
@@ -260,7 +288,6 @@ document.addEventListener("DOMContentLoaded", function () {
         inputX.value = xPercent.toFixed(2);
         inputY.value = yPercent.toFixed(2);
 
-        // position marker
         const markerX = (xPercent / 100) * img.width - (marker.offsetWidth / 2);
         const markerY = (yPercent / 100) * img.height - (marker.offsetHeight / 2);
 
@@ -269,7 +296,6 @@ document.addEventListener("DOMContentLoaded", function () {
         marker.style.display = "block";
     });
 
-    // Show own claim option if enabled
     const showOwnClaim = {% if show_own_claim_real %}true{% else %}false{% endif %};
     const textarea = document.getElementById('claim-response');
     const interpretationsSection = document.getElementById('interpretations-section');
@@ -298,6 +324,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateClaimText(this);
                 document.getElementById('claim-truth-section').style.display = 'block';
                 document.getElementById('feel-true-question').style.display = 'block';
+                claimWasSubmitted = true;
+                disableClaimInput();
             };
 
             label.appendChild(input);
@@ -309,6 +337,7 @@ document.addEventListener("DOMContentLoaded", function () {
         interpretationsSection.style.display = 'block';
         textarea.disabled = true;
         button.disabled = true;
+        claimWasSubmitted = true;
         interpretationsSection.scrollIntoView({ behavior: 'smooth' });
     };
 
@@ -355,6 +384,22 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Disable textarea and button once claim is submitted or selected
+    function disableClaimInput() {
+        textarea.disabled = true;
+        const submitBtn = document.querySelector('button[onclick*="submitClaim"]');
+        if (submitBtn) submitBtn.disabled = true;
+    }
+
+    // Add event listeners to claim radios to set claimWasSubmitted and disable inputs
+    const claimRadios = document.getElementsByName('image_claim_real');
+    Array.from(claimRadios).forEach(radio => {
+        radio.addEventListener('click', function () {
+            claimWasSubmitted = true;
+            disableClaimInput();
+        });
+    });
+
     // Form validation on submit
     document.querySelector('form').addEventListener('submit', function(event) {
         function isVisible(el) {
@@ -386,32 +431,31 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        // 4) Claim textarea filled and submitted
-        const claimTextarea = document.getElementById('claim-response');
+        // 4) Must have submitted or selected a claim
         const interpretationsVisible = isVisible(interpretationsSection);
+        const claimTextarea = textarea;
 
-        if (claimTextarea && isVisible(claimTextarea)) {
-            const claimText = claimTextarea.value.trim();
-            const submitClaimBtn = document.querySelector('button[onclick*="submitClaim"]');
-
+        if (!claimWasSubmitted) {
             if (!interpretationsVisible) {
-                if (claimText === '') {
+                if (claimTextarea.value.trim() === '') {
                     alert('Please type your claim and submit it before proceeding.');
                     event.preventDefault();
                     return false;
                 }
-                if (!submitClaimBtn.disabled) {
-                    alert('Please submit your claim before proceeding.');
-                    event.preventDefault();
-                    return false;
-                }
+                alert('Please submit your claim before proceeding.');
+                event.preventDefault();
+                return false;
+            } else {
+                alert('Please select the claim that best represents the post and image.');
+                event.preventDefault();
+                return false;
             }
         }
 
-        // 5) Must select a claim radio if interpretations visible
+        // 5) Must select claim radio if interpretations visible
         if (interpretationsVisible) {
-            const claimRadios = document.getElementsByName('image_claim_real');
-            if (!Array.from(claimRadios).some(r => r.checked)) {
+            const claimRadiosCheck = document.getElementsByName('image_claim_real');
+            if (!Array.from(claimRadiosCheck).some(r => r.checked)) {
                 alert('Please select the claim that best represents the post and image.');
                 event.preventDefault();
                 return false;
@@ -433,7 +477,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const feelTrue = document.getElementById('feel-true-question');
         if (feelTrue && isVisible(feelTrue)) {
             const slider = document.querySelector('input[name="image_feelstrue_real"]');
-            const binaryRadios = document.getElementsByName('image_feelstrue_binary_real');
+            const binaryRadiosCheck = document.getElementsByName('image_feelstrue_binary_real');
 
             if (slider && isVisible(slider) && slider.value === '') {
                 alert('Please indicate how much the post feels true using the slider.');
@@ -441,7 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return false;
             }
 
-            if (binaryRadios.length > 0 && !Array.from(binaryRadios).some(r => r.checked)) {
+            if (binaryRadiosCheck.length > 0 && !Array.from(binaryRadiosCheck).some(r => r.checked)) {
                 alert('Please select whether the post feels true or does not feel true.');
                 event.preventDefault();
                 return false;
@@ -456,7 +500,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
     });
-
 });
 </script>
 {% endblock %}
