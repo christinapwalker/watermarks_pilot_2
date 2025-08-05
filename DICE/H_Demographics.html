@@ -34,65 +34,35 @@
     margin-bottom: 1rem;
   }
 
-  /* ===== Slider ===== */
-  .slider-container {
-    position: relative;
-    width: 100%;
-    margin-bottom: 60px;
-  }
-
-  .slider {
-    width: 100%;
-    height: 14px;
-    background: #ddd;
-    border-radius: 7px;
-    margin-bottom: 40px;
-    appearance: none;
-    outline: none;
-  }
-
-  /* ===== Rotated Labels ===== */
-  .slider-labels {
-    position: relative;
-    height: 80px;
-    width: 100%;
-    user-select: none;
-  }
-
-  .slider-labels span {
-    position: absolute;
-    top: 0;
-    transform: rotate(60deg) translateY(6px);
-    transform-origin: top center;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  /* Position each label centered over its tick */
-  .slider-labels span:nth-child(1) { left: 0%; }
-  .slider-labels span:nth-child(2) { left: 16.666%; }
-  .slider-labels span:nth-child(3) { left: 33.333%; }
-  .slider-labels span:nth-child(4) { left: 50%; }
-  .slider-labels span:nth-child(5) { left: 66.666%; }
-  .slider-labels span:nth-child(6) { left: 83.333%; }
-  .slider-labels span:nth-child(7) { left: 90%; }
-
-  /* ===== Slider Value Display ===== */
-  .slider-value {
-    text-align: center;
+  .question-label {
     font-size: 1.3rem;
     font-weight: 600;
-    color: #444;
-    margin-top: -20px;
+    color: #222;
   }
-  .question-label {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #222;
-}
 
+  /* ===== Radio Button Container Styling (FIX FOR MOBILE) ===== */
+  .form-group div {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
 
+  .form-group input[type="radio"] {
+    flex-shrink: 0;
+    margin: 0;
+    margin-top: 2px; /* Slight adjustment to align with first line of text */
+  }
+
+  .form-group label {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #333;
+    line-height: 1.4;
+    cursor: pointer;
+    margin: 0;
+  }
 
   /* ===== Table Styles ===== */
   table {
@@ -156,14 +126,13 @@
   }
 
   /* Radio Answer Columns */
-.matrix-table th:not(:first-child),
-.matrix-table td:not(.question-column) {
-  padding: 4px 1px;
-  font-size: 0.7rem;
-  word-break: break-word;
-  text-align: center;
-}
-
+  .matrix-table th:not(:first-child),
+  .matrix-table td:not(.question-column) {
+    padding: 4px 1px;
+    font-size: 0.7rem;
+    word-break: break-word;
+    text-align: center;
+  }
 
   /* Radio Inputs */
   .matrix-table input[type="radio"] {
@@ -178,92 +147,86 @@
   }
 
   /* Wrapper for horizontal scroll on small screens */
-.matrix-wrapper {
-  overflow-x: auto;
-  width: 100%;
-}
+  .matrix-wrapper {
+    overflow-x: auto;
+    width: 100%;
+  }
 
   .matrix-wrapper {
     overflow-x: hidden;
     width: 100%;
   }
 
-
-
-  /* ===== Responsive ===== */
-  @media (max-width: 700px) {
-  .survey-container {
-    margin: 15px;
-    padding: 20px;
+  /* ===== ERROR MESSAGE STYLES (matching second page) ===== */
+  .error-message {
+    color: red !important;
+    font-size: 0.75rem !important;
+    padding: 4px 6px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: block !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    margin-top: 4px;
+    min-height: 16px;
   }
 
-  .slider-labels span {
-    font-size: 0.6rem;
+  /* Validation highlighting styles (matching second page) */
+  .missing-answer {
+    background-color: #ffebee !important;
+    border: 2px solid #f44336 !important;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 4px 0;
+    animation: pulse-red 1s ease-in-out;
   }
 
-  p, .slider-value {
-    font-size: 1rem;
+  .missing-answer .question-column {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-  .slider-container {
-    padding: 0;
+  .missing-answer .question-label {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-  .matrix-table th,
-  .matrix-table td {
-    font-size: 0.75rem;
-    padding: 6px;
+  .missing-answer .question-text {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-  .matrix-table {
-    width: 100%;
-    table-layout: fixed;
-  }
-    .question-label {
-    font-size: 1rem;
+  .missing-answer p {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-
-  /* Slightly wider question column */
-  .matrix-table .question-column {
-    width: 50%;             /* Give more space for questions */
-    font-size: 0.5rem;
-    padding-left: 1px;
-    padding-right: 1px;
-    word-break: break-word;
-    white-space: normal;
+  .missing-answer > label {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-
-  /* Make radio columns narrow */
-  .matrix-table th:not(:first-child),
-  .matrix-table td:not(.question-column) {
-    max-width: 1px;
-    white-space: normal;
-    /*text-align: center;*/
-    word-break: break-word;
-    padding: 0px 0px;
-    font-size: 0.6rem;
-
-
+  /* Special styling for matrix table rows with missing answers */
+  .missing-answer-row {
+    background-color: #ffebee !important;
+    animation: pulse-red 1s ease-in-out;
   }
-}
 
-/* Only apply bold style to labels with the 'question-label' class */
-.question-label {
-  font-weight: 600;
-  font-size: 1.2rem;
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #222;
-}
+  .missing-answer-row td {
+    background-color: #ffebee !important;
+    border: 1px solid #f44336 !important;
+  }
 
-/* Restore normal weight for inline radio/checkbox labels */
-label:not(.question-label) {
-  font-weight: normal;
-  font-size: 1rem;
-  display: inline;
-}
+  .missing-answer-row .question-column {
+    color: #d32f2f !important;
+    font-weight: bold;
+  }
+
+  @keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+  }
 
   /* Submit button container */
   .submit-container {
@@ -289,43 +252,123 @@ label:not(.question-label) {
     background-color: #1a5fd9;
   }
 
+  /* ===== Responsive ===== */
+  @media (max-width: 700px) {
+    .survey-container {
+      margin: 15px;
+      padding: 20px;
+    }
+
+    /* Mobile Radio Button Fixes */
+    .form-group div {
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+
+    .form-group input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+    }
+
+    .slider-labels span {
+      font-size: 0.6rem;
+    }
+
+    p, .slider-value {
+      font-size: 1rem;
+    }
+
+    .slider-container {
+      padding: 0;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      font-size: 0.75rem;
+      padding: 6px;
+    }
+
+    .matrix-table {
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .question-label {
+      font-size: 1rem;
+    }
+
+    /* Slightly wider question column */
+    .matrix-table .question-column {
+      width: 50%;             /* Give more space for questions */
+      font-size: 0.5rem;
+      padding-left: 1px;
+      padding-right: 1px;
+      word-break: break-word;
+      white-space: normal;
+    }
+
+    /* Make radio columns narrow */
+    .matrix-table th:not(:first-child),
+    .matrix-table td:not(.question-column) {
+      max-width: 1px;
+      white-space: normal;
+      word-break: break-word;
+      padding: 0px 0px;
+      font-size: 0.6rem;
+    }
+  }
 </style>
 
-<label class="question-label" for="age">
-  How old are you?
-</label>
-{{ form.age }}
+<div class="form-field" id="age-field">
+  <label class="question-label" for="age">
+    How old are you?
+  </label>
+  {{ form.age }}
+</div>
 
-<label class="question-label" for="gender" style="margin-top: 40px;">
-  What is your gender?
-</label>
-{{ form.gender }}
+<div class="form-field" id="gender-field">
+  <label class="question-label" for="gender">
+    What is your gender?
+  </label>
+  {{ form.gender }}
+</div>
 
-<label class="question-label" for="state" style="margin-top: 40px;">
-  What state do you live in?
-</label>
-{{ form.state }}
+<div class="form-field" id="state-field">
+  <label class="question-label" for="state">
+    What state do you live in?
+  </label>
+  {{ form.state }}
+</div>
 
+<div class="form-field" id="race-field">
+  <label class="question-label" for="race">
+    What is your race?
+  </label>
+  {{ form.race }}
+</div>
 
-<label class="question-label" for="race" style="margin-top: 40px;">
-  What is your race?
-</label>
-{{ form.race }}
+<div class="form-field" id="education-field">
+  <label class="question-label" for="education">
+    What is the highest level of education that you have completed?
+  </label>
+  {{ form.education }}
+</div>
 
-<label class="question-label" for="education" style="margin-top: 40px;">
-What is the highest level of education that you have completed?
-</label>
-{{ form.education }}
-
-<label class="question-label" for="income" style="margin-top: 40px;">
-What is your combined household income?
-</label>
-{{ form.income }}
-
-
+<div class="form-field" id="income-field">
+  <label class="question-label" for="income">
+    What is your combined household income?
+  </label>
+  {{ form.income }}
+</div>
 
 <div class="submit-container">
-  <button type="submit" id="submitButton" aria-label="Submit survey responses">
+  <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
     ➔
   </button>
 </div>
@@ -334,39 +377,152 @@ What is your combined household income?
 </div>
 
 <script>
-document.querySelector('form').addEventListener('submit', function(event) {
-  const form = event.target;
+// Enhanced validation function with highlighting and detailed messages
+function validateForm() {
+  console.log('validateForm() called');
 
-  // 1. Find all radio groups by unique name attribute
-  const radioInputs = form.querySelectorAll('input[type="radio"]');
-  const radioGroups = new Set();
-  radioInputs.forEach(radio => radioGroups.add(radio.name));
+  // Define field names with their user-friendly labels
+  const requiredFields = {
+    'age': 'Your age',
+    'gender': 'Your gender',
+    'state': 'What state you live in',
+    'race': 'Your race',
+    'education': 'Your highest level of education',
+    'income': 'Your combined household income'
+  };
 
-  // For each radio group, check that one is selected
-  for (const groupName of radioGroups) {
-    if (!form.querySelector(`input[name="${groupName}"]:checked`)) {
-      alert('Please answer all required questions before submitting.');
-      event.preventDefault();
-      return false;
-    }
+  const form = document.querySelector('form');
+  if (!form) {
+    console.log('Form not found');
+    return true; // Let it submit if we can't find form
   }
 
-  // 2. Check for any required textareas or text inputs if applicable
-  const requiredTexts = form.querySelectorAll('textarea[required], input[type="text"][required]');
-  for (const input of requiredTexts) {
-    if (!input.value.trim()) {
-      alert('Please fill out all required text fields.');
-      event.preventDefault();
-      return false;
+  let unansweredFields = [];
+  let missingElements = [];
+
+  // Clear any previous highlighting
+  document.querySelectorAll('.missing-answer').forEach(el => {
+    el.classList.remove('missing-answer');
+  });
+
+  // Check each required field and collect missing ones
+  Object.keys(requiredFields).forEach(function(fieldName) {
+    let isAnswered = false;
+
+    // Check if it's a radio button group
+    const radioInputs = form.querySelectorAll(`input[name="${fieldName}"][type="radio"]`);
+    if (radioInputs.length > 0) {
+      // It's a radio group - check if any is selected
+      const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
+      isAnswered = checked !== null;
+    } else {
+      // It's likely a select dropdown or text input
+      const field = form.querySelector(`select[name="${fieldName}"], input[name="${fieldName}"]`);
+      if (field) {
+        if (field.type === 'text' || field.type === 'email' || field.tagName === 'TEXTAREA') {
+          isAnswered = field.value.trim() !== '';
+        } else if (field.tagName === 'SELECT') {
+          isAnswered = field.value !== '' && field.value !== null;
+        }
+      }
     }
+
+    if (!isAnswered) {
+      unansweredFields.push(requiredFields[fieldName]);
+
+      // Find and highlight the question container
+      const fieldContainer = document.getElementById(`${fieldName}-field`);
+      if (fieldContainer) {
+        fieldContainer.classList.add('missing-answer');
+        missingElements.push(fieldContainer);
+      }
+    }
+  });
+
+  if (unansweredFields.length > 0) {
+    console.log('Validation failed. Unanswered fields:', unansweredFields);
+
+    // Create detailed error message
+    let message = 'Please answer the following question';
+    if (unansweredFields.length > 1) {
+      message += 's';
+    }
+    message += ' before submitting:\n\n';
+
+    unansweredFields.forEach(function(fieldLabel, index) {
+      message += '• ' + fieldLabel;
+      if (index < unansweredFields.length - 1) {
+        message += '\n';
+      }
+    });
+
+    alert(message);
+
+    // Scroll to first missing question
+    if (missingElements.length > 0) {
+      missingElements[0].scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+
+    return false; // Prevent form submission
   }
 
-  // 3. For sliders, if you want them required, check their values (optional)
-  // Example: ensure slider value is not empty or within expected range
-  // If your sliders are input[type=range], they always have a value, so often no need
+  console.log('Validation passed');
+  return true; // Allow form submission
+}
 
-  // If all validations pass, form submits normally
+// Backup: Also try the event listener approach
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, setting up additional event listeners...');
+
+  const forms = document.querySelectorAll('form');
+  forms.forEach(function(form) {
+    // Try to intercept with capturing phase
+    form.addEventListener('submit', function(e) {
+      console.log('Event listener caught submit');
+      if (!validateForm()) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    }, true); // Use capturing phase
+  });
 });
+
+// Also try intercepting all clicks on submit elements
+document.addEventListener('click', function(e) {
+  if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+    console.log('Submit element clicked, validating...');
+    if (!validateForm()) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return false;
+    }
+  }
+}, true);
+
+// Optional: Add real-time validation feedback
+function addRealTimeValidation() {
+  const form = document.querySelector('form');
+  if (!form) return;
+
+  // Add change listeners to all form inputs
+  const allInputs = form.querySelectorAll('input, select, textarea');
+  allInputs.forEach(function(input) {
+    input.addEventListener('change', function() {
+      // Remove highlighting when question is answered
+      const container = this.closest('.form-field');
+      if (container && container.classList.contains('missing-answer')) {
+        container.classList.remove('missing-answer');
+      }
+    });
+  });
+}
+
+// Initialize real-time validation when DOM is ready
+document.addEventListener('DOMContentLoaded', addRealTimeValidation);
 </script>
 
 

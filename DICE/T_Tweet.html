@@ -1,3 +1,17 @@
+<script>
+const dismissedOverlays = new Set();
+
+function dismissOverlaySession(docId) {
+    const overlay = document.getElementById('overlay_' + docId);
+    dismissedOverlays.add(docId);
+    if (overlay) overlay.style.display = 'none';
+}
+
+function isOverlayDismissed(docId) {
+    return dismissedOverlays.has(docId);
+}
+</script>
+
 {{if i.watermark == "fb_content_warning" }}
 
     <!-- ================================================ FB CONTENT WARNING ================================================ -->
@@ -112,108 +126,111 @@
 
     <!-- ================================================ INSTA CONTENT WARNING ================================================ -->
     <tr id="{{i.doc_id}}"
-    {% if i.sponsored %}
-        style="background-color: #E5E4E2;"
-    {% endif %}
-    onmouseover="sequence('i' + {{i.doc_id}});" 
-    ontouchstart="sequence('i' + {{i.doc_id}});">      
-        <td>
-        <div class="row justify-content-start">
-            <div class="col-2">
-                {{ if i.profile_pic_available == True}}
-                    <img src="{{i.user_image}}" class="card-img p1 ms-3 poster img-fit" alt="Profile picture of {{i.username}}."
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-html="true"
-                        data-bs-custom-class="custom-tooltip"
-                        title="<div class='text-start text-secondary'><b class='text-dark'>{{i.username}}</b><br>
-                                @{{i.handle}}<br><br>
-                                {{i.user_description}} <br><br><b class='text-dark'>{{i.user_followers}}</b> Followers</div>">
-                {{ else }}
-                    <div class="poster p1 ms-3"
-                        data-user-id="{{i.username}}"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-html="true"
-                        data-bs-custom-class="custom-tooltip"
-                        title="<div class='text-start text-secondary'><b class='text-dark'>{{i.username}}</b><br>
-                                @{{i.handle}}<br><br>
-                                {{i.user_description}} <br><br><b class='text-dark'>{{i.user_followers}}</b> Followers</div>">
-                        <h4>{{i.icon}}</h4>
-                    </div>
-                {{ endif }}
-            </div>
-            <div class="col-9 me-0">
-                <div class="card-body" id="tweet_{{i.doc_id}}">
-                    <h5 class="card-title"></h5>
-                    <h6 class="card-subtitle mb-2 mt-3">
-                        <a style="cursor: pointer;"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        data-bs-html="true"
-                        data-bs-custom-class="custom-tooltip"
-                        title="<div class='text-start text-secondary'><b class='text-dark'>{{i.username}}</b><br>
-                        @{{i.handle}}<br><br>
-                        {{i.user_description}} <br><br><b class='text-dark'>{{i.user_followers}}</b> Followers</div>">
-                            {{i.handle}}
-                        </a>
-                        <small class="text-muted">
-                            {{i.username}} &middot; 
-                            {% if i.sponsored %}
-                                Sponsored
-                            {% else %}
-                                {{i.date}}
-                            {% endif %}
-                        </small>
-                    </h6>
-                    {% if i.sponsored %}
-                        <a href="{{ i.target }}" target="_blank" style="text-decoration: none; color: black;"
-                        <p class="tweet-text" id="tweet_{{i.doc_id}}">{{i.tweet}}</p>
-                        </a>
+{% if i.sponsored %}
+    style="background-color: #E5E4E2;"
+{% endif %}
+onmouseover="sequence('i' + {{i.doc_id}});"
+ontouchstart="sequence('i' + {{i.doc_id}});">
+    <td>
+    <div class="row justify-content-start">
+        <div class="col-2">
+            {{ if i.profile_pic_available == True}}
+                <img src="{{i.user_image}}" class="card-img p1 ms-3 poster img-fit" alt="Profile picture of {{i.username}}."
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-html="true"
+                    data-bs-custom-class="custom-tooltip"
+                    title="<div class='text-start text-secondary'><b class='text-dark'>{{i.username}}</b><br>
+                            @{{i.handle}}<br><br>
+                            {{i.user_description}} <br><br><b class='text-dark'>{{i.user_followers}}</b> Followers</div>">
+            {{ else }}
+                <div class="poster p1 ms-3"
+                    data-user-id="{{i.username}}"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-html="true"
+                    data-bs-custom-class="custom-tooltip"
+                    title="<div class='text-start text-secondary'><b class='text-dark'>{{i.username}}</b><br>
+                            @{{i.handle}}<br><br>
+                            {{i.user_description}} <br><br><b class='text-dark'>{{i.user_followers}}</b> Followers</div>">
+                    <h4>{{i.icon}}</h4>
+                </div>
+            {{ endif }}
+        </div>
+        <div class="col-9 me-0">
+            <div class="card-body" id="tweet_{{i.doc_id}}">
+                <h5 class="card-title"></h5>
+                <h6 class="card-subtitle mb-2 mt-3">
+                    <a style="cursor: pointer;"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-html="true"
+                    data-bs-custom-class="custom-tooltip"
+                    title="<div class='text-start text-secondary'><b class='text-dark'>{{i.username}}</b><br>
+                    @{{i.handle}}<br><br>
+                    {{i.user_description}} <br><br><b class='text-dark'>{{i.user_followers}}</b> Followers</div>">
+                        {{i.handle}}
+                    </a>
+                    <small class="text-muted">
+                        {{i.username}} &middot;
+                        {% if i.sponsored %}
+                            Sponsored
                         {% else %}
-                        <p class="tweet-text" id="tweet_{{i.doc_id}}">{{i.tweet}}</p>
+                            {{i.date}}
                         {% endif %}
+                    </small>
+                </h6>
+                {% if i.sponsored %}
+                    <a href="{{ i.target }}" target="_blank" style="text-decoration: none; color: black;"
+                    <p class="tweet-text" id="tweet_{{i.doc_id}}">{{i.tweet}}</p>
+                    </a>
+                    {% else %}
+                    <p class="tweet-text" id="tweet_{{i.doc_id}}">{{i.tweet}}</p>
+                    {% endif %}
 
+            </div>
+
+            {{ if i.pic_available == True }}
+            <div class="watermark-container" tabindex="0" style="position: relative;"
+                 id="watermark_{{i.doc_id}}"
+                 onclick="dismissOverlaySession('{{i.doc_id}}')">
+                <img src="{{ i.media }}" class="card-img ps-0 mt-2 rounded-4 img-fluid img-tweet" alt="...">
+                <!-- Semi-transparent overlay -->
+                <div class="overlay" id="overlay_{{i.doc_id}}">
+                    <h3>Manipulated Content</h3>
+                    <p>This photo may contain manipulated media.</p>
+                    <p>Click To See Photo</p> <!-- Focusable div for accessibility -->
                 </div>
+            </div>
+            <a href="{{ i.target }}" class="link-disabled" target="_blank" style="text-decoration: none; cursor: pointer;">
+            </a>
+            {{ endif }}
 
-                {{ if i.pic_available == True }}
-                <div class="watermark-container" tabindex="0" style="position: relative;">
-                    <img src="{{ i.media }}" class="card-img ps-0 mt-2 rounded-4 img-fluid img-tweet" alt="...">
-                    <!-- Semi-transparent overlay -->
-                    <div class="overlay">
-                        <h3>Manipulated Content.</h3>
-                        <p>This photo may contain manipulated media.</p>
-                        <p>Click To See Photo</p> <!-- Focusable div for accessibility -->
-                    </div>
+            <div class="d-flex border-top-0 mt-3 ms-5">
+                <div class="reply-button col" data-bs-toggle="modal" data-bs-target="#replyModal_{{i.doc_id}}" id="reply_button_{{i.doc_id}}">
+                    <span class="bi bi-chat text-secondary reply-icon" id="reply_icon_{{i.doc_id}}" style="cursor: pointer">️</span>
+                    <span class="reply-count text-secondary" id="reply_count_{{i.doc_id}}">{{i.replies}}</span>
                 </div>
-                <a href="{{ i.target }}" class="link-disabled" target="_blank" style="text-decoration: none; cursor: pointer;">
-                </a>
-                {{ endif }}
-
-                <div class="d-flex border-top-0 mt-3 ms-5">
-                    <div class="reply-button col" data-bs-toggle="modal" data-bs-target="#replyModal_{{i.doc_id}}" id="reply_button_{{i.doc_id}}">
-                        <span class="bi bi-chat text-secondary reply-icon" id="reply_icon_{{i.doc_id}}" style="cursor: pointer">️</span>
-                        <span class="reply-count text-secondary" id="reply_count_{{i.doc_id}}">{{i.replies}}</span>
-                    </div>
-                    <div class="retweet-button col">
-                        <span class="bi bi-arrow-repeat text-secondary retweet-icon" style="cursor: pointer">️</span>
-                        <span class="retweet-count text-secondary">{{i.retweets}}</span>
-                    </div>
-                    <div class="like-button col" id="like_button_{{i.doc_id}}">
-                        <span class="bi bi-heart text-secondary like-icon" style="cursor: pointer">️</span>
-                        <span class="like-count text-secondary">{{i.likes}}</span>
-                        {{ if i.sponsored }}
-                            <input class="like-field" type="hidden" name="liked_item_{{i.doc_id}}" id="liked_item_{{i.doc_id}}">
-                        {{ endif }}
-                    </div>
-                    <div class="share-button col">
-                        <span class="bi bi-upload text-secondary share-icon" style="cursor: pointer">️</span>
-                    </div>
+                <div class="retweet-button col">
+                    <span class="bi bi-arrow-repeat text-secondary retweet-icon" style="cursor: pointer">️</span>
+                    <span class="retweet-count text-secondary">{{i.retweets}}</span>
+                </div>
+                <div class="like-button col" id="like_button_{{i.doc_id}}">
+                    <span class="bi bi-heart text-secondary like-icon" style="cursor: pointer">️</span>
+                    <span class="like-count text-secondary">{{i.likes}}</span>
+                    {{ if i.sponsored }}
+                        <input class="like-field" type="hidden" name="liked_item_{{i.doc_id}}" id="liked_item_{{i.doc_id}}">
+                    {{ endif }}
+                </div>
+                <div class="share-button col">
+                    <span class="bi bi-upload text-secondary share-icon" style="cursor: pointer">️</span>
                 </div>
             </div>
         </div>
-        </td>
-    </tr>
+    </div>
+    </td>
+</tr>
+
 
 
 {{elif i.watermark == "cr_watermark" }}
@@ -581,3 +598,23 @@
         </div>
     </div>
 </div>
+
+<style>
+    .reply-button,
+.retweet-button,
+.like-button,
+.share-button {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  white-space: nowrap;
+
+  margin-right: 1.5rem; /* add space between buttons */
+}
+
+/* Remove margin from last button so no extra trailing space */
+.share-button {
+  margin-right: 0;
+}
+</style>

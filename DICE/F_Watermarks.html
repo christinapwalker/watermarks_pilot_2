@@ -2,7 +2,6 @@
 
 {% block content %}
 
-
 <style>
   body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -12,7 +11,6 @@
     margin: 0;
     padding: 0;
   }
-
   .survey-container {
     max-width: 1400px;
     margin: 30px auto 60px auto;
@@ -21,22 +19,18 @@
     box-shadow: 0 0 12px rgba(0,0,0,0.08);
     border-radius: 6px;
   }
-
   .survey-container label:first-of-type {
     font-size: 1.3rem;
     font-weight: 600;
     display: block;
     margin-bottom: 1.5rem;
   }
-
   .matrix-instructions {
   font-size: 1.3rem;
   font-weight: 600;
   display: block;
   margin: 1.5rem 0;
 }
-
-
   img {
     width: 100%;
     max-width: 100%;
@@ -45,14 +39,11 @@
     display: block;
     margin: auto;
   }
-
   input[type="radio"] {
     transform: scale(1.3);
     margin: 0.5rem;
     cursor: pointer;
   }
-
-  /* Matrix Table - Universal */
 .matrix-table {
   width: 100%;
   border-collapse: collapse;
@@ -84,19 +75,66 @@
   word-break: break-word;
 }
 
-/* Radio Buttons */
 .matrix-table input[type="radio"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
 }
 
-/* Matrix Wrapper (for scroll if needed) */
 .matrix-table-wrapper {
   overflow-x: hidden;
   width: 100%;
 }
 
+/* ===== ERROR MESSAGE STYLES (matching other pages) ===== */
+.error-message {
+    color: red !important;
+    font-size: 0.75rem !important;
+    padding: 4px 6px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: block !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    margin-top: 4px;
+    min-height: 16px;
+}
+
+/* Validation highlighting styles (matching other pages) */
+.missing-answer {
+    background-color: #ffebee !important;
+    border: 2px solid #f44336 !important;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 4px 0;
+    animation: pulse-red 1s ease-in-out;
+}
+
+.missing-answer .question-text {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
+.missing-answer p {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
+.missing-answer .matrix-instructions {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
+.missing-answer .question-column {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
 
   @media (max-width: 700px) {
   .matrix-table {
@@ -126,8 +164,6 @@
   }
 }
 
-
-  /* GENERAL TABLE STYLES OVERRIDE */
   table:not(.matrix-table) {
     width: 100%;
     border-collapse: separate;
@@ -164,7 +200,6 @@
     width: 12%;
   }
 
-  /* SMALL SCREEN FONT & PADDING */
   @media (max-width: 768px) {
     th, td {
       font-size: 0.85rem;
@@ -172,8 +207,6 @@
     }
   }
 
-
-      /* Submit button container */
   .submit-container {
     display: flex;
     justify-content: flex-end;
@@ -199,7 +232,6 @@
 
 </style>
 
-
 <div class="survey-container">
     <label>    <strong>
         You previously saw the following post that contained an image with
@@ -215,20 +247,10 @@
     </strong></label>
 
 
-
-<!-- Screenshot at the top, with click listener and marker -->
-<!--<div style="position: relative; display: block; margin: 20px auto; max-width: 100%; text-align: center;">-->
-<!--    <img src="{{ player.screenshot_treatment }}" id="treatment-image" alt="Screenshot"-->
-<!--         style="width: 100%; max-width: 600px; cursor: crosshair; display: block;">-->
-<!--</div>-->
-
 <div class="image-container">
     <img src="{{ player.screenshot_treatment }}" id="treatment-image" alt="Screenshot" />
     <div id="click-marker"></div>
 </div>
-
-
-
 
 <form method="post">
   <!-- Instruction Text -->
@@ -245,10 +267,8 @@
   you saw on the previous social media page:
 </label>
 
-
-
   <!-- Likert Scale Table -->
-    <div class="matrix-table-wrapper">
+    <div class="matrix-table-wrapper" id="matrix-wrapper">
   <table class="matrix-table">
     <tr>
       <th></th>
@@ -337,9 +357,15 @@
   </table>
 </div>
 
+<!-- Error message for matrix questions -->
+<div class="error-message" id="matrix-error" style="display: none;">
+  {{ formfield_errors 'clarity_watermarks' }}
+  {{ formfield_errors 'informative_watermarks' }}
+  {{ formfield_errors 'trustworthy_watermarks' }}
+  {{ formfield_errors 'biased_watermarks' }}
+</div>
 
-
-<div class="form-group">
+<div class="form-group" id="creates-watermark-group">
   <label for="creates_watermarks"><strong>Who do you believe creates the
     {% if player.watermark_condition == "cr_watermark" %}watermark{%
     elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}label{%
@@ -352,8 +378,8 @@
   <div><input type="radio" name="creates_watermarks" value="Journalists" onclick="toggleOtherTextbox(false)"> Journalists</div>
   <div><input type="radio" name="creates_watermarks" value="Activists" onclick="toggleOtherTextbox(false)"> Activists</div>
   <div><input type="radio" name="creates_watermarks" value="The user who posted the content" onclick="toggleOtherTextbox(false)"> The user who posted the content</div>
-  <div><input type="radio" name="creates_watermarks" value="The AI Developer" onclick="toggleOtherTextbox(false)"> The AI Developer</div>
-  <div><input type="radio" name="creates_watermarks" value="Government Politicians" onclick="toggleOtherTextbox(false)"> Government/Politicians</div>
+  <div><input type="radio" name="creates_watermarks" value="The AI Developer" onclick="toggleOtherTextbox(false)"> The AI developer</div>
+  <div><input type="radio" name="creates_watermarks" value="Government Politicians" onclick="toggleOtherTextbox(false)"> Government/politicians</div>
   <div><input type="radio" name="creates_watermarks" value="Non-profit organizations" onclick="toggleOtherTextbox(false)"> Non-profit organizations</div>
   <div><input type="radio" name="creates_watermarks" value="International organizations" onclick="toggleOtherTextbox(false)"> International organizations</div>
   <div><input type="radio" name="creates_watermarks" value="Fact-checkers" onclick="toggleOtherTextbox(false)"> Fact-checkers</div>
@@ -362,26 +388,146 @@
   <div id="otherTextbox" style="display: none; margin-top: 8px;">
     <input type="text" name="creates_watermarks_other" id="creates_watermarks_other" placeholder="Please specify..." />
   </div>
+
+  <!-- Error messages for creates_watermarks -->
+  <div class="error-message" id="creates-watermarks-error" style="display: none;">
+    {{ formfield_errors 'creates_watermarks' }}
+  </div>
+
+  <div class="error-message" id="other-text-error" style="display: none;">
+    {{ formfield_errors 'creates_watermarks_other' }}
+  </div>
 </div>
 
-
-
-
-
-
-
   <div class="submit-container">
-    <button type="submit" id="submitButton" aria-label="Submit survey responses">
+    <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
       ➔
     </button>
   </div>
 </form>
 
 <script>
+// Enhanced validation function with highlighting and popup messages (matching other pages approach)
+function validateForm() {
+    console.log('validateForm() called');
+
+    // Define field names with their user-friendly labels
+    const requiredFields = {
+        'clarity_watermarks': 'Rating for clarity of watermark/label',
+        'informative_watermarks': 'Rating for how informative the watermark/label is',
+        'trustworthy_watermarks': 'Rating for trustworthiness of watermark/label',
+        'biased_watermarks': 'Rating for bias of watermark/label',
+        'creates_watermarks': 'Who creates the watermark/label',
+        'creates_watermarks_other': 'Specification for "Other" option'
+    };
+
+    const form = document.querySelector('form');
+    if (!form) {
+        console.log('Form not found');
+        return true; // Let it submit if we can't find form
+    }
+
+    let unansweredFields = [];
+    let missingElements = [];
+
+    // Clear any previous highlighting
+    document.querySelectorAll('.missing-answer').forEach(el => {
+        el.classList.remove('missing-answer');
+    });
+
+    // Check each required field and collect missing ones
+    Object.keys(requiredFields).forEach(function(fieldName) {
+        let isAnswered = false;
+        let fieldContainer = null;
+
+        if (['clarity_watermarks', 'informative_watermarks', 'trustworthy_watermarks', 'biased_watermarks'].includes(fieldName)) {
+            // Check matrix questions
+            const radioInputs = form.querySelectorAll(`input[name="${fieldName}"]`);
+            if (radioInputs.length > 0) {
+                const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
+                isAnswered = checked !== null;
+
+                // Only add to missing if this is the first unanswered matrix question
+                if (!isAnswered && !unansweredFields.some(field => ['clarity_watermarks', 'informative_watermarks', 'trustworthy_watermarks', 'biased_watermarks'].some(matrixField => requiredFields[matrixField] === field))) {
+                    fieldContainer = document.getElementById('matrix-wrapper');
+                }
+            }
+        } else if (fieldName === 'creates_watermarks') {
+            // Check creates_watermarks selection
+            const radioInputs = form.querySelectorAll(`input[name="${fieldName}"]`);
+            if (radioInputs.length > 0) {
+                const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
+                isAnswered = checked !== null;
+                fieldContainer = document.getElementById('creates-watermark-group');
+            }
+        } else if (fieldName === 'creates_watermarks_other') {
+            // Check if "Other" is selected and text is provided
+            const createsSelected = document.querySelector('input[name="creates_watermarks"]:checked');
+            if (createsSelected && createsSelected.value === 'Other') {
+                const otherInput = document.getElementById('creates_watermarks_other');
+                isAnswered = otherInput && otherInput.value.trim() !== '';
+                fieldContainer = document.getElementById('creates-watermark-group');
+            } else {
+                isAnswered = true; // Not required if "Other" is not selected
+            }
+        }
+
+        if (!isAnswered && fieldContainer) {
+            unansweredFields.push(requiredFields[fieldName]);
+            fieldContainer.classList.add('missing-answer');
+            missingElements.push(fieldContainer);
+        }
+    });
+
+    // Remove duplicates from unansweredFields and missingElements
+    unansweredFields = [...new Set(unansweredFields)];
+    missingElements = missingElements.filter((element, index, self) =>
+        self.indexOf(element) === index);
+
+    if (unansweredFields.length > 0) {
+        console.log('Validation failed. Unanswered fields:', unansweredFields);
+
+        // Create detailed popup error message
+        let message = 'Please answer the following question';
+        if (unansweredFields.length > 1) {
+            message += 's';
+        }
+        message += ' before submitting:\n\n';
+
+        unansweredFields.forEach(function(fieldLabel, index) {
+            message += '• ' + fieldLabel;
+            if (index < unansweredFields.length - 1) {
+                message += '\n';
+            }
+        });
+
+        alert(message);
+
+        // Scroll to first missing question
+        if (missingElements.length > 0) {
+            missingElements[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        return false; // Prevent form submission
+    }
+
+    console.log('Validation passed');
+    return true; // Allow form submission
+}
+
   // Toggle visibility of the "Other" textbox
   function toggleOtherTextbox(show) {
     const textbox = document.getElementById('otherTextbox');
     textbox.style.display = show ? 'block' : 'none';
+
+    // Remove highlighting when toggling
+    const container = document.getElementById('creates-watermark-group');
+    if (container && container.classList.contains('missing-answer')) {
+        container.classList.remove('missing-answer');
+    }
   }
 
   // Show textbox on page load if "Other" is selected
@@ -390,66 +536,64 @@
     if (selected && selected.value === 'Other') {
       toggleOtherTextbox(true);
     }
-  });
 
-  // Form submission validation for "Other" option
-  document.querySelector('form').addEventListener('submit', function (e) {
-    const selected = document.querySelector('input[name="creates_watermarks"]:checked');
-    const otherInput = document.getElementById('creates_watermarks_other');
+    // Add real-time validation feedback - removes red highlighting when answered
+    function addRealTimeValidation() {
+        const form = document.querySelector('form');
+        if (!form) return;
 
-    if (selected && selected.value === 'Other') {
-      if (!otherInput.value.trim()) {
-        alert('Please specify your answer for "Other".');
-        e.preventDefault(); // stop submission
-      } else {
-        // Set the value of the radio button to the custom input
-        selected.value = otherInput.value.trim();
-      }
+        // Add change listeners to all form inputs
+        const allInputs = form.querySelectorAll('input, select, textarea');
+        allInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('#matrix-wrapper') ||
+                                this.closest('#creates-watermark-group');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('#matrix-wrapper') ||
+                                this.closest('#creates-watermark-group');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
+        });
     }
+
+    // Initialize real-time validation
+    addRealTimeValidation();
+
+    // Multiple event listeners to catch form submission (matching other pages approach)
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+        // Try to intercept with capturing phase
+        form.addEventListener('submit', function(e) {
+            console.log('Event listener caught submit');
+            if (!validateForm()) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true); // Use capturing phase
+    });
+
+    // Also try intercepting all clicks on submit elements
+    document.addEventListener('click', function(e) {
+        if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+            console.log('Submit element clicked, validating...');
+            if (!validateForm()) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }
+    }, true);
   });
+</script>
 
-    document.querySelector('form').addEventListener('submit', function(event) {
-    // 1. Validate matrix questions (radio groups)
-    // Collect all unique radio group names in the matrix
-    const matrixRadioNames = new Set();
-    // Assuming matrix inputs have names that include _watermarks (adjust if needed)
-    document.querySelectorAll('input[type="radio"]').forEach(input => {
-    if (input.name.includes('_watermarks')) {
-    matrixRadioNames.add(input.name);
-  }
-  });
-
-    for (const groupName of matrixRadioNames) {
-    if (!document.querySelector(`input[name="${groupName}"]:checked`)) {
-    alert('Please answer all the statements about the watermark/label.');
-    event.preventDefault();
-    return false;
-  }
-  }
-
-    // 2. Validate creates_watermarks radio question
-    const createsSelected = document.querySelector('input[name="creates_watermarks"]:checked');
-    if (!createsSelected) {
-    alert('Please select who you believe creates the watermark/label.');
-    event.preventDefault();
-    return false;
-  }
-
-    // 3. If "Other" is selected, validate textbox is not empty
-    if (createsSelected.value === 'Other') {
-    const otherInput = document.getElementById('creates_watermarks_other');
-    if (!otherInput.value.trim()) {
-    alert('Please specify your answer for "Other".');
-    event.preventDefault();
-    return false;
-  }
-  }
-
-    // If all checks pass, form submits normally
-  });
-
-
-  </script>
-
-
-  {% endblock %}
+{% endblock %}

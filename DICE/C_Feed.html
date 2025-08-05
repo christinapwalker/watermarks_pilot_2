@@ -177,6 +177,62 @@
         </div>
     </div>
 
+<style>
+    /* ===== COMMON BUTTON HOVER STYLING ===== */
+    .reply-button .bi-chat,
+    .retweet-button .bi-arrow-repeat,
+    .share-button .bi-upload {
+        color: gray;
+        transition: color 0.2s ease-in-out;
+    }
+
+    .reply-button:hover .bi-chat {
+        color: #1da1f2 !important; /* Twitter blue */
+    }
+
+    .retweet-button:hover .bi-arrow-repeat {
+        color: #17bf63 !important; /* Twitter green for retweets */
+    }
+
+    .share-button:hover .bi-upload {
+        color: #6c757d !important; /* A subtle dark gray */
+    }
+
+    /* Keep existing like hover */
+    .like-button .bi-heart,
+    .like-button .bi-heart-fill {
+        color: gray;
+        transition: color 0.2s ease-in-out;
+    }
+
+    .like-button:hover .bi-heart,
+    .like-button:hover .bi-heart-fill {
+        color: red !important;
+    }
+
+    /* ===== BUTTON + COUNT LAYOUT ===== */
+    .button-with-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+
+    .button-with-count i,
+    .button-with-count span {
+        display: inline-block;
+    }
+
+    @media (max-width: 576px) {
+        .button-with-count {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+
+
+    </style>
 
 
 <!--    &lt;!&ndash; Tweet Modal for composing tweets &ndash;&gt;-->

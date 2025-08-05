@@ -129,9 +129,9 @@ class Player(BasePlayer):
     )
 
     smp_entertaining_pre = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label="I find the content on the social media platforms I use to be entertaining."
+        label="I find the content on social media platforms entertaining."
     )
 
     smp_trust_execs_pre = models.StringField(
@@ -140,27 +140,27 @@ class Player(BasePlayer):
         label='I trust social media executives to ensure accurate information.'
     )
     smp_accuracy_pre = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I trust the accuracy of the content on the social media platforms that I use.'
+        label='I trust the accuracy of the content on social media platforms.'
     )
 
     smp_enjoyment_pre = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I enjoy spending time on the social media platforms that I use.'
+        label='I enjoy spending time on social media platforms.'
     )
 
     smp_community_pre = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I feel part of a community on the social media platforms I use.'
+        label='I feel part of a community on social media platforms.'
     )
 
     smp_news_pre = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I get my news from the social media platforms I use.'
+        label='I get my news from social media platforms.'
     )
     # How much, if at all, do you trust the information you get from... need to randomize order
     # from pew https://www.pewresearch.org/wp-content/uploads/sites/20/2024/10/SR_24.10.16_media-trust-topline.pdf
@@ -196,8 +196,17 @@ class Player(BasePlayer):
     # Image 2
     image_accuracy_ai = models.StringField(
         choices=[['AI-generated', 'Yes'], ['Accurate', 'No']],
-        widget=widgets.RadioSelect,
+        widget=widgets.RadioSelectHorizontal,
         label="Based on your own assessment, is the image in the post above AI-generated?"
+    )
+
+    why_click_ai = models.LongStringField(
+        label="Why did you click on that spot?",
+        blank=False
+    )
+    why_click_real = models.LongStringField(
+        label="Why did you click on that spot?",
+        blank=False
     )
 
     image_claim_ai = models.IntegerField(
@@ -238,7 +247,7 @@ class Player(BasePlayer):
     image_reason_ai = models.IntegerField(
         label="On the post above, please click on the part that makes you believe the image was {accurate/AI-generated}."
     )
-    image_confidence_ai = models.IntegerField(blank=True)  # e.g., 0-10 scale from your slider
+    image_confidence_ai = models.IntegerField(blank=False, min=0, max=10)
 
     claim_response_real = models.StringField(
         label = "Regardless if the image in the post is an accurate image or AI-generated, what claim do you believe the post is making?",
@@ -319,17 +328,16 @@ class Player(BasePlayer):
         required=None
     )
     use_twitter = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="Twitter/X",
         widget=widgets.RadioSelect
+    )
+
+    smp_entertaining_pre = models.StringField(
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        widget=widgets.RadioSelect,
+        label="I find the content on social media platforms entertaining."
     )
 
     use_instagram = models.StringField(
@@ -473,7 +481,7 @@ class Player(BasePlayer):
             ['not_at_all', 'Not at all'],
             ['no_opinion', 'No opinion']
         ],
-        label="National News Organizations",
+        label="National news organizations",
         widget=widgets.RadioSelect)
     trust_localnews_posttreatment = models.StringField(
         choices=[
@@ -483,7 +491,7 @@ class Player(BasePlayer):
             ['not_at_all', 'Not at all'],
             ['no_opinion', 'No opinion']
         ],
-        label="Local News Organizations",
+        label="Local news organizations",
         widget=widgets.RadioSelect)
     trust_friendsfamily_posttreatment = models.StringField(
         choices=[
@@ -493,7 +501,7 @@ class Player(BasePlayer):
             ['not_at_all', 'Not at all'],
             ['no_opinion', 'No opinion']
         ],
-        label="Friends and Family",
+        label="Friends and family",
         widget=widgets.RadioSelect)
     trust_pinterest_posttreatment = models.StringField(
         choices=[
@@ -577,14 +585,12 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect)
 
     benefits_ai = models.StringField(
-        choices=['A lot', 'Some', 'Not too much', 'Not at all',
-                 'Do not use'],
+        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         label='Thinking about society generally, the benefits of artificial intelligence (AI) outweigh the risks.',
         widget=widgets.RadioSelect)
 
     distinguish_ability = models.StringField(
-        choices=['A lot', 'Some', 'Not too much', 'Not at all',
-                 'Do not use'],
+        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         label='I feel confident in my ability to distinguish real from AI-generated images.',
         widget=widgets.RadioSelect)
     smp_trust_users_post = models.StringField(
@@ -606,13 +612,13 @@ class Player(BasePlayer):
             ['extremely', 'Extremely']
         ],
         widget=widgets.RadioSelect,
-        label='I trust the accuracy of content on social media platforms that I use.'
+        label='I trust the accuracy of content on social media platforms.'
     )
 
     smp_entertaining_post = models.StringField(
         choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label="I find the content on the social media platforms I use to be entertaining."
+        label="I find the content on social media platforms entertaining."
     )
 
     smp_trust_execs_post = models.StringField(
@@ -621,27 +627,27 @@ class Player(BasePlayer):
         label='I trust social media executives to ensure accurate information.'
     )
     smp_accuracy_post = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I trust the accuracy of the content on the social media platforms that I use.'
+        label='I trust the accuracy of content on social media platforms.'
     )
 
     smp_enjoyment_post = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I enjoy spending time on the social media platforms that I use.'
+        label='I enjoy spending time on social media platforms.'
     )
 
     smp_community_post = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I feel part of a community on the social media platforms I use.'
+        label='I feel part of a community on social media platforms.'
     )
 
     smp_news_post = models.StringField(
-        choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
+        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I get my news from the social media platforms I use.'
+        label='I get my news from social media platforms.'
     )
     benefits_understanding_watermarks = models.IntegerField(min=1, max=5)
 
@@ -649,15 +655,15 @@ class Player(BasePlayer):
     # Demographics post-treatment:
     age = models.IntegerField(
         choices=list(range(18, 100)),
-        label="How old are you?"
+        label="What is your age?"
     )
     gender = models.StringField(
         label="What is your gender?",
         choices=[
-            [1, 'A man'],
-            [2, "A woman"],
-            [3, "Non-binary"],
-            [4, "Another gender"]
+            [1, 'Man'],
+            [2, "Woman"],
+            [3, "Non-binary / third gender"],
+            [4, "Prefer not to say"]
         ]
     )
 
@@ -674,37 +680,37 @@ class Player(BasePlayer):
         label="What state do you live in?",
         required=None
     )
+
     race = models.StringField(
-        choices=['White/Caucasian', 'African American', 'Hispanic', 'Native American', 'Asian', 'Pacific Islander',
-                 'Other'],
-        label="What is your race?",
+        choices=['White', 'Black or African American', 'Hispanic or Latino/a', 'Asian', 'Other Race or Ethnicity'],
+        label="Choose the group listed below that best captures what you consider yourself to be.",
         required=None
     )
 
     education = models.StringField(
-        choices=['Less than a high school diploma', 'High school diploma/GED', 'Some college (no degree)',
-                 '2-year college degree', '4-year college degree', 'Graduate degree'],
+        choices=['Less than high school degree', 'High school graduate (high school diploma or equivalent including GED)',
+                 'Some college but no degree', 'Associate degree in college (2-year)', "Bachelor's degree in college (4-year)",
+                 "Master's degree", 'Doctoral degree', 'Professional degree (JD, MD)'],
         widget=widgets.RadioSelect,
         label="What is the highest level of education that you have completed?",
         required=None
     )
     income = models.StringField(
-        choices=['$0 - $24,999', '$25,000 - $49,999', '$50,000 - 74,999', '$75,000 - $99,999', '$100,000 - $149,999',
-                 '$150,000 - $199,999', '$200,000+'],
+        choices=['Less than $14,999', '$15,000 to $19,999', '$20,000 to $24,999', '$25,000 to $29,999', '$30,000 to $34,999',
+                 '$35,000 to $39,999', '$40,000 to $44,999', '$45,000 to $49,999', '$50,000 to $54,999', '$55,000 to $59,999',
+                 '$60,000 to $64,999', '$65,000 to $69,999', '$70,000 to $74,999', '$75,000 to $79,999', '$80,000 to $84,999',
+                 '$85,000 to $89,999', '$90,000 to $94,999', '$95,000 to $99,999', '$100,000 to $124,999', '$125,000 to $149,999',
+                 '$150,000 to $174,999', '$175,000 to $199,999', '$200,000 to $249,999', '$250,000 and above', 'Prefer not to answer'],
         widget=widgets.RadioSelect,
-        label="What is your combined household income?",
+        label="What is your current annual household income before taxes?",
         required=None
     )
 
     # Logistics Questions:
-    # all_images = models.IntegerField(
-    #     choices=list(range(0, 10)),
-    #     label="How many images did you see on the previous simulated social media page?",
-    #     widget=widgets.RadioSelect
-    # )
     all_images = models.IntegerField(
         choices=[(i, str(i)) for i in range(11)],
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
+        label="How many images did you see on the previous simulated social media page?"
     )
     loading = models.IntegerField(
         label="Did the images load quickly enough for you on the previous social media page?",
@@ -736,7 +742,7 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect
     )
     # watermark_familiarity = models.IntegerField(
-    #     label="Before today, how familiar were you with watermarks or warning labels on social media?",
+    #     label="Before today, how familiar were you with the idea of watermarks or warning labels on social media?",
     #     widget=widgets.RadioSelect,
     #     choices=[(1, 'Very Familiar'), (2, 'Somewhat Familiar'), (3, "Not Familiar At All")],
     # )
@@ -1225,7 +1231,8 @@ class D_DirectQuestions_AI_First(Page):
         'image_claim_true_ai',
         'saw_own_claim_ai',
         'image_feelstrue_ai',
-        'image_feelstrue_binary_ai'
+        'image_feelstrue_binary_ai',
+        'why_click_ai'
     ]
 
 
@@ -1254,9 +1261,8 @@ class D_DirectQuestions_AI_First(Page):
             claim_choices_ai=list(enumerate(claims, start=1)),
             show_slider=show_slider,
             show_own_claim_ai=show_own,
-            saw_own_claim_ai=show_own,
+            saw_own_claim_ai=show_own
         )
-
 
 
 class D_DirectQuestions_Real_First(Page):
@@ -1271,6 +1277,7 @@ class D_DirectQuestions_Real_First(Page):
         'image_feelstrue_real',
         'image_feelstrue_binary_real',
         'saw_own_claim_real',
+        'why_click_real'
     ]
 
     @staticmethod
@@ -1310,7 +1317,7 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
     form_fields = [
         'click_x_ai', 'click_y_ai', 'image_claim_ai', 'image_feelstrue_followup',
         'image_accuracy_ai', 'image_confidence_ai', 'claim_response_ai',
-        'image_claim_true_ai', 'image_feelstrue', 'image_feelstrue_binary_ai'
+        'image_claim_true_ai', 'image_feelstrue', 'image_feelstrue_binary_ai', 'why_click_ai'
     ]
 
     @staticmethod
@@ -1324,17 +1331,24 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
             print("AI_Second_FeelTrue: skipped because first_question != 'Real'")
             return False
 
-        if player.field_maybe_none('image_feelstrue_followup') not in [None, '']:
-            print("AI_Second_FeelTrue: skipped because follow-up already answered")
-            return False
+        # Show FeelTrue page if they answered "Does NOT feel true" on Real page
+        # This gets them to explain the opposite perspective
+        feels_true_slider = player.field_maybe_none('image_feelstrue_real')
+        feels_true_binary = player.field_maybe_none('image_feelstrue_binary_real')
 
-        prior_answer = player.field_maybe_none('image_feelsnottrue_followup')
-        if prior_answer and str(prior_answer).strip() != "":
-            print("AI_Second_FeelTrue: showing because image_feelsnottrue_followup was filled")
+        # Determine if they answered "does not feel true" on Real page
+        answered_does_not_feel_true = False
+        if feels_true_slider is not None:
+            answered_does_not_feel_true = int(feels_true_slider) < 50
+        elif feels_true_binary == "Does not feel true":
+            answered_does_not_feel_true = True
+
+        if answered_does_not_feel_true:
+            print("AI_Second_FeelTrue: showing because user answered 'does not feel true' on Real page")
             return True
-
-        print("AI_Second_FeelTrue: skipped because image_feelsnottrue_followup was empty")
-        return False
+        else:
+            print("AI_Second_FeelTrue: skipped because user answered 'feels true' on Real page")
+            return False
 
     @staticmethod
     def vars_for_template(player):
@@ -1353,7 +1367,7 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
 
 class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
     form_model = 'player'
-    form_fields = ['click_x_ai', 'click_y_ai', 'image_claim_ai', 'image_feelsnottrue_followup']
+    form_fields = ['click_x_ai', 'click_y_ai', 'image_claim_ai', 'image_feelsnottrue_followup', 'why_click_ai']
 
     @staticmethod
     def is_displayed(player):
@@ -1366,17 +1380,24 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
             print("AI_Second_DoesNotFeelTrue: skipped because first_question != 'Real'")
             return False
 
-        if player.field_maybe_none('image_feelsnottrue_followup') not in [None, '']:
-            print("AI_Second_DoesNotFeelTrue: skipped because follow-up already answered")
-            return False
+        # Show DoesNotFeelTrue page if they answered "Feels true" on Real page
+        # This gets them to explain the opposite perspective
+        feels_true_slider = player.field_maybe_none('image_feelstrue_real')
+        feels_true_binary = player.field_maybe_none('image_feelstrue_binary_real')
 
-        prior_answer = player.field_maybe_none('image_feelstrue_followup')
-        if prior_answer and str(prior_answer).strip() != "":
-            print("AI_Second_DoesNotFeelTrue: showing because image_feelstrue_followup was filled")
+        # Determine if they answered "feels true" on Real page
+        answered_feels_true = False
+        if feels_true_slider is not None:
+            answered_feels_true = int(feels_true_slider) >= 50
+        elif feels_true_binary == "Feels true":
+            answered_feels_true = True
+
+        if answered_feels_true:
+            print("AI_Second_DoesNotFeelTrue: showing because user answered 'feels true' on Real page")
             return True
-
-        print("AI_Second_DoesNotFeelTrue: skipped because image_feelstrue_followup was empty")
-        return False
+        else:
+            print("AI_Second_DoesNotFeelTrue: skipped because user answered 'does not feel true' on Real page")
+            return False
 
     @staticmethod
     def vars_for_template(player):
@@ -1391,16 +1412,13 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
             show_slider=random.choice([True, False]),
             show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
         )
-
-
-
 class D_DirectQuestions_Real_Second_FeelTrue(Page):
     form_model = 'player'
     form_fields = [
         'click_x_real', 'click_y_real', 'image_feelstrue_followup', 'image_feelsnottrue_followup',
         'image_claim_real', 'image_accuracy_real', 'image_confidence_real',
         'claim_response_real', 'image_claim_true_real',
-        'image_feelstrue_real', 'image_feelstrue_binary_real',
+        'image_feelstrue_real', 'image_feelstrue_binary_real', 'why_click_real'
     ]
 
     @staticmethod
@@ -1449,7 +1467,7 @@ class D_DirectQuestions_Real_Second_FeelTrue(Page):
 
 class D_DirectQuestions_Real_Second_DoesNotFeelTrue(Page):
     form_model = 'player'
-    form_fields = ['click_x_real', 'click_y_real', 'image_claim_real', 'image_feelsnottrue_followup']
+    form_fields = ['click_x_real', 'click_y_real', 'image_claim_real', 'image_feelsnottrue_followup', 'why_click_real']
 
     @staticmethod
     def is_displayed(player):

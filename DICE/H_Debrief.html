@@ -208,15 +208,17 @@ document.addEventListener('DOMContentLoaded', () => {
             </h1>
             <p class="text-center fs-6">
               User Engagement with Social Media Posts<br>
-              Dr. Kaylyn Jackson Schiff<br>
-              Department of Political Science, Purdue University
+              Dr. Kaylyn Jackson Schiff, Dr. Daniel Schiff, Dr. JP Messina, Dr. Natalia Bueno<br>
+              Department of Political Science, Emory University and Purdue University
             </p>
 
         </div>
 
         <p class="lead">
 <!--            <Large>-->
-                <p>Thank you for participating in this study. This study involved deception.   This means that we did not provide you with the complete description of the purpose of the study and some of the methods or instruments used had a different purpose than how we described them. Deception is used in research when knowledge of the purpose of the study or certain aspects of the study may bias participant responses. Deception involves either false information—a “cover story” -- or omission of certain information. The purpose of this form is to explain the true purpose of the study and/or provide information that had been omitted. You also will be asked permission to use the information we obtained from you during your participation.</p><br>
+                <p><strong>To continue to the end of the survey, please confirm or withdraw your consent at the bottom of this page.</strong></p>
+
+                <p>Thank you for participating in this study. This study involved deception. This means that we did not provide you with the complete description of the purpose of the study and some of the methods or instruments used had a different purpose than how we described them. Deception is used in research when knowledge of the purpose of the study or certain aspects of the study may bias participant responses. Deception involves either false information—a “cover story”—or omission of certain information. The purpose of this form is to explain the true purpose of the study and/or provide information that had been omitted. You also will be asked permission to use the information we obtained from you during your participation.</p><br>
 
                 <p> You were told that the study was about your opinions on social media. <strong>Our research actually focuses on deepfakes.</strong> Deepfakes are inauthentic content (including video, audio, and visual content) created and/or altered by generative machine learning models or other artificial intelligence (AI) techniques. We are interested in whether putting labels or watermarks on deepfakes can improve individuals’ ability to distinguish between AI-generated and authentic content.<br></p>
 
@@ -227,18 +229,25 @@ document.addEventListener('DOMContentLoaded', () => {
          style="max-width: 100%; width: 100%; max-width: 600px; cursor: crosshair;">
 </div>
 
-                <p> <strong> THE IMAGE IN THIS POST IS AI-GENERATED.</strong> <br> </p>
+
+
+<div style="text-align: center; margin: 20px auto;">
+                    <p> <strong> THE IMAGE IN THIS POST IS AI-GENERATED.</strong> <br> </p>
+</div>
 
                 <p> This was necessary for us to better understand natural reactions to deepfakes. When designing this study, we took care to minimize any possible risks or discomforts that might be related to the deception. <br> </p>
+<div style="text-align: center; margin: 20px auto;">
 
+  <label for="id_understand_AI" class="form-label" style="display: inline-block;">
+      To make sure you understand this message, please type the following sentence:
+      <strong>The image about {{ disclaimer }} is AI-generated.</strong>
+  </label>
+</div>
 
-<label for="id_understand_AI" class="form-label">
-    To make sure you understand this message, please type the following sentence: <strong>The image about {{ disclaimer }} is AI-generated.</strong>
-</label>
 <textarea name="understand_AI" id="id_understand_AI" rows="4" class="form-control" required></textarea>
 
 
-                <p> <strong>Additional information about deepfakes:</strong> : A deepfake is a highly realistic but fake image, video, or audio recording of a person saying or doing something that they never actually said or did.  Some tips for recognizing deepfakes generated with AI include looking for:</p>
+                <p> <strong>Some tips for recognizing deepfakes generated with AI include looking for:</strong></p>
                 <ul>
                     <li>Missing or extra fingers or hands that are deformed in some way</li>
                     <li>Small details in faces that are distorted</li>
@@ -246,7 +255,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <li>Inconsistent reflections</li>
                 </ul>
 
-                <p> <strong>Additional resources about deepfakes:</strong><br> </p>
+        <p>In addition, apply media literacy skills:</p>
+        <ul>
+                    <li><strong>Pause and reflect:</strong> Ask who created the content and why</li>
+                    <li><strong>Check the source:</strong> Is it a reputable outlet or an unknown outlet?</li>
+                    <li><strong>Cross-verify:</strong> Search for the same story or image across multiple credible sources</li>
+                    <li><strong>Analyze tone and language:</strong> Be wary of sensational, emotionally charged, or divise language</li>
+                    <li><strong>Consider context:</strong> Images and videos can be taken out of context to mislead</li>
+
+        </ul>
+
+                <p> None of these techniques are foolproof, especially as AI-generated content becomes more sophisticated. <strong>Additional resources about deepfakes:</strong><br> </p>
 
                 <ul>
 <li>

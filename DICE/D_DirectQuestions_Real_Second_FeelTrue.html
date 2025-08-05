@@ -1,98 +1,6 @@
 {% extends "global/Page.html" %}
 
 {% block content %}
-<div class="image-container">
-    <img src="{{ player.screenshot_control }}" id="clickable-image" alt="Screenshot" />
-    <div id="click-marker"></div>
-</div>
-
-<form method="post" novalidate>
-    <!-- Hidden inputs for click coords and follow-up flags -->
-    <input type="hidden" id="click_x_real" name="click_x_real" />
-    <input type="hidden" id="click_y_real" name="click_y_real" />
-    <input type="hidden" id="image_feelstrue_answered" name="image_feelstrue_answered" value="False" />
-    <input type="hidden" id="image_feelsnottrue_answered" name="image_feelsnottrue_answered" value="False" />
-
-    <div class="question">
-        <p><strong>Based on your own assessment, is the image in the post above AI-generated?</strong></p>
-        <div class="multiple-choice">
-            <label><input type="radio" name="image_accuracy_real" value="AI-generated"> Yes</label>
-            <label><input type="radio" name="image_accuracy_real" value="Accurate"> No</label>
-        </div>
-    </div>
-
-    <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
-    <div class="slider-container">
-        <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="image_confidence_real" min="0" max="10" value="5" oninput="updateConfidence(this)" />
-        {{ formfield_errors 'image_confidence_real' }}
-        <span class="slider-label-right">100% Confidence</span>
-        <p id="description-image_confidence_real" class="slider-result"></p>
-    </div>
-
-    <p><strong>In the post above, please click on the part of the post or image that helped you make your determination about whether the image is AI-generated. A red dot will appear to confirm your selection.</strong></p>
-
-    <div class="question">
-        <p><strong>Regardless of whether you think the image in the post is AI-generated or not, what <em>claim</em> do you believe the post is making?</strong></p>
-        <textarea id="claim-response" name="claim_response_real" rows="4" placeholder="Type your claim here..."></textarea>
-        {{ formfield_errors 'claim_response_real' }}
-        <br />
-        <button type="button" class="btn btn-primary" onclick="submitClaim(this)">Submit Claim</button>
-    </div>
-
-    <div id="interpretations-section" style="display:none;">
-        <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
-        {% for value, label in claim_choices_real %}
-            <label class="claim-option">
-                <input type="radio" name="image_claim_real" value="{{ value }}"
-                       onclick="updateClaimText(this);
-                                document.getElementById('claim-truth-section').style.display='block';
-                                document.getElementById('feel-true-question').style.display='block';
-                                claimWasSubmitted = true;
-                                disableClaimInput();">
-                {{ label }}
-            </label><br>
-        {% endfor %}
-    </div>
-
-    <div id="claim-truth-section" style="display:none;">
-        <p style="margin-top: 40px;"><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></>
-        <div class="multiple-choice">
-            <label><input type="radio" name="image_claim_true_real" value="It is true"> It is true</label>
-            <label><input type="radio" name="image_claim_true_real" value="It is not true"> It is not true</label>
-        </div>
-    </div>
-
-    <div id="feel-true-question" style="display:none; margin-top:40px;">
-        <p><strong>Regardless of whether you think the claim of the post is literally true, to what extent do you think the post represents something that feels true about the world?</strong></p>
-        {% if show_slider_real %}
-            <div class="slider-container">
-                <span class="slider-label-left">Does not feel true</span>
-                <input type="range" name="image_feelstrue_real" min="0" max="100" oninput="updateFeelTrueLabel(this)" />
-                <span class="slider-label-right">Feels true</span>
-                <p id="feeltrue-description" class="slider-result"></p>
-            </div>
-        {% else %}
-            <div class="multiple-choice">
-                <label><input type="radio" name="image_feelstrue_binary_real" value="Does not feel true"> Does not feel true</label>
-                <label><input type="radio" name="image_feelstrue_binary_real" value="Feels true"> Feels true</label>
-            </div>
-            {{ formfield_errors 'image_feelstrue_binary_real' }}
-        {% endif %}
-    </div>
-
-    <div class="question" id="follow-up-question" style="display:none;">
-        <p><strong>What do you think it means if something “feels true”?</strong></p>
-        <textarea name="image_feelstrue_followup" rows="4" oninput="markFeelsTrueAnswered()" placeholder="Type response here..."></textarea>
-    </div>
-
-    <div class="submit-container">
-    <button type="submit" id="submitButton" aria-label="Submit survey responses">
-      ➔
-    </button>
-  </div>
-</form>
-
 <style>
 /* Your existing styles, unchanged */
 .image-container {
@@ -206,28 +114,6 @@ input[type=range]::-moz-range-thumb {
 .btn-primary:hover {
     background-color: #0056b3;
 }
-.d-flex.justify-content-end.m-5 {
-    display: flex;
-    justify-content: flex-end;
-    margin: 3rem 0;
-}
-.btn-success.shadow {
-    background-color: #28a745;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(40,167,69,0.4);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn-success.shadow:hover {
-    background-color: #218838;
-}
 .subtitle {
     font-size: 1.1rem;
     margin-bottom: 20px;
@@ -243,14 +129,14 @@ input[type=range]::-moz-range-thumb {
     margin-right: 8px;
 }
 
-  /* Submit button container */
-  .submit-container {
+/* Submit button container */
+.submit-container {
     display: flex;
     justify-content: flex-end;
     margin-top: 30px;
-  }
+}
 
-  button[type="submit"] {
+button[type="submit"] {
     background-color: #2c7be5;
     color: white;
     border: none;
@@ -261,17 +147,449 @@ input[type=range]::-moz-range-thumb {
     cursor: pointer;
     box-shadow: 0 5px 10px rgba(44,123,229,0.4);
     transition: background-color 0.25s ease;
-  }
+}
 
-  button[type="submit"]:hover {
+button[type="submit"]:hover {
     background-color: #1a5fd9;
-  }
+}
+
+/* Survey container from first page */
+.survey-container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px 40px;
+    border-radius: 6px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Base styles from first page */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #222;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+/* Validation highlighting styles from first page */
+.missing-answer {
+    background-color: #ffebee !important;
+    border: 2px solid #f44336 !important;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 4px 0;
+    animation: pulse-red 1s ease-in-out;
+}
+
+.missing-answer .question-column {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
+.missing-answer .question-text {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    let claimWasSubmitted = false;
+// Enhanced validation function with highlighting and detailed messages (from first page)
+function validateForm() {
+    console.log('validateForm() called');
 
+    // Define field names with their user-friendly labels
+    const requiredFields = {
+        'image_accuracy_real': 'Whether the image is AI-generated',
+        'image_confidence_real': 'Your confidence level',
+        'why_click_real': 'Why you clicked on that spot',
+        'click_coordinates': 'Click on the image to indicate your selection',
+        'claim_response_real': 'Your claim about the post',
+        'image_claim_real': 'Selection of the claim that best represents the post',
+        'image_claim_true_real': 'Whether you think the claim is literally true',
+        'image_feelstrue_response': 'Whether the post feels true about the world',
+        'image_feelstrue_followup': 'Explanation of what "feels true" means'
+    };
+
+    const form = document.querySelector('form');
+    if (!form) {
+        console.log('Form not found');
+        return true; // Let it submit if we can't find form
+    }
+
+    let unansweredFields = [];
+    let missingElements = [];
+
+    // Clear any previous highlighting
+    document.querySelectorAll('.missing-answer').forEach(el => {
+        el.classList.remove('missing-answer');
+    });
+
+    // Check image accuracy selection
+    const imageAccuracyRadios = form.querySelectorAll('input[name="image_accuracy_real"]');
+    let imageAccuracyAnswered = false;
+    if (imageAccuracyRadios.length > 0) {
+        imageAccuracyAnswered = Array.from(imageAccuracyRadios).some(r => r.checked);
+    }
+    if (!imageAccuracyAnswered) {
+        unansweredFields.push(requiredFields['image_accuracy_real']);
+        const container = document.querySelector('.question');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+
+    // Check confidence slider (assuming it needs interaction)
+    const confidenceSlider = form.querySelector('input[name="image_confidence_real"]');
+    if (confidenceSlider && !window.confidenceSliderInteracted) {
+        unansweredFields.push(requiredFields['image_confidence_real']);
+        const container = confidenceSlider.closest('.slider-container') || confidenceSlider.closest('div');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+
+    // Check click coordinates
+    const clickX = document.getElementById('click_x_real')?.value;
+    const clickY = document.getElementById('click_y_real')?.value;
+    if (!clickX || !clickY) {
+        unansweredFields.push(requiredFields['click_coordinates']);
+        const container = document.querySelector('.image-container');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+    // Check why click field
+    const whyClickField = form.querySelector('input[name="why_click_real"], textarea[name="why_click_real"], select[name="why_click_real"]');
+    if (whyClickField) {
+        let whyClickValue = '';
+        if (whyClickField.type === 'radio' || whyClickField.type === 'checkbox') {
+            const whyClickRadios = form.querySelectorAll('input[name="why_click_real"]');
+            whyClickValue = Array.from(whyClickRadios).find(r => r.checked)?.value || '';
+        } else {
+            whyClickValue = whyClickField.value?.trim() || '';
+        }
+
+        if (!whyClickValue) {
+            unansweredFields.push(requiredFields['why_click_real']);
+            const container = whyClickField.closest('.question');
+            if (container) {
+                container.classList.add('missing-answer');
+                missingElements.push(container);
+            }
+        }
+    }
+
+    // Check claim submission
+    const textarea = document.getElementById('claim-response');
+    const interpretationsSection = document.getElementById('interpretations-section');
+    if (textarea && !window.claimWasSubmitted) {
+        if (textarea.offsetParent !== null && !textarea.disabled && textarea.value.trim() === '') {
+            unansweredFields.push(requiredFields['claim_response_real']);
+            const container = textarea.closest('.question');
+            if (container) {
+                container.classList.add('missing-answer');
+                missingElements.push(container);
+            }
+        } else if (interpretationsSection && interpretationsSection.offsetParent === null) {
+            unansweredFields.push('Submit your claim before proceeding');
+            const container = textarea.closest('.question');
+            if (container) {
+                container.classList.add('missing-answer');
+                missingElements.push(container);
+            }
+        }
+    }
+
+    // Check claim selection
+    const claimRadios = form.querySelectorAll('input[name="image_claim_real"]');
+    if (interpretationsSection && interpretationsSection.offsetParent !== null) {
+        const claimSelected = Array.from(claimRadios).some(r => r.checked);
+        if (!claimSelected) {
+            unansweredFields.push(requiredFields['image_claim_real']);
+            if (interpretationsSection) {
+                interpretationsSection.classList.add('missing-answer');
+                missingElements.push(interpretationsSection);
+            }
+        }
+    }
+
+    // Check claim truth selection
+    const claimTrueRadios = form.querySelectorAll('input[name="image_claim_true_real"]');
+    const claimTruthSection = document.getElementById('claim-truth-section');
+    if (claimTruthSection && claimTruthSection.offsetParent !== null) {
+        const claimTruthSelected = Array.from(claimTrueRadios).some(r => r.checked);
+        if (!claimTruthSelected) {
+            unansweredFields.push(requiredFields['image_claim_true_real']);
+            if (claimTruthSection) {
+                claimTruthSection.classList.add('missing-answer');
+                missingElements.push(claimTruthSection);
+            }
+        }
+    }
+
+    // Check feels true section
+    const feelTrueQuestion = document.getElementById('feel-true-question');
+    if (feelTrueQuestion && feelTrueQuestion.offsetParent !== null) {
+        // Check slider or binary selection
+        const slider = form.querySelector('input[name="image_feelstrue_real"]');
+        const binaryRadios = form.querySelectorAll('input[name="image_feelstrue_binary_real"]');
+
+        let feelsTrueAnswered = false;
+        let feelsTrueValue = null;
+
+        if (slider && slider.offsetParent !== null) {
+            feelsTrueAnswered = window.feelsTrueSliderInteracted || false;
+            feelsTrueValue = parseInt(slider.value);
+        } else if (binaryRadios.length > 0) {
+            const selectedBinary = Array.from(binaryRadios).find(r => r.checked);
+            feelsTrueAnswered = selectedBinary !== undefined;
+            feelsTrueValue = selectedBinary ? (selectedBinary.value === 'Feels true' ? 100 : 0) : null;
+        }
+
+        if (!feelsTrueAnswered) {
+            unansweredFields.push(requiredFields['image_feelstrue_response']);
+            feelTrueQuestion.classList.add('missing-answer');
+            missingElements.push(feelTrueQuestion);
+        } else {
+            // Check follow-up question
+            const followUpFeelsTrue = document.getElementById('follow-up-question');
+
+            if (feelsTrueValue !== null && feelsTrueValue >= 50) {
+                // Should answer "feels true" follow-up
+                if (followUpFeelsTrue && followUpFeelsTrue.offsetParent !== null) {
+                    const followUpTextarea = followUpFeelsTrue.querySelector('textarea');
+                    if (!followUpTextarea || followUpTextarea.value.trim() === '') {
+                        unansweredFields.push(requiredFields['image_feelstrue_followup']);
+                        followUpFeelsTrue.classList.add('missing-answer');
+                        missingElements.push(followUpFeelsTrue);
+                    }
+                }
+            }
+        }
+    }
+
+    if (unansweredFields.length > 0) {
+        console.log('Validation failed. Unanswered fields:', unansweredFields);
+
+        // Create detailed error message
+        let message = 'Please answer the following question';
+        if (unansweredFields.length > 1) {
+            message += 's';
+        }
+        message += ' before submitting:\n\n';
+
+        unansweredFields.forEach(function(fieldLabel, index) {
+            message += '• ' + fieldLabel;
+            if (index < unansweredFields.length - 1) {
+                message += '\n';
+            }
+        });
+
+        alert(message);
+
+        // Scroll to first missing question
+        if (missingElements.length > 0) {
+            missingElements[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        return false; // Prevent form submission
+    }
+
+    console.log('Validation passed');
+    return true; // Allow form submission
+}
+
+// Backup: Also try the event listener approach
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up additional event listeners...');
+
+    // Track interactions
+    window.confidenceSliderInteracted = false;
+    window.feelsTrueSliderInteracted = false;
+    window.claimWasSubmitted = false;
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+        // Try to intercept with capturing phase
+        form.addEventListener('submit', function(e) {
+            console.log('Event listener caught submit');
+            if (!validateForm()) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true); // Use capturing phase
+    });
+
+    // Add real-time validation feedback
+    function addRealTimeValidation() {
+        const form = document.querySelector('form');
+        if (!form) return;
+
+        // Add change listeners to all form inputs
+        const allInputs = form.querySelectorAll('input, select, textarea');
+        allInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('.question') ||
+                                this.closest('.slider-container') ||
+                                this.closest('#interpretations-section') ||
+                                this.closest('#claim-truth-section') ||
+                                this.closest('#feel-true-question') ||
+                                this.closest('#follow-up-question') ||
+                                this.closest('.image-container');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('.question') ||
+                                this.closest('.slider-container') ||
+                                this.closest('#interpretations-section') ||
+                                this.closest('#claim-truth-section') ||
+                                this.closest('#feel-true-question') ||
+                                this.closest('#follow-up-question') ||
+                                this.closest('.image-container');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
+        });
+    }
+
+    // Initialize real-time validation
+    addRealTimeValidation();
+});
+
+// Also try intercepting all clicks on submit elements
+document.addEventListener('click', function(e) {
+    if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+        console.log('Submit element clicked, validating...');
+        if (!validateForm()) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }
+}, true);
+</script>
+
+<div class="survey-container">
+<div class="image-container">
+    <img src="{{ player.screenshot_control }}" id="clickable-image" alt="Screenshot" />
+    <div id="click-marker"></div>
+</div>
+
+<form method="post" novalidate>
+    <!-- Hidden inputs for click coords and follow-up flags -->
+    <input type="hidden" id="click_x_real" name="click_x_real" />
+    <input type="hidden" id="click_y_real" name="click_y_real" />
+    <input type="hidden" id="image_feelstrue_answered" name="image_feelstrue_answered" value="False" />
+    <input type="hidden" id="image_feelsnottrue_answered" name="image_feelsnottrue_answered" value="False" />
+
+    <div class="question">
+        <p><strong>Based on your own assessment, is the image in the post above AI-generated?</strong></p>
+        <div class="multiple-choice">
+            <label><input type="radio" name="image_accuracy_real" value="AI-generated"> Yes</label>
+            <label><input type="radio" name="image_accuracy_real" value="Accurate"> No</label>
+        </div>
+    </div>
+
+    <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
+    <div class="slider-container">
+        <span class="slider-label-left">0% Confidence</span>
+        <input type="range" name="image_confidence_real" min="0" max="10" value="5" oninput="updateConfidence(this)" />
+        {{ formfield_errors 'image_confidence_real' }}
+        <span class="slider-label-right">100% Confidence</span>
+        <p id="description-image_confidence_real" class="slider-result"></p>
+    </div>
+
+    <p><strong>In the post above, please click on the part of the post or image that helped you make your determination about whether the image is AI-generated. A red dot will appear to confirm your selection.</strong></p>
+
+    <div class="question">
+    <p><strong>Why did you click on that spot?</strong></p>
+    {{ formfield 'why_click_real' label='' }}
+</div>
+
+    <div class="question">
+        <p><strong>Regardless of whether you think the image in the post is AI-generated or not, what <em>claim</em> do you believe the post is making?</strong></p>
+        <textarea id="claim-response" name="claim_response_real" rows="4" placeholder="Type your claim here..."></textarea>
+        {{ formfield_errors 'claim_response_real' }}
+        <br />
+        <button type="button" class="btn btn-primary" onclick="submitClaim(this)">Submit Claim</button>
+    </div>
+
+    <div id="interpretations-section" style="display:none;">
+        <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
+        {% for value, label in claim_choices_real %}
+            <label class="claim-option">
+                <input type="radio" name="image_claim_real" value="{{ value }}"
+                       onclick="updateClaimText(this);
+                                document.getElementById('claim-truth-section').style.display='block';
+                                document.getElementById('feel-true-question').style.display='block';
+                                window.claimWasSubmitted = true;
+                                disableClaimInput();">
+                {{ label }}
+            </label><br>
+        {% endfor %}
+    </div>
+
+    <div id="claim-truth-section" style="display:none;">
+        <p style="margin-top: 40px;"><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></>
+        <div class="multiple-choice">
+            <label><input type="radio" name="image_claim_true_real" value="It is true"> It is true</label>
+            <label><input type="radio" name="image_claim_true_real" value="It is not true"> It is not true</label>
+        </div>
+    </div>
+
+    <div id="feel-true-question" style="display:none; margin-top:40px;">
+        <p><strong>Regardless of whether you think the claim of the post is literally true, to what extent do you think the post represents something that feels true about the world?</strong></p>
+        {% if show_slider_real %}
+            <div class="slider-container">
+                <span class="slider-label-left">Does not feel true</span>
+                <input type="range" name="image_feelstrue_real" min="0" max="100" oninput="updateFeelTrueLabel(this)" />
+                <span class="slider-label-right">Feels true</span>
+                <p id="feeltrue-description" class="slider-result"></p>
+            </div>
+        {% else %}
+            <div class="multiple-choice">
+                <label><input type="radio" name="image_feelstrue_binary_real" value="Does not feel true"> Does not feel true</label>
+                <label><input type="radio" name="image_feelstrue_binary_real" value="Feels true"> Feels true</label>
+            </div>
+            {{ formfield_errors 'image_feelstrue_binary_real' }}
+        {% endif %}
+    </div>
+
+    <div class="question" id="follow-up-question" style="display:none;">
+        <p><strong>What do you think it means if something "feels true"?</strong></p>
+        <textarea name="image_feelstrue_followup" rows="4" oninput="markFeelsTrueAnswered()" placeholder="Type response here..."></textarea>
+    </div>
+
+    <div class="submit-container">
+    <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
+      ➔
+    </button>
+  </div>
+</form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
     const img = document.getElementById("clickable-image");
     const marker = document.getElementById("click-marker");
     const inputX = document.getElementById("click_x_real");
@@ -294,6 +612,12 @@ document.addEventListener("DOMContentLoaded", function () {
         marker.style.left = markerX + "px";
         marker.style.top = markerY + "px";
         marker.style.display = "block";
+
+        // Remove highlighting when user clicks
+        const container = img.closest('.image-container');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
+        }
     });
 
     const showOwnClaim = {% if show_own_claim_real %}true{% else %}false{% endif %};
@@ -302,7 +626,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.submitClaim = function (button) {
         const claimText = textarea.value.trim();
-        if (!claimText) return;
+        if (!claimText) {
+            alert('Please enter a claim before submitting.');
+            return;
+        }
 
         const existingOptions = document.querySelectorAll('input[name="image_claim_real"]');
         for (const option of existingOptions) {
@@ -324,7 +651,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateClaimText(this);
                 document.getElementById('claim-truth-section').style.display = 'block';
                 document.getElementById('feel-true-question').style.display = 'block';
-                claimWasSubmitted = true;
+                window.claimWasSubmitted = true;
                 disableClaimInput();
             };
 
@@ -337,8 +664,14 @@ document.addEventListener("DOMContentLoaded", function () {
         interpretationsSection.style.display = 'block';
         textarea.disabled = true;
         button.disabled = true;
-        claimWasSubmitted = true;
+        window.claimWasSubmitted = true;
         interpretationsSection.scrollIntoView({ behavior: 'smooth' });
+
+        // Remove highlighting when claim is submitted
+        const container = textarea.closest('.question');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
+        }
     };
 
     window.updateClaimText = function (radio) {
@@ -350,12 +683,20 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     window.updateConfidence = function (input) {
+        window.confidenceSliderInteracted = true;
         const confidence = parseInt(input.value);
         const percentage = (confidence / 10) * 100;
         document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
+
+        // Remove highlighting when user interacts with slider
+        const container = input.closest('.slider-container');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
+        }
     };
 
     window.updateFeelTrueLabel = function (input) {
+        window.feelsTrueSliderInteracted = true;
         const description = document.getElementById('feeltrue-description');
         description.textContent = input.value;
 
@@ -364,6 +705,12 @@ document.addEventListener("DOMContentLoaded", function () {
             followUpFeelsTrue.style.display = 'block';
         } else {
             followUpFeelsTrue.style.display = 'none';
+        }
+
+        // Remove highlighting when user interacts with slider
+        const container = input.closest('#feel-true-question');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
         }
     };
 
@@ -381,6 +728,12 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 followUpFeelsTrue.style.display = 'none';
             }
+
+            // Remove highlighting when user selects option
+            const container = this.closest('#feel-true-question');
+            if (container && container.classList.contains('missing-answer')) {
+                container.classList.remove('missing-answer');
+            }
         });
     });
 
@@ -395,110 +748,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const claimRadios = document.getElementsByName('image_claim_real');
     Array.from(claimRadios).forEach(radio => {
         radio.addEventListener('click', function () {
-            claimWasSubmitted = true;
+            window.claimWasSubmitted = true;
             disableClaimInput();
         });
-    });
-
-    // Form validation on submit
-    document.querySelector('form').addEventListener('submit', function(event) {
-        function isVisible(el) {
-            return el && el.offsetParent !== null;
-        }
-
-        // 1) Must click on image to get coords
-        const clickX = inputX.value;
-        const clickY = inputY.value;
-        if (!clickX || !clickY) {
-            alert('Please click on the image to indicate the part that helped you decide.');
-            event.preventDefault();
-            return false;
-        }
-
-        // 2) Must choose AI-generated or not
-        const accuracyRadios = document.getElementsByName('image_accuracy_real');
-        if (!Array.from(accuracyRadios).some(r => r.checked)) {
-            alert('Please indicate whether the image is AI-generated.');
-            event.preventDefault();
-            return false;
-        }
-
-        // 3) Confidence slider value if visible and required
-        const confidenceSlider = document.querySelector('input[name="image_confidence_real"]');
-        if (confidenceSlider && isVisible(confidenceSlider) && confidenceSlider.value === '') {
-            alert('Please indicate your confidence using the slider.');
-            event.preventDefault();
-            return false;
-        }
-
-        // 4) Must have submitted or selected a claim
-        const interpretationsVisible = isVisible(interpretationsSection);
-        const claimTextarea = textarea;
-
-        if (!claimWasSubmitted) {
-            if (!interpretationsVisible) {
-                if (claimTextarea.value.trim() === '') {
-                    alert('Please type your claim and submit it before proceeding.');
-                    event.preventDefault();
-                    return false;
-                }
-                alert('Please submit your claim before proceeding.');
-                event.preventDefault();
-                return false;
-            } else {
-                alert('Please select the claim that best represents the post and image.');
-                event.preventDefault();
-                return false;
-            }
-        }
-
-        // 5) Must select claim radio if interpretations visible
-        if (interpretationsVisible) {
-            const claimRadiosCheck = document.getElementsByName('image_claim_real');
-            if (!Array.from(claimRadiosCheck).some(r => r.checked)) {
-                alert('Please select the claim that best represents the post and image.');
-                event.preventDefault();
-                return false;
-            }
-        }
-
-        // 6) Must select claim truth radio if visible
-        const claimTruth = document.getElementById('claim-truth-section');
-        if (claimTruth && isVisible(claimTruth)) {
-            const claimTruthRadios = document.getElementsByName('image_claim_true_real');
-            if (!Array.from(claimTruthRadios).some(r => r.checked)) {
-                alert('Please indicate to what extent you think the claim is literally true.');
-                event.preventDefault();
-                return false;
-            }
-        }
-
-        // 7) Must select feel-true slider or binary if visible
-        const feelTrue = document.getElementById('feel-true-question');
-        if (feelTrue && isVisible(feelTrue)) {
-            const slider = document.querySelector('input[name="image_feelstrue_real"]');
-            const binaryRadiosCheck = document.getElementsByName('image_feelstrue_binary_real');
-
-            if (slider && isVisible(slider) && slider.value === '') {
-                alert('Please indicate how much the post feels true using the slider.');
-                event.preventDefault();
-                return false;
-            }
-
-            if (binaryRadiosCheck.length > 0 && !Array.from(binaryRadiosCheck).some(r => r.checked)) {
-                alert('Please select whether the post feels true or does not feel true.');
-                event.preventDefault();
-                return false;
-            }
-        }
-
-        // 8) Require follow-up textarea if visible (for "feels true" follow-up)
-        const followUp = document.querySelector('#follow-up-question textarea');
-        if (followUp && isVisible(followUp) && followUp.value.trim() === '') {
-            alert('Please answer what you think it means if something “feels true.”');
-            event.preventDefault();
-            return false;
-        }
     });
 });
 </script>

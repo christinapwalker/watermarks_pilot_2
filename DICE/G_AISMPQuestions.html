@@ -26,63 +26,35 @@
     margin-bottom: 1rem;
   }
 
-  /* ===== Slider ===== */
-  .slider-container {
-    position: relative;
-    width: 100%;
-    margin-bottom: 60px;
-  }
-
-  .slider {
-    width: 100%;
-    height: 14px;
-    background: #ddd;
-    border-radius: 7px;
-    margin-bottom: 40px;
-    appearance: none;
-    outline: none;
-  }
-
-  /* ===== Rotated Labels ===== */
-  .slider-labels {
-    position: relative;
-    height: 80px;
-    width: 100%;
-    user-select: none;
-  }
-
-  .slider-labels span {
-    position: absolute;
-    top: 0;
-    transform: rotate(60deg) translateY(6px);
-    transform-origin: top center;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  /* Position each label centered over its tick */
-  .slider-labels span:nth-child(1) { left: 0%; }
-  .slider-labels span:nth-child(2) { left: 16.666%; }
-  .slider-labels span:nth-child(3) { left: 33.333%; }
-  .slider-labels span:nth-child(4) { left: 50%; }
-  .slider-labels span:nth-child(5) { left: 66.666%; }
-  .slider-labels span:nth-child(6) { left: 83.333%; }
-  .slider-labels span:nth-child(7) { left: 90%; }
-
-  /* ===== Slider Value Display ===== */
-  .slider-value {
-    text-align: center;
+  .question-label {
     font-size: 1.3rem;
     font-weight: 600;
-    color: #444;
-    margin-top: -20px;
+    color: #222;
   }
-  .question-label {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #222;
-}
+
+  /* ===== Radio Button Container Styling (FIX FOR MOBILE) ===== */
+  .form-group div {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
+  .form-group input[type="radio"] {
+    flex-shrink: 0;
+    margin: 0;
+    margin-top: 2px; /* Slight adjustment to align with first line of text */
+  }
+
+  .form-group label {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #333;
+    line-height: 1.4;
+    cursor: pointer;
+    margin: 0;
+  }
 
   /* ===== Table Styles ===== */
   table {
@@ -146,14 +118,13 @@
   }
 
   /* Radio Answer Columns */
-.matrix-table th:not(:first-child),
-.matrix-table td:not(.question-column) {
-  padding: 4px 1px;
-  font-size: 0.7rem;
-  word-break: break-word;
-  text-align: center;
-}
-
+  .matrix-table th:not(:first-child),
+  .matrix-table td:not(.question-column) {
+    padding: 4px 1px;
+    font-size: 0.7rem;
+    word-break: break-word;
+    text-align: center;
+  }
 
   /* Radio Inputs */
   .matrix-table input[type="radio"] {
@@ -168,77 +139,70 @@
   }
 
   /* Wrapper for horizontal scroll on small screens */
-.matrix-wrapper {
-  overflow-x: auto;
-  width: 100%;
-}
+  .matrix-wrapper {
+    overflow-x: auto;
+    width: 100%;
+  }
 
   .matrix-wrapper {
     overflow-x: hidden;
     width: 100%;
   }
 
-
-
-  /* ===== Responsive ===== */
-  @media (max-width: 700px) {
-  .survey-container {
-    margin: 15px;
-    padding: 20px;
+  /* ===== ERROR STYLING (matching other pages) ===== */
+  /* Validation highlighting styles */
+  .missing-answer {
+    background-color: #ffebee !important;
+    border: 2px solid #f44336 !important;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 4px 0;
+    animation: pulse-red 1s ease-in-out;
   }
 
-  .slider-labels span {
-    font-size: 0.6rem;
+  .missing-answer .question-column {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-  p, .slider-value {
-    font-size: 1rem;
+  .missing-answer .question-label {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-  .slider-container {
-    padding: 0;
+  .missing-answer p {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-  .matrix-table th,
-  .matrix-table td {
-    font-size: 0.75rem;
-    padding: 6px;
+  .missing-answer > label {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
-  .matrix-table {
-    width: 100%;
-    table-layout: fixed;
-  }
-    .question-label {
-    font-size: 1rem;
+  /* Special styling for matrix table rows with missing answers */
+  .missing-answer-row {
+    background-color: #ffebee !important;
+    animation: pulse-red 1s ease-in-out;
   }
 
-
-  /* Slightly wider question column */
-  .matrix-table .question-column {
-    width: 50%;             /* Give more space for questions */
-    font-size: 0.5rem;
-    padding-left: 1px;
-    padding-right: 1px;
-    word-break: break-word;
-    white-space: normal;
+  .missing-answer-row td {
+    background-color: #ffebee !important;
+    border: 1px solid #f44336 !important;
   }
 
-
-  /* Make radio columns narrow */
-  .matrix-table th:not(:first-child),
-  .matrix-table td:not(.question-column) {
-    max-width: 1px;
-    white-space: normal;
-    /*text-align: center;*/
-    word-break: break-word;
-    padding: 0px 0px;
-    font-size: 0.6rem;
-
-
+  .missing-answer-row .question-column {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
-}
-      /* Submit button container */
+
+  @keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+  }
+
+  /* Submit button container */
   .submit-container {
     display: flex;
     justify-content: flex-end;
@@ -262,13 +226,83 @@
     background-color: #1a5fd9;
   }
 
+  /* ===== Responsive ===== */
+  @media (max-width: 700px) {
+    .survey-container {
+      margin: 15px;
+      padding: 20px;
+    }
+
+    /* Mobile Radio Button Fixes */
+    .form-group div {
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+
+    .form-group input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+    }
+
+    .slider-labels span {
+      font-size: 0.6rem;
+    }
+
+    p, .slider-value {
+      font-size: 1rem;
+    }
+
+    .slider-container {
+      padding: 0;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      font-size: 0.75rem;
+      padding: 6px;
+    }
+
+    .matrix-table {
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .question-label {
+      font-size: 1rem;
+    }
+
+    /* Slightly wider question column */
+    .matrix-table .question-column {
+      width: 50%;             /* Give more space for questions */
+      font-size: 0.5rem;
+      padding-left: 1px;
+      padding-right: 1px;
+      word-break: break-word;
+      white-space: normal;
+    }
+
+    /* Make radio columns narrow */
+    .matrix-table th:not(:first-child),
+    .matrix-table td:not(.question-column) {
+      max-width: 1px;
+      white-space: normal;
+      word-break: break-word;
+      padding: 0px 0px;
+      font-size: 0.6rem;
+    }
+  }
 </style>
 
-
-<div class="qualtrics-container">
+<div class="survey-container">
   <form method="post">
-    <div class="form-group">
-  <label for="llm_familiarity" class="question-label"">
+    <div class="form-group" id="llm-familiarity-group">
+      <label for="llm_familiarity" class="question-label">
         <strong>Before today, how familiar were you with large language models (LLMs) or AI chatbots like ChatGPT, Gemini, or Claude?</strong>
       </label>
       <div>
@@ -294,206 +328,408 @@
     </div>
 
     <!-- Instruction Text -->
-<p style="margin-top: 40px;"><strong>How much, if at all, do you trust the information you get from the following sources:</strong></p>
+    <p style="margin-top: 40px;"><strong>How much, if at all, do you trust the information you get from the following sources:</strong></p>
 
-      <div class="matrix-wrapper">
-    <table class="matrix-table">
-    <!-- Likert Scale -->
-      <tr>
-        <th></th>
-        <th>A lot</th>
-        <th>Some</th>
-        <th>Not too much</th>
-        <th>Not at all</th>
-        <th>No opinion</th>
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_twitter_posttreatment.label }}</td>
-        {% for choice in form.trust_twitter_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
+    <div class="matrix-wrapper" id="trust-matrix-wrapper">
+      <table class="matrix-table">
+      <!-- Likert Scale -->
+        <tr>
+          <th></th>
+          <th>A lot</th>
+          <th>Some</th>
+          <th>Not too much</th>
+          <th>Not at all</th>
+          <th>No opinion</th>
+        </tr>
+        <tr data-field="trust_twitter_posttreatment">
+          <td class="question-column">{{ form.trust_twitter_posttreatment.label }}</td>
+          {% for choice in form.trust_twitter_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-      <tr>
-        <td class="question-column">{{ form.trust_instagram_posttreatment.label }}</td>
-        {% for choice in form.trust_instagram_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_nationalnews_posttreatment.label }}</td>
-        {% for choice in form.trust_nationalnews_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_localnews_posttreatment.label }}</td>
-        {% for choice in form.trust_localnews_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_friendsfamily_posttreatment.label }}</td>
-        {% for choice in form.trust_friendsfamily_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_pinterest_posttreatment.label }}</td>
-        {% for choice in form.trust_pinterest_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_linkedin_posttreatment.label }}</td>
-        {% for choice in form.trust_linkedin_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_facebook_posttreatment.label }}</td>
-        {% for choice in form.trust_facebook_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_youtube_posttreatment.label }}</td>
-        {% for choice in form.trust_youtube_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_tiktok_posttreatment.label }}</td>
-        {% for choice in form.trust_tiktok_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_bluesky_posttreatment.label }}</td>
-        {% for choice in form.trust_bluesky_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_truthsocial_posttreatment.label }}</td>
-        {% for choice in form.trust_truthsocial_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.trust_acquaintances_posttreatment.label }}</td>
-        {% for choice in form.trust_acquaintances_posttreatment %}
-          <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-    </table>
+        <tr data-field="trust_instagram_posttreatment">
+          <td class="question-column">{{ form.trust_instagram_posttreatment.label }}</td>
+          {% for choice in form.trust_instagram_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_nationalnews_posttreatment">
+          <td class="question-column">{{ form.trust_nationalnews_posttreatment.label }}</td>
+          {% for choice in form.trust_nationalnews_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_localnews_posttreatment">
+          <td class="question-column">{{ form.trust_localnews_posttreatment.label }}</td>
+          {% for choice in form.trust_localnews_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_friendsfamily_posttreatment">
+          <td class="question-column">{{ form.trust_friendsfamily_posttreatment.label }}</td>
+          {% for choice in form.trust_friendsfamily_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_pinterest_posttreatment">
+          <td class="question-column">{{ form.trust_pinterest_posttreatment.label }}</td>
+          {% for choice in form.trust_pinterest_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_linkedin_posttreatment">
+          <td class="question-column">{{ form.trust_linkedin_posttreatment.label }}</td>
+          {% for choice in form.trust_linkedin_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_facebook_posttreatment">
+          <td class="question-column">{{ form.trust_facebook_posttreatment.label }}</td>
+          {% for choice in form.trust_facebook_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_youtube_posttreatment">
+          <td class="question-column">{{ form.trust_youtube_posttreatment.label }}</td>
+          {% for choice in form.trust_youtube_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_tiktok_posttreatment">
+          <td class="question-column">{{ form.trust_tiktok_posttreatment.label }}</td>
+          {% for choice in form.trust_tiktok_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_bluesky_posttreatment">
+          <td class="question-column">{{ form.trust_bluesky_posttreatment.label }}</td>
+          {% for choice in form.trust_bluesky_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_truthsocial_posttreatment">
+          <td class="question-column">{{ form.trust_truthsocial_posttreatment.label }}</td>
+          {% for choice in form.trust_truthsocial_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="trust_acquaintances_posttreatment">
+          <td class="question-column">{{ form.trust_acquaintances_posttreatment.label }}</td>
+          {% for choice in form.trust_acquaintances_posttreatment %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+      </table>
     </div>
 
     <!-- Instruction Text -->
     <p><b>Please indicate your level of agreement with the following statements regarding social media platforms:</b></p>
 
     <!-- Likert Scale -->
-      <div class="matrix-wrapper">
-    <table class="matrix-table">
-      <tr>
-        <th></th>
-        <th>Strongly Disagree</th>
-        <th>Disagree</th>
-        <th>Neither Agree Nor Disagree</th>
-        <th>Agree</th>
-        <th>Strongly Agree</th>
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.smp_entertaining_post.label }}</td>
-        {% for choice in form.smp_entertaining_post %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.smp_accuracy_post.label }}</td>
-        {% for choice in form.smp_accuracy_post %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.smp_enjoyment_post.label }}</td>
-        {% for choice in form.smp_enjoyment_post %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.smp_community_post.label }}</td>
-        {% for choice in form.smp_community_post %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.smp_news_post.label }}</td>
-        {% for choice in form.smp_news_post %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
-    </table>
-      </div>
+    <div class="matrix-wrapper" id="smp-matrix-wrapper">
+      <table class="matrix-table">
+        <tr>
+          <th></th>
+          <th>Strongly Disagree</th>
+          <th>Disagree</th>
+          <th>Neither Agree Nor Disagree</th>
+          <th>Agree</th>
+          <th>Strongly Agree</th>
+        </tr>
+        <tr data-field="smp_entertaining_post">
+          <td class="question-column">{{ form.smp_entertaining_post.label }}</td>
+          {% for choice in form.smp_entertaining_post %}
+            <td>{{ choice }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="smp_accuracy_post">
+          <td class="question-column">{{ form.smp_accuracy_post.label }}</td>
+          {% for choice in form.smp_accuracy_post %}
+            <td>{{ choice }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="smp_enjoyment_post">
+          <td class="question-column">{{ form.smp_enjoyment_post.label }}</td>
+          {% for choice in form.smp_enjoyment_post %}
+            <td>{{ choice }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="smp_community_post">
+          <td class="question-column">{{ form.smp_community_post.label }}</td>
+          {% for choice in form.smp_community_post %}
+            <td>{{ choice }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="smp_news_post">
+          <td class="question-column">{{ form.smp_news_post.label }}</td>
+          {% for choice in form.smp_news_post %}
+            <td>{{ choice }}</td>
+          {% endfor %}
+        </tr>
+      </table>
+    </div>
 
     <!-- Instruction Text -->
     <p><b>Please indicate your level of agreement with the following statements regarding artificial intelligence:</b></p>
 
     <!-- Likert Scale -->
-      <div class="matrix-wrapper">
-    <table class="matrix-table">
-      <tr>
-        <th></th>
-        <th>A lot</th>
-        <th>Some</th>
-        <th>Not too much</th>
-        <th>Not at all</th>
-        <th>Do not use</th>
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.benefits_ai.label }}</td>
-        {% for choice in form.benefits_ai %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.distinguish_ability.label }}</td>
-        {% for choice in form.distinguish_ability %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
-    </table>
-      </div>
+    <div class="matrix-wrapper" id="ai-matrix-wrapper">
+      <table class="matrix-table">
+        <tr>
+          <th></th>
+          <th>Strongly Disagree</th>
+          <th>Disagree</th>
+          <th>Neither Agree Nor Disagree</th>
+          <th>Agree</th>
+          <th>Strongly Agree</th>
+        </tr>
+        <tr data-field="benefits_ai">
+          <td class="question-column">{{ form.benefits_ai.label }}</td>
+          {% for choice in form.benefits_ai %}
+            <td>{{ choice }}</td>
+          {% endfor %}
+        </tr>
+        <tr data-field="distinguish_ability">
+          <td class="question-column">{{ form.distinguish_ability.label }}</td>
+          {% for choice in form.distinguish_ability %}
+            <td>{{ choice }}</td>
+          {% endfor %}
+        </tr>
+      </table>
+    </div>
 
-  <div class="submit-container">
-    <button type="submit" id="submitButton" aria-label="Submit survey responses">
-      ➔
-    </button>
-  </div>
+    <div class="submit-container">
+      <button type="submit" id="submitButton" aria-label="Submit survey responses">
+        ➔
+      </button>
+    </div>
   </form>
 </div>
 
 <script>
-document.querySelector('form').addEventListener('submit', function(event) {
-  // Get all radio inputs inside the form
-  const radios = event.target.querySelectorAll('input[type="radio"]');
+// Enhanced validation function with highlighting and detailed messages
+function validateForm() {
+    console.log('validateForm() called');
 
-  // Collect unique radio group names (the "name" attribute groups radios)
-  const radioGroups = new Set();
-  radios.forEach(radio => radioGroups.add(radio.name));
+    // Define field names with their user-friendly labels
+    const requiredFields = {
+        'llm_familiarity': 'How familiar you are with large language models',
+        'trust_twitter_posttreatment': 'Trust in Twitter/X',
+        'trust_instagram_posttreatment': 'Trust in Instagram',
+        'trust_nationalnews_posttreatment': 'Trust in National News',
+        'trust_localnews_posttreatment': 'Trust in Local News',
+        'trust_friendsfamily_posttreatment': 'Trust in Friends and Family',
+        'trust_pinterest_posttreatment': 'Trust in Pinterest',
+        'trust_linkedin_posttreatment': 'Trust in LinkedIn',
+        'trust_facebook_posttreatment': 'Trust in Facebook',
+        'trust_youtube_posttreatment': 'Trust in YouTube',
+        'trust_tiktok_posttreatment': 'Trust in TikTok',
+        'trust_bluesky_posttreatment': 'Trust in Bluesky',
+        'trust_truthsocial_posttreatment': 'Trust in Truth Social',
+        'trust_acquaintances_posttreatment': 'Trust in Acquaintances',
+        'smp_entertaining_post': 'Social media platforms are entertaining',
+        'smp_accuracy_post': 'Social media platform accuracy statement',
+        'smp_enjoyment_post': 'Social media enjoyment statement',
+        'smp_community_post': 'Social media community statement',
+        'smp_news_post': 'Social media news statement',
+        'benefits_ai': 'Benefits of AI',
+        'distinguish_ability': 'Ability to distinguish AI content'
+    };
 
-  // For each group, check if any radio is selected
-  for (const groupName of radioGroups) {
-    const checked = event.target.querySelector(`input[name="${groupName}"]:checked`);
-    if (!checked) {
-      alert('Please answer all questions before submitting the survey.');
-      event.preventDefault();
-      return false;
+    const form = document.querySelector('form');
+    if (!form) {
+        console.log('Form not found');
+        return true;
     }
-  }
 
-  // If all groups answered, form submits normally
+    let unansweredFields = [];
+    let missingElements = [];
+
+    // Clear any previous highlighting
+    document.querySelectorAll('.missing-answer').forEach(el => {
+        el.classList.remove('missing-answer');
+    });
+
+    document.querySelectorAll('.missing-answer-row').forEach(el => {
+        el.classList.remove('missing-answer-row');
+    });
+
+    // Helper function to check if a radio group has a checked input
+    function isRadioGroupChecked(name) {
+        return document.querySelector(`input[name="${name}"]:checked`) !== null;
+    }
+
+    // Check LLM familiarity question
+    if (!isRadioGroupChecked('llm_familiarity')) {
+        unansweredFields.push(requiredFields['llm_familiarity']);
+        const container = document.getElementById('llm-familiarity-group');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+
+    // Check all trust questions
+    const trustFields = [
+        'trust_twitter_posttreatment',
+        'trust_instagram_posttreatment',
+        'trust_nationalnews_posttreatment',
+        'trust_localnews_posttreatment',
+        'trust_friendsfamily_posttreatment',
+        'trust_pinterest_posttreatment',
+        'trust_linkedin_posttreatment',
+        'trust_facebook_posttreatment',
+        'trust_youtube_posttreatment',
+        'trust_tiktok_posttreatment',
+        'trust_bluesky_posttreatment',
+        'trust_truthsocial_posttreatment',
+        'trust_acquaintances_posttreatment'
+    ];
+
+    trustFields.forEach(fieldName => {
+        if (!isRadioGroupChecked(fieldName)) {
+            unansweredFields.push(requiredFields[fieldName]);
+            const row = document.querySelector(`tr[data-field="${fieldName}"]`);
+            if (row) {
+                row.classList.add('missing-answer-row');
+                missingElements.push(row);
+            }
+        }
+    });
+
+    // Check social media platform questions
+    const smpFields = [
+        'smp_entertaining_post',
+        'smp_accuracy_post',
+        'smp_enjoyment_post',
+        'smp_community_post',
+        'smp_news_post'
+    ];
+
+    smpFields.forEach(fieldName => {
+        if (!isRadioGroupChecked(fieldName)) {
+            unansweredFields.push(requiredFields[fieldName]);
+            const row = document.querySelector(`tr[data-field="${fieldName}"]`);
+            if (row) {
+                row.classList.add('missing-answer-row');
+                missingElements.push(row);
+            }
+        }
+    });
+
+    // Check AI questions
+    const aiFields = [
+        'benefits_ai',
+        'distinguish_ability'
+    ];
+
+    aiFields.forEach(fieldName => {
+        if (!isRadioGroupChecked(fieldName)) {
+            unansweredFields.push(requiredFields[fieldName]);
+            const row = document.querySelector(`tr[data-field="${fieldName}"]`);
+            if (row) {
+                row.classList.add('missing-answer-row');
+                missingElements.push(row);
+            }
+        }
+    });
+
+    if (unansweredFields.length > 0) {
+        console.log('Validation failed. Unanswered fields:', unansweredFields);
+
+        // Create detailed popup error message
+        let message = 'Please answer the following question';
+        if (unansweredFields.length > 1) {
+            message += 's';
+        }
+        message += ' before submitting:\n\n';
+
+        unansweredFields.forEach(function(fieldLabel, index) {
+            message += '• ' + fieldLabel;
+            if (index < unansweredFields.length - 1) {
+                message += '\n';
+            }
+        });
+
+        alert(message);
+
+        // Scroll to first missing question
+        if (missingElements.length > 0) {
+            missingElements[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        return false; // Prevent form submission
+    }
+
+    console.log('Validation passed');
+    return true; // Allow form submission
+}
+
+// Add real-time validation feedback
+function addRealTimeValidation() {
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    // Add change listeners to all radio inputs
+    const allRadios = form.querySelectorAll('input[type="radio"]');
+    allRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            // Remove highlighting when question is answered
+            const fieldName = this.name;
+
+            // For LLM familiarity (single question group)
+            if (fieldName === 'llm_familiarity') {
+                const container = document.getElementById('llm-familiarity-group');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            } else {
+                // For matrix table rows
+                const row = document.querySelector(`tr[data-field="${fieldName}"]`);
+                if (row && row.classList.contains('missing-answer-row')) {
+                    row.classList.remove('missing-answer-row');
+                }
+            }
+        });
+    });
+}
+
+// DOM Content Loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up validation...');
+
+    // Initialize real-time validation
+    addRealTimeValidation();
+
+    // Add form submit event listener
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submit event caught');
+            if (!validateForm()) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+    });
 });
+
+// Backup validation on submit button click
+document.addEventListener('click', function(e) {
+    if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+        console.log('Submit button clicked, validating...');
+        if (!validateForm()) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }
+}, true);
 </script>
 
 {% endblock %}

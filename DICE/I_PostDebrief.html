@@ -1,7 +1,7 @@
 {% block content %}
 <form method="post">
 
-    <style>
+<style>
 /* Container for image and marker */
 .image-container {
     position: relative;
@@ -161,40 +161,120 @@ input[type=range]::-moz-range-thumb {
     margin-right: 8px;
 }
 
-      /* Submit button container */
-  .submit-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 30px;
-  }
+/* Submit button container */
+.submit-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
 
-  button[type="submit"] {
-    background-color: #2c7be5;
-    color: white;
-    border: none;
-    padding: 10px 22px;
-    font-size: 1.3rem;
-    font-weight: 700;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
-    transition: background-color 0.25s ease;
-  }
+button[type="submit"] {
+  background-color: #2c7be5;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+  transition: background-color 0.25s ease;
+}
 
-  button[type="submit"]:hover {
-    background-color: #1a5fd9;
-  }
+button[type="submit"]:hover {
+  background-color: #1a5fd9;
+}
 
+/* ===== ERROR MESSAGE STYLES (matching other pages) ===== */
+.error-message {
+  color: red !important;
+  font-size: 0.75rem !important;
+  padding: 4px 6px !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  display: block !important;
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+  margin-top: 4px;
+  min-height: 16px;
+}
+
+/* Validation highlighting styles (matching other pages) */
+.missing-answer {
+  background-color: #ffebee !important;
+  border: 2px solid #f44336 !important;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0;
+  animation: pulse-red 1s ease-in-out;
+}
+
+.missing-answer .question-column {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+.missing-answer .question-label {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+.missing-answer .question-text {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+.missing-answer p {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+.missing-answer > label {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+.missing-answer strong {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+/* Special styling for matrix table rows with missing answers */
+.missing-answer-row {
+  background-color: #ffebee !important;
+  animation: pulse-red 1s ease-in-out;
+}
+
+.missing-answer-row td {
+  background-color: #ffebee !important;
+  border: 1px solid #f44336 !important;
+}
+
+.missing-answer-row .question-column {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
+
+/* Form field containers */
+.form-field {
+  margin-bottom: 30px;
+}
 </style>
 
-<div style="margin-bottom: 50px; font-size: 1.5rem">
+<div class="form-field" id="study-topic-field" style="margin-bottom: 50px; font-size: 1.5rem">
     <label for="id_study_topic">
         <strong>What do you believe this research study is about? That is, what is the purpose of this study?</strong>
     </label><br>
     {{ form.study_topic }}
 </div>
 
-
+<div class="form-field" id="political-influence-field">
     <p style="margin-bottom: 40px; font-size: 1.5rem"><strong>
         Move the slider below to indicate to what extent you believe participating in the study will influence your political preferences:
     </strong></p>
@@ -206,7 +286,9 @@ input[type=range]::-moz-range-thumb {
         <p id="description-influence_politics" class="slider-result"></p>
         {{ formfield_errors 'ethics_influence_political_prefs' }}
     </div>
+</div>
 
+<div class="form-field" id="watermarks-understanding-field">
     <p style="margin-bottom: 40px; margin-top: 50px; font-size: 1.5rem"><strong>
         Move the slider below to indicate to what extent this study helped you understand watermarks or labels for identifying AI-generated content:
     </strong></p>
@@ -218,6 +300,7 @@ input[type=range]::-moz-range-thumb {
         <p id="description-benefits_understanding_watermarks" class="slider-result"></p>
         {{ formfield_errors 'benefits_understanding_watermarks' }}
     </div>
+</div>
 
   <div class="submit-container">
     <button type="submit" id="submitButton" aria-label="Submit survey responses">
@@ -226,74 +309,214 @@ input[type=range]::-moz-range-thumb {
   </div>
 </form>
 
-
-
-
 <script>
-    let descriptioninfluence_politics = document.getElementById('description-influence_politics');
-    let descriptionbenefits_understanding_watermarks = document.getElementById('description-benefits_understanding_watermarks');
+let descriptioninfluence_politics = document.getElementById('description-influence_politics');
+let descriptionbenefits_understanding_watermarks = document.getElementById('description-benefits_understanding_watermarks');
 
-    function updatebenefits_understanding_watermarks(input) {
-        const labels = {
-            1: "Not at all",
-            2: "Slightly",
-            3: "Moderately",
-            4: "Very",
-            5: "Extremely"
-        };
-        const value = parseInt(input.value);
-        descriptionbenefits_understanding_watermarks.innerText = labels[value];
-    }
+// Track slider interactions
+window.politicalInfluenceInteracted = false;
+window.watermarksUnderstandingInteracted = false;
 
-    function updateinfluence_politics(input) {
-        const labels = {
-            1: "Not at all influential",
-            2: "Slightly influential",
-            3: "Moderately influential",
-            4: "Very influential",
-            5: "Extremely influential"
-        };
-        const value = parseInt(input.value);
-        descriptioninfluence_politics.innerText = labels[value];
-    }
-
-    // Optional: initialize descriptions on page load
-    window.onload = function() {
-        const slider1 = document.querySelector('input[name="ethics_influence_political_prefs"]');
-        if (slider1) updateinfluence_politics(slider1);
-        const slider2 = document.querySelector('input[name="benefits_understanding_watermarks"]');
-        if (slider2) updatebenefits_understanding_watermarks(slider2);
+function updatebenefits_understanding_watermarks(input) {
+    window.watermarksUnderstandingInteracted = true;
+    const labels = {
+        1: "Not at all",
+        2: "Slightly",
+        3: "Moderately",
+        4: "Very",
+        5: "Extremely"
     };
-    document.querySelector('form').addEventListener('submit', function(event) {
-  // 1. Check study_topic is selected (assuming it's a select or input field)
-  const studyTopic = this.querySelector('[name="study_topic"]');
-  if (!studyTopic || !studyTopic.value.trim()) {
-    alert('Please select a study topic.');
-    event.preventDefault();
-    studyTopic?.focus();
-    return false;
-  }
+    const value = parseInt(input.value);
+    descriptionbenefits_understanding_watermarks.innerText = labels[value];
 
-  // 2. Check sliders have values in the range 1-5 (they always do, but we confirm)
-  const slider1 = this.querySelector('input[name="ethics_influence_political_prefs"]');
-  const slider2 = this.querySelector('input[name="benefits_understanding_watermarks"]');
+    // Remove highlighting when user interacts with slider
+    const container = input.closest('.form-field');
+    if (container && container.classList.contains('missing-answer')) {
+        container.classList.remove('missing-answer');
+    }
+}
 
-  if (!slider1 || slider1.value < 1 || slider1.value > 5) {
-    alert('Please move the slider to indicate the influence on political preferences.');
-    slider1?.focus();
-    event.preventDefault();
-    return false;
-  }
+function updateinfluence_politics(input) {
+    window.politicalInfluenceInteracted = true;
+    const labels = {
+        1: "Not at all influential",
+        2: "Slightly influential",
+        3: "Moderately influential",
+        4: "Very influential",
+        5: "Extremely influential"
+    };
+    const value = parseInt(input.value);
+    descriptioninfluence_politics.innerText = labels[value];
 
-  if (!slider2 || slider2.value < 1 || slider2.value > 5) {
-    alert('Please move the slider to indicate how this study helped you understand watermarks.');
-    slider2?.focus();
-    event.preventDefault();
-    return false;
-  }
+    // Remove highlighting when user interacts with slider
+    const container = input.closest('.form-field');
+    if (container && container.classList.contains('missing-answer')) {
+        container.classList.remove('missing-answer');
+    }
+}
 
-  // All validations passed, allow submit
+// Enhanced validation function matching other pages
+function validateForm() {
+    console.log('validateForm() called');
+
+    // Define field names with their user-friendly labels
+    const requiredFields = {
+        'study_topic': 'What you believe this research study is about',
+        'ethics_influence_political_prefs': 'How much participating will influence your political preferences',
+        'benefits_understanding_watermarks': 'How much this study helped you understand watermarks'
+    };
+
+    const form = document.querySelector('form');
+    if (!form) {
+        console.log('Form not found');
+        return true; // Let it submit if we can't find form
+    }
+
+    let unansweredFields = [];
+    let missingElements = [];
+
+    // Clear any previous highlighting
+    document.querySelectorAll('.missing-answer').forEach(el => {
+        el.classList.remove('missing-answer');
+    });
+
+    // Check study topic
+    const studyTopic = form.querySelector('[name="study_topic"]');
+    if (!studyTopic || !studyTopic.value.trim()) {
+        unansweredFields.push(requiredFields['study_topic']);
+        const container = document.getElementById('study-topic-field');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+
+    // Check political influence slider
+    const slider1 = form.querySelector('input[name="ethics_influence_political_prefs"]');
+    if (!slider1 || !window.politicalInfluenceInteracted) {
+        unansweredFields.push(requiredFields['ethics_influence_political_prefs']);
+        const container = document.getElementById('political-influence-field');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+
+    // Check watermarks understanding slider
+    const slider2 = form.querySelector('input[name="benefits_understanding_watermarks"]');
+    if (!slider2 || !window.watermarksUnderstandingInteracted) {
+        unansweredFields.push(requiredFields['benefits_understanding_watermarks']);
+        const container = document.getElementById('watermarks-understanding-field');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+
+    if (unansweredFields.length > 0) {
+        console.log('Validation failed. Unanswered fields:', unansweredFields);
+
+        // Create detailed popup error message
+        let message = 'Please answer the following question';
+        if (unansweredFields.length > 1) {
+            message += 's';
+        }
+        message += ' before submitting:\n\n';
+
+        unansweredFields.forEach(function(fieldLabel, index) {
+            message += '• ' + fieldLabel;
+            if (index < unansweredFields.length - 1) {
+                message += '\n';
+            }
+        });
+
+        alert(message);
+
+        // Scroll to first missing question
+        if (missingElements.length > 0) {
+            missingElements[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        return false; // Prevent form submission
+    }
+
+    console.log('Validation passed');
+    return true; // Allow form submission
+}
+
+// Optional: initialize descriptions on page load
+window.onload = function() {
+    const slider1 = document.querySelector('input[name="ethics_influence_political_prefs"]');
+    if (slider1) updateinfluence_politics(slider1);
+    const slider2 = document.querySelector('input[name="benefits_understanding_watermarks"]');
+    if (slider2) updatebenefits_understanding_watermarks(slider2);
+};
+
+// Enhanced event listeners matching other pages
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up validation...');
+
+    // Initialize interaction tracking
+    window.politicalInfluenceInteracted = false;
+    window.watermarksUnderstandingInteracted = false;
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+        // Try to intercept with capturing phase
+        form.addEventListener('submit', function(e) {
+            console.log('Event listener caught submit');
+            if (!validateForm()) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true); // Use capturing phase
+    });
+
+    // Add real-time validation feedback
+    function addRealTimeValidation() {
+        const form = document.querySelector('form');
+        if (!form) return;
+
+        // Add change listeners to all form inputs
+        const allInputs = form.querySelectorAll('input, select, textarea');
+        allInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('.form-field');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('.form-field');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
+        });
+    }
+
+    // Initialize real-time validation
+    addRealTimeValidation();
 });
+
+// Also try intercepting all clicks on submit elements
+document.addEventListener('click', function(e) {
+    if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+        console.log('Submit element clicked, validating...');
+        if (!validateForm()) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }
+}, true);
 </script>
 
 <!--<div class="container">-->

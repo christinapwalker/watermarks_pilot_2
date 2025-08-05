@@ -1,6 +1,6 @@
 from os import environ
 
-DEBUG = False
+DEBUG = True
 
 SESSION_CONFIGS = [ # defining a session
     dict(

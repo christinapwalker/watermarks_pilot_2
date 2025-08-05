@@ -26,11 +26,12 @@
     margin-bottom: 1rem;
   }
 
-  /* ===== Slider ===== */
+  /* ===== Slider Styles ===== */
   .slider-container {
     position: relative;
     width: 100%;
     margin-bottom: 60px;
+    padding: 0;
   }
 
   .slider {
@@ -43,7 +44,14 @@
     outline: none;
   }
 
-  /* ===== Rotated Labels ===== */
+  .slider-value {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #444;
+    margin-top: -20px;
+  }
+
   .slider-labels {
     position: relative;
     height: 80px;
@@ -56,12 +64,12 @@
     top: 0;
     transform: rotate(60deg) translateY(6px);
     transform-origin: top center;
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     white-space: nowrap;
     text-align: center;
   }
 
-  /* Position each label centered over its tick */
+  /* Position slider labels */
   .slider-labels span:nth-child(1) { left: 0%; }
   .slider-labels span:nth-child(2) { left: 16.666%; }
   .slider-labels span:nth-child(3) { left: 33.333%; }
@@ -69,15 +77,6 @@
   .slider-labels span:nth-child(5) { left: 66.666%; }
   .slider-labels span:nth-child(6) { left: 83.333%; }
   .slider-labels span:nth-child(7) { left: 90%; }
-
-  /* ===== Slider Value Display ===== */
-  .slider-value {
-    text-align: center;
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #444;
-    margin-top: -20px;
-  }
 
   /* ===== Table Styles ===== */
   table {
@@ -101,9 +100,8 @@
     border-bottom: 2px solid #ddd;
   }
 
-  /* Question Column */
   .question-column {
-    width: 20%;
+    width: 25%;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -112,74 +110,91 @@
     color: #222;
   }
 
-  /* ----- Matrix Table Specific Styles ----- */
+  /* ===== Matrix Table ===== */
+  .matrix-wrapper {
+    overflow-x: auto;
+    width: 100%;
+  }
+
   .matrix-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 40px;
-    table-layout: auto;
+    table-layout: fixed;
   }
+
+  .matrix-table td .error-message {
+  display: block;
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.7rem;
+  line-height: 1.1;
+  color: red;
+  margin-top: 2px;
+  min-height: 16px;  /* Reserve vertical space for consistency */
+}
+
 
   .matrix-table th,
   .matrix-table td {
     border: 1px solid #ddd;
-    padding: 10px 8px;
+    padding: 4px 6px;
     text-align: center;
     vertical-align: middle;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
     color: #333;
   }
 
   .matrix-table .question-column {
-    max-width: 30%; /* wider for question text */
-    white-space: normal;
+    width: 50%;
+    font-size: 0.5rem;
+    padding: 0px;
     word-break: break-word;
-    overflow-wrap: break-word;
+    white-space: normal;
     text-align: left;
     font-weight: 600;
     color: #222;
   }
 
-  /* Radio Answer Columns */
-.matrix-table th:not(:first-child),
-.matrix-table td:not(.question-column) {
-  padding: 4px 1px;
-  font-size: 0.7rem;
-  word-break: break-word;
-  text-align: center;
-}
+  .matrix-table th:not(:first-child),
+  .matrix-table td:not(.question-column) {
+    max-width: 1px;
+    white-space: normal;
+    word-break: break-word;
+    padding: 0;
+    font-size: 0.6rem;
+  }
 
-
-  /* Radio Inputs */
   .matrix-table input[type="radio"] {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
     cursor: pointer;
   }
 
-  /* Hide mobile labels on desktop */
-  .matrix-table td label.mobile-label {
-    display: none;
+  /* Validation highlighting styles */
+  .missing-answer {
+    background-color: #ffebee !important;
+    border: 2px solid #f44336 !important;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 4px 0;
+    animation: pulse-red 1s ease-in-out;
   }
 
-  /* Wrapper for horizontal scroll on small screens */
-.matrix-wrapper {
-  overflow-x: auto;
-  width: 100%;
-}
-
-  .matrix-wrapper {
-    overflow-x: hidden;
-    width: 100%;
+  .missing-answer .question-column {
+    color: #d32f2f !important;
+    font-weight: bold;
   }
 
+  .missing-answer .question-text {
+    color: #d32f2f !important;
+    font-weight: bold;
+  }
 
-
-  /* ===== Responsive ===== */
-  @media (max-width: 700px) {
-  .survey-container {
-    margin: 15px;
-    padding: 20px;
+  @keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
   }
 
   .slider-labels span {
@@ -190,48 +205,32 @@
     font-size: 1rem;
   }
 
-  .slider-container {
-    padding: 0;
+  .matrix-table .question-column {
+    font-size: 0.5rem;
   }
 
   .matrix-table th,
   .matrix-table td {
     font-size: 0.75rem;
-    padding: 6px;
   }
 
-  .matrix-table {
-    width: 100%;
-    table-layout: fixed;
+  @media screen and (max-width: 700px) {
+  .matrix-table td .error-message {
+    font-size: 0.8rem;
   }
 
-
-  /* Slightly wider question column */
-  .matrix-table .question-column {
-    width: 50%;             /* Give more space for questions */
-    font-size: 0.5rem;
-    padding-left: 1px;
-    padding-right: 1px;
-    word-break: break-word;
-    white-space: normal;
+  .matrix-table th,
+  .matrix-table td {
+    font-size: 0.85rem;
   }
 
-
-  /* Make radio columns narrow */
-  .matrix-table th:not(:first-child),
-  .matrix-table td:not(.question-column) {
-    max-width: 1px;
-    white-space: normal;
-    /*text-align: center;*/
-    word-break: break-word;
-    padding: 0px 0px;
-    font-size: 0.6rem;
-
-
+  .matrix-wrapper {
+    overflow-x: scroll;
   }
 }
 
-/* Submit button container */
+
+  /* ===== Submit Button Styles ===== */
   .submit-container {
     display: flex;
     justify-content: flex-end;
@@ -247,7 +246,7 @@
     font-weight: 700;
     border-radius: 5px;
     cursor: pointer;
-    box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+    box-shadow: 0 5px 10px rgba(44, 123, 229, 0.4);
     transition: background-color 0.25s ease;
   }
 
@@ -255,177 +254,411 @@
     background-color: #1a5fd9;
   }
 
+  .error-message {
+    color: red !important;       /* Ensure it stands out */
+    font-size: 0.75rem !important; /* Match your matrix table font size */
+    padding: 4px 6px !important; /* Add a little space inside */
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: block !important;   /* Force block display so it doesn't collapse */
+    max-width: 100% !important;  /* Prevent clipping */
+    overflow-wrap: break-word !important;
+  }
+
 </style>
 
+<script>
+  // Update slider label text on input
+  function updateSliderValue(value) {
+    const labels = [
+      'Strong Democrat',
+      'Democrat',
+      'Lean Democrat',
+      'Independent',
+      'Lean Republican',
+      'Republican',
+      'Strong Republican'
+    ];
+    document.getElementById('slider_value').innerText = labels[value - 1];
+  }
 
+  // Enhanced validation function with highlighting and detailed messages
+  function validateForm() {
+    console.log('validateForm() called');
 
+    // Define field names with their user-friendly labels
+    const requiredFields = {
+      'party_id': 'Political party identification',
+      'use_twitter': 'How often you use Twitter/X',
+      'use_instagram': 'How often you use Instagram',
+      'use_pinterest': 'How often you use Pinterest',
+      'use_linkedin': 'How often you use LinkedIn',
+      'use_facebook': 'How often you use Facebook',
+      'use_youtube': 'How often you use YouTube',
+      'use_tiktok': 'How often you use TikTok',
+      'use_bluesky': 'How often you use Bluesky',
+      'use_truthsocial': 'How often you use Truth Social',
+      'smp_entertaining_pre': 'Social media platforms are entertaining',
+      'smp_accuracy_pre': 'Social media platform accuracy statement',
+      'smp_enjoyment_pre': 'Social media enjoyment statement',
+      'smp_community_pre': 'Social media community statement',
+      'smp_news_pre': 'Social media news statement'
+    };
 
-<form method="post">
-  <div class="slider-container">
-    <p class="question-text"><b>{{ form.party_id.label }}</b></p>
-    <input type="range" id="party_id_slider" name="party_id" min="1" max="7" value="4" class="slider" step="1" oninput="updateSliderValue(this.value)">
+    const form = document.querySelector('form');
+    if (!form) {
+      console.log('Form not found');
+      return true; // Let it submit if we can't find form
+    }
 
-    <div class="slider-labels">
-      <span>Strong Democrat</span>
-      <span>Democrat</span>
-      <span>Lean Democrat</span>
-      <span>Independent</span>
-      <span>Lean Republican</span>
-      <span>Republican</span>
-      <span>Strong Republican</span>
+    let unansweredFields = [];
+    let missingElements = [];
+
+    // Clear any previous highlighting
+    document.querySelectorAll('.missing-answer').forEach(el => {
+      el.classList.remove('missing-answer');
+    });
+
+    // Check each required field and collect missing ones
+    Object.keys(requiredFields).forEach(function(fieldName) {
+      let isAnswered = false;
+
+      // Check if it's a radio button group
+      const radioInputs = form.querySelectorAll(`input[name="${fieldName}"][type="radio"]`);
+      if (radioInputs.length > 0) {
+        // It's a radio group - check if any is selected
+        const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
+        isAnswered = checked !== null;
+      } else {
+        // It's likely a slider or other input
+        const field = form.querySelector(`input[name="${fieldName}"], select[name="${fieldName}"]`);
+        if (field) {
+          if (field.type === 'range') {
+            // For sliders, we assume they always have a value (default), so they're always answered
+            // If you want to require a specific selection, modify this logic
+            isAnswered = true;
+          } else if (field.type === 'text' || field.type === 'email' || field.tagName === 'TEXTAREA') {
+            isAnswered = field.value.trim() !== '';
+          } else if (field.tagName === 'SELECT') {
+            isAnswered = field.value !== '' && field.value !== null;
+          } else {
+            isAnswered = field.value !== '';
+          }
+        }
+      }
+
+      if (!isAnswered) {
+        unansweredFields.push(requiredFields[fieldName]);
+
+        // Find and highlight the question container
+        let fieldContainer = null;
+
+        // Special handling for the slider
+        if (fieldName === 'party_id') {
+          fieldContainer = document.querySelector('.slider-container');
+        } else {
+          // For matrix table rows, find the row containing the field
+          const fieldInput = form.querySelector(`input[name="${fieldName}"]`);
+          if (fieldInput) {
+            fieldContainer = fieldInput.closest('tr');
+          }
+        }
+
+        if (fieldContainer) {
+          fieldContainer.classList.add('missing-answer');
+          missingElements.push(fieldContainer);
+        }
+      }
+    });
+
+    if (unansweredFields.length > 0) {
+      console.log('Validation failed. Unanswered fields:', unansweredFields);
+
+      // Create detailed error message
+      let message = 'Please answer the following question';
+      if (unansweredFields.length > 1) {
+        message += 's';
+      }
+      message += ' before submitting:\n\n';
+
+      unansweredFields.forEach(function(fieldLabel, index) {
+        message += '• ' + fieldLabel;
+        if (index < unansweredFields.length - 1) {
+          message += '\n';
+        }
+      });
+
+      alert(message);
+
+      // Scroll to first missing question
+      if (missingElements.length > 0) {
+        missingElements[0].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+
+      return false; // Prevent form submission
+    }
+
+    console.log('Validation passed');
+    return true; // Allow form submission
+  }
+
+  // Backup: Also try the event listener approach
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up additional event listeners...');
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+      // Try to intercept with capturing phase
+      form.addEventListener('submit', function(e) {
+        console.log('Event listener caught submit');
+        if (!validateForm()) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return false;
+        }
+      }, true); // Use capturing phase
+    });
+  });
+
+  // Also try intercepting all clicks on submit elements
+  document.addEventListener('click', function(e) {
+    if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+      console.log('Submit element clicked, validating...');
+      if (!validateForm()) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    }
+  }, true);
+
+  // Optional: Add real-time validation feedback
+  function addRealTimeValidation() {
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    // Add change listeners to all form inputs
+    const allInputs = form.querySelectorAll('input, select, textarea');
+    allInputs.forEach(function(input) {
+      input.addEventListener('change', function() {
+        // Remove highlighting when question is answered
+        const container = this.closest('tr') || this.closest('.slider-container');
+        if (container && container.classList.contains('missing-answer')) {
+          container.classList.remove('missing-answer');
+        }
+      });
+    });
+  }
+
+  // Initialize real-time validation when DOM is ready
+  document.addEventListener('DOMContentLoaded', addRealTimeValidation);
+</script>
+
+<div class="survey-container">
+  <form method="post" novalidate>
+    <div class="slider-container">
+      <p class="question-text"><b>{{ form.party_id.label }}</b></p>
+      <input type="range" id="party_id_slider" name="party_id" min="1" max="7" value="4" class="slider" step="1" oninput="updateSliderValue(this.value)">
+
+      <div class="slider-labels">
+        <span>Strong Democrat</span>
+        <span>Democrat</span>
+        <span>Lean Democrat</span>
+        <span>Independent</span>
+        <span>Lean Republican</span>
+        <span>Republican</span>
+        <span>Strong Republican</span>
+      </div>
+
+      <div id="slider_value" class="slider-value">Independent</div>
+      <div class="error-message">{{ formfield_errors 'party_id' }}</div>
     </div>
 
-    <div id="slider_value" class="slider-value">Independent</div>
-    <div class="error-message">{{ formfield_errors 'party_id' }}</div>
-  </div>
+    <!-- Instruction Text -->
+    <p class="question-text"><b>Thinking about social networking sites, how often do you visit or use the following?</b></p>
 
-  <!-- Instruction Text -->
-  <p class="question-text"><b>Thinking about social networking sites, how often do you visit or use the following?</b></p>
-
-  <!-- Likert Scale for specific platforms -->
-  <div class="matrix-wrapper">
-    <table class="matrix-table">
-
-      <tr>
-        <th></th>
-        <th>Several times a day</th>
-        <th>About once a day</th>
-        <th>A few days a week</th>
-        <th>Every few weeks</th>
-        <th>Less often</th>
+    <!-- Likert Scale -->
+    <div class="matrix-wrapper">
+      <table class="matrix-table">
+        <tr>
+          <th></th>
+          <th>Several times a day</th>
+          <th>About once a day</th>
+          <th>A few days a week</th>
+          <th>Every few weeks</th>
+          <th>Less often</th>
           <th>Never</th>
           <th>Don't know</th>
-      </tr>
-  <tr>
-    <td class="question-column">{{ form.use_twitter.label }}</td>
-    {% for choice in form.use_twitter %}
-      <td data-label="">{{ choice|safe }}</td>
-    {% endfor %}
-  </tr>
+        </tr>
 
-      <tr>
-        <td class="question-column">{{ form.use_instagram.label }}</td>
-        {% for choice in form.use_instagram %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.use_pinterest.label }}</td>
-        {% for choice in form.use_pinterest %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.use_linkedin.label }}</td>
-        {% for choice in form.use_linkedin %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.use_facebook.label }}</td>
-        {% for choice in form.use_facebook %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.use_youtube.label }}</td>
-        {% for choice in form.use_youtube %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.use_tiktok.label }}</td>
-        {% for choice in form.use_tiktok %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.use_bluesky.label }}</td>
-        {% for choice in form.use_bluesky %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td class="question-column">{{ form.use_truthsocial.label }}</td>
-        {% for choice in form.use_truthsocial %}
-        <td data-label="">{{ choice|safe }}</td>
-        {% endfor %}
-      </tr>
-    </table>
-  </div>
+        <tr>
+          <td class="question-column">
+            {{ form.use_twitter.label }}
+            <div id="errorUseTwitter" class="error-message">{{ formfield_errors 'use_twitter' }}</div>
+          </td>
+          {% for choice in form.use_twitter %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
+        <tr>
+          <td class="question-column">
+            {{ form.use_instagram.label }}
+            <div id="errorUseInstagram" class="error-message">{{ formfield_errors 'use_instagram' }}</div>
+          </td>
+          {% for choice in form.use_instagram %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-  <!-- Instruction Text -->
-<p class="question-text"><b>Please indicate your level of agreement with the following statements regarding social media platforms:</b></p>
+        <tr>
+          <td class="question-column">
+            {{ form.use_pinterest.label }}
+            <div id="errorUsePinterest" class="error-message">{{ formfield_errors 'use_pinterest' }}</div>
+          </td>
+          {% for choice in form.use_pinterest %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-<!-- Likert Scale -->
-<div class="matrix-wrapper">
-  <table class="matrix-table">
-    <tr>
-      <th></th> <!-- Aligns with question column -->
-      <th>Strongly Disagree</th>
-      <th>Disagree</th>
-      <th>Neither Agree Nor Disagree</th>
-      <th>Agree</th>
-      <th>Strongly Agree</th>
-    </tr>
+        <tr>
+          <td class="question-column">
+            {{ form.use_linkedin.label }}
+            <div id="errorUseLinkedIn" class="error-message">{{ formfield_errors 'use_linkedin' }}</div>
+          </td>
+          {% for choice in form.use_linkedin %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-    <tr>
-      <td class="question-column">{{ form.smp_entertaining_pre.label }}</td>
-      {% for choice in form.smp_entertaining_pre %}
-        <td data-label="">{{ choice|safe }}</td>
-      {% endfor %}
-    </tr>
+        <tr>
+          <td class="question-column">
+            {{ form.use_facebook.label }}
+            <div id="errorUseFacebook" class="error-message">{{ formfield_errors 'use_facebook' }}</div>
+          </td>
+          {% for choice in form.use_facebook %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-    <tr>
-      <td class="question-column">{{ form.smp_accuracy_pre.label }}</td>
-      {% for choice in form.smp_accuracy_pre %}
-        <td data-label="">{{ choice|safe }}</td>
-      {% endfor %}
-    </tr>
+        <tr>
+          <td class="question-column">
+            {{ form.use_youtube.label }}
+            <div id="errorUseYouTube" class="error-message">{{ formfield_errors 'use_youtube' }}</div>
+          </td>
+          {% for choice in form.use_youtube %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-    <tr>
-      <td class="question-column">{{ form.smp_enjoyment_pre.label }}</td>
-      {% for choice in form.smp_enjoyment_pre %}
-        <td data-label="">{{ choice|safe }}</td>
-      {% endfor %}
-    </tr>
+        <tr>
+          <td class="question-column">
+            {{ form.use_tiktok.label }}
+            <div id="errorUseTikTok" class="error-message">{{ formfield_errors 'use_tiktok' }}</div>
+          </td>
+          {% for choice in form.use_tiktok %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-    <tr>
-      <td class="question-column">{{ form.smp_community_pre.label }}</td>
-      {% for choice in form.smp_community_pre %}
-        <td data-label="">{{ choice|safe }}</td>
-      {% endfor %}
-    </tr>
+        <tr>
+          <td class="question-column">
+            {{ form.use_bluesky.label }}
+            <div id="errorUseBluesky" class="error-message">{{ formfield_errors 'use_bluesky' }}</div>
+          </td>
+          {% for choice in form.use_bluesky %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
 
-    <tr>
-      <td class="question-column">{{ form.smp_news_pre.label }}</td>
-      {% for choice in form.smp_news_pre %}
-        <td data-label="">{{ choice|safe }}</td>
-      {% endfor %}
-    </tr>
-  </table>
+        <tr>
+          <td class="question-column">
+            {{ form.use_truthsocial.label }}
+            <div id="errorUsetruthsocial" class="error-message">{{ formfield_errors 'use_truthsocial' }}</div>
+          </td>
+          {% for choice in form.use_truthsocial %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+      </table>
+    </div>
+
+    <!-- Instruction Text -->
+    <p class="question-text"><b>Please indicate your level of agreement with the following statements regarding social media platforms:</b></p>
+
+    <!-- Likert Scale -->
+    <div class="matrix-wrapper">
+      <table class="matrix-table">
+        <tr>
+          <th></th> <!-- Aligns with question column -->
+          <th>Strongly Disagree</th>
+          <th>Disagree</th>
+          <th>Neither Agree Nor Disagree</th>
+          <th>Agree</th>
+          <th>Strongly Agree</th>
+        </tr>
+
+        <tr>
+          <td class="question-column">
+            {{ form.smp_entertaining_pre.label }}
+            <div id="errorSmpEntertainingPre" class="error-message">{{ formfield_errors 'smp_entertaining_pre' }}</div>
+          </td>
+          {% for choice in form.smp_entertaining_pre %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+
+        <tr>
+          <td class="question-column">
+            {{ form.smp_accuracy_pre.label }}
+            <div id="errorSmpAccuracyPre" class="error-message">{{ formfield_errors 'smp_accuracy_pre' }}</div>
+          </td>
+          {% for choice in form.smp_accuracy_pre %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+
+        <tr>
+          <td class="question-column">
+            {{ form.smp_enjoyment_pre.label }}
+            <div id="errorSmpEnjoymentPre" class="error-message">{{ formfield_errors 'smp_enjoyment_pre' }}</div>
+          </td>
+          {% for choice in form.smp_enjoyment_pre %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+
+        <tr>
+          <td class="question-column">
+            {{ form.smp_community_pre.label }}
+            <div id="errorSmpCommunityPre" class="error-message">{{ formfield_errors 'smp_community_pre' }}</div>
+          </td>
+          {% for choice in form.smp_community_pre %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+
+        <tr>
+          <td class="question-column">
+            {{ form.smp_news_pre.label }}
+            <div id="errorSmpNewsPre" class="error-message">{{ formfield_errors 'smp_news_pre' }}</div>
+          </td>
+          {% for choice in form.smp_news_pre %}
+            <td data-label="">{{ choice|safe }}</td>
+          {% endfor %}
+        </tr>
+      </table>
+    </div>
+
+    <div class="submit-container">
+      <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
+        ➔
+      </button>
+    </div>
+  </form>
 </div>
 
-  <div class="submit-container">
-    <button type="submit" id="submitButton" aria-label="Submit survey responses">
-      ➔
-    </button>
-  </div>
-</form>
-
-<script>
-  function updateSliderValue(value) {
-  const labels = [
-    'Strong Democrat',
-    'Democrat',
-    'Lean Democrat',
-    'Independent',
-    'Lean Republican',
-    'Republican',
-    'Strong Republican'
-  ];
-  document.getElementById('slider_value').innerText = labels[value - 1];
-}
-</script>
 {% endblock %}
