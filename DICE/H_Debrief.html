@@ -1,6 +1,27 @@
 {{ block scripts }}
 <!-- This script block contains JavaScript code to handle consent for the survey -->
 <style>
+    .missing-answer {
+    background-color: #ffebee !important;
+    border: 2px solid #f44336 !important;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 4px 0;
+    animation: pulse-red 1s ease-in-out;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
+
+.missing-answer label,
+.missing-answer .form-check-label {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
+
   /* If the field is a textarea or input text box */
   #id_understand_AI, /* assuming the rendered input has this id */
   input[name="understand_AI"],
@@ -162,28 +183,96 @@ label[for="id_understand_AI"] {
   button[type="submit"]:hover {
     background-color: #1a5fd9;
   }
+  /* Red box styling for the question text container */
+.missing-answer-redbox {
+  border: 2px solid #f44336 !important;
+  border-radius: 6px;
+  padding: 10px;
+  background-color: #ffebee;
+  animation: pulse-red 1s ease-in-out;
+  margin-bottom: 10px;
+}
+
+</style>
+
+<style>
+  /* Add a red error style for the consent paragraph */
+  p.consent-label-error {
+    color: #d9534f; /* Bootstrap red */
+    font-weight: 700;
+  }
 </style>
 
 <script>
-/* --- unlock as soon as one of the radios is chosen --- */
-function toggleSubmitDebrief() {
-  const chosen = document.querySelector('input[name="consentdebrief"]:checked');
-  document.getElementById('submitButton').disabled = !chosen;   // enable if one picked
-  document.getElementById('messageDiv').textContent = chosen ? '' : 'Please make a selection to continue.';
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  // disable at start
-  document.getElementById('submitButton').disabled = true;
+  const submitButton = document.getElementById('submitButton');
 
-  // watch both radios
-  document.querySelectorAll('input[name="consentdebrief"]').forEach(radio => {
-    radio.addEventListener('click', toggleSubmitDebrief);
+  const consentGroup = document.getElementById('consent-group');
+  const radios = document.querySelectorAll('input[name="consentdebrief"]');
+
+  const understandAIContainer = document.getElementById('understand_AI_container');
+  const understandAITextarea = document.getElementById('id_understand_AI');
+
+  // Remove error highlight on input/change
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      consentGroup.classList.remove('missing-answer');
+    });
   });
 
-  // in case something is pre‑selected on reload
-  toggleSubmitDebrief();
+  understandAITextarea.addEventListener('input', () => {
+    if (understandAITextarea.value.trim()) {
+      understandAIContainer.classList.remove('missing-answer-redbox');
+    }
+  });
+
+  submitButton.addEventListener('click', (e) => {
+    e.preventDefault();  // prevent submission until validated
+
+    let missingQuestions = [];
+    // Check understand_AI textarea
+        if (!understandAITextarea.value.trim()) {
+          missingQuestions.push("Understanding question");
+          understandAIContainer.classList.add('missing-answer-redbox');
+        } else {
+          understandAIContainer.classList.remove('missing-answer-redbox');
+        }
+    // Check consent radios
+    const consentSelected = document.querySelector('input[name="consentdebrief"]:checked');
+    if (!consentSelected) {
+      missingQuestions.push("Consent confirmation");
+      consentGroup.classList.add('missing-answer');
+    } else {
+      consentGroup.classList.remove('missing-answer');
+    }
+
+
+
+    if (missingQuestions.length > 0) {
+  alert("Please answer the following question(s) before submitting:\n- " + missingQuestions.join("\n- "));
+
+  // Scroll to the first missing question based on document order
+  const elementsInOrder = [
+    { missing: !understandAITextarea.value.trim(), element: understandAITextarea },
+    { missing: !consentSelected, element: consentGroup }
+  ];
+
+  const firstUnanswered = elementsInOrder.find(item => item.missing);
+  if (firstUnanswered) {
+    firstUnanswered.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  return;  // prevent submission
+}
+
+
+
+    // If all validated, submit the form
+    e.target.form.submit();
+  });
 });
+
+
 </script>
 
 {{ endblock }}
@@ -231,20 +320,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-<div style="text-align: center; margin: 20px auto;">
-                    <p> <strong> THE IMAGE IN THIS POST IS AI-GENERATED.</strong> <br> </p>
+<!-- Reduced top margin for this div -->
+<div style="text-align: center; margin: -30px auto 10px auto;">
+  <p style="margin: 0;"><strong>THE IMAGE IN THIS POST IS AI-GENERATED.</strong></p>
 </div>
 
-                <p> This was necessary for us to better understand natural reactions to deepfakes. When designing this study, we took care to minimize any possible risks or discomforts that might be related to the deception. <br> </p>
-<div style="text-align: center; margin: 20px auto;">
+<!-- Optional: tighten this spacing too if needed -->
+<p style="margin-top: 4px;">
+  This was necessary for us to better understand natural reactions to deepfakes. When designing this study, we took care to minimize any possible risks or discomforts that might be related to the deception.
+</p>
 
+
+<div id="understand_AI_container" style="text-align: center; margin: 20px auto;">
   <label for="id_understand_AI" class="form-label" style="display: inline-block;">
-      To make sure you understand this message, please type the following sentence:
-      <strong>The image about {{ disclaimer }} is AI-generated.</strong>
+    To make sure you understand this message, please type the following sentence:
+    <strong>The image about {{ disclaimer }} is AI-generated.</strong>
   </label>
 </div>
 
-<textarea name="understand_AI" id="id_understand_AI" rows="4" class="form-control" required></textarea>
+
+
+<textarea name="understand_AI" id="id_understand_AI" rows="4" class="form-control"></textarea>
 
 
                 <p> <strong>Some tips for recognizing deepfakes generated with AI include looking for:</strong></p>
@@ -281,6 +377,13 @@ document.addEventListener('DOMContentLoaded', () => {
   </a>
 </li>
 
+                    <li>
+
+  <a href="https://newslit.org/educators/resources/breaking-news-checklist/" target="_blank" rel="noopener noreferrer">
+    News Literacy Project: Breaking News Checklist
+  </a>
+</li>
+
                 </ul>
 
                 <p>Now that you understand the true nature of our study, you have the chance to refuse the use of the data we collected from you for research purposes. You are free to ask us not to use your data in our study analysis. If you decline to let us use your data, you will still receive compensation just as you would if we use your data in our analysis. This is entirely voluntary, but we hope to analyze as much data as possible to better understand solutions to the problem of disinformation due to deepfakes.</p>
@@ -291,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <p>If you have questions, comments or concerns about this research project, you can talk to one of the researchers.  Please contact Dr. Kaylyn Jackson Schiff (+1 765-494-4161), the principal investigator.
 
-If you have questions about your rights while taking part in the study or have concerns about the treatment of research participants, please call the Human Research Protection Program at (765) 494-5942, email (irb@purdue.edu)or write to:
+If you have questions about your rights while taking part in the study or have concerns about the treatment of research participants, please call the Human Research Protection Program at (765) 494-5942, email (irb@purdue.edu) or write to:
 Human Research Protection Program - Purdue University
 Ernest C. Young Hall, Room 1010
 155 S. Grant St.,
@@ -300,29 +403,31 @@ West Lafayette, IN 47907-2114
 
 </p>
 
-                <p><strong>Documentation of Informed Consent</strong></p>
+<p style="margin-top: 1.5rem; margin-bottom: 0.5rem;"><strong>Documentation of Informed Consent</strong></p>
 
-<table class="table mt-5 mb-5 table-responsive">
+<div id="consent-group">
+  <table class="table table-responsive" style="margin-top: 0.5rem;">
     <tbody>
-        <tr>
-            <th scope="row"> </th>
-            <td>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="consentdebrief" id="consentdebriefYes" value="yes" required>
-                    <label class="form-check-label" for="consentdebriefYes">
-                        I have had the opportunity to read this consent form and have the research study more fully explained, including the need for and use of deception.
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="consentdebrief" id="consentdebriefNo" value="no" required>
-                    <label class="form-check-label" for="consentdebriefNo">
-                        No, I do not give permission for the researchers to use my anonymous survey responses. Please discard the data you obtained from me.
-                    </label>
-                </div>
-            </td>
-        </tr>
+      <tr>
+        <th scope="row"> </th>
+        <td>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="consentdebrief" id="consentdebriefYes" value="yes">
+            <label class="form-check-label" for="consentdebriefYes">
+              I have had the opportunity to read this consent form and have the research study more fully explained, including the need for and use of deception.
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="consentdebrief" id="consentdebriefNo" value="no">
+            <label class="form-check-label" for="consentdebriefNo">
+              No, I do not give permission for the researchers to use my anonymous survey responses. Please discard the data you obtained from me.
+            </label>
+          </div>
+        </td>
+      </tr>
     </tbody>
-</table>
+  </table>
+</div>
 
 <div class="submit-container">
   <button type="submit" id="submitButton" aria-label="Submit survey responses">

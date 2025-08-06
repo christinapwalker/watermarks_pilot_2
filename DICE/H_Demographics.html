@@ -20,7 +20,7 @@
   }
 
   .survey-container {
-    max-width: 700px;
+    max-width: 1400px;
     margin: 40px auto;
     background: white;
     padding: 30px 40px;
@@ -39,6 +39,9 @@
     font-weight: 600;
     color: #222;
   }
+  .form-field {
+  margin-bottom: 40px; /* or more if you want more space */
+}
 
   /* ===== Radio Button Container Styling (FIX FOR MOBILE) ===== */
   .form-group div {
@@ -96,6 +99,58 @@
     font-weight: 600;
     color: #222;
   }
+  /* ===== Slider Styles ===== */
+  .slider-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 60px;
+    padding: 0;
+  }
+
+  .slider {
+    width: 100%;
+    height: 14px;
+    background: #ddd;
+    border-radius: 7px;
+    margin-bottom: 40px;
+    appearance: none;
+    outline: none;
+  }
+
+  .slider-value {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #444;
+    margin-top: -20px;
+  }
+
+  .slider-labels {
+    position: relative;
+    height: 80px;
+    width: 100%;
+    user-select: none;
+  }
+
+  .slider-labels span {
+    position: absolute;
+    top: 0;
+    transform: rotate(60deg) translateY(6px);
+    transform-origin: top center;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* Position slider labels */
+  .slider-labels span:nth-child(1) { left: 0%; }
+  .slider-labels span:nth-child(2) { left: 16.666%; }
+  .slider-labels span:nth-child(3) { left: 33.333%; }
+  .slider-labels span:nth-child(4) { left: 50%; }
+  .slider-labels span:nth-child(5) { left: 66.666%; }
+  .slider-labels span:nth-child(6) { left: 83.333%; }
+  .slider-labels span:nth-child(7) { left: 90%; }
+
 
   /* ----- Matrix Table Specific Styles ----- */
   .matrix-table {
@@ -111,15 +166,15 @@
     padding: 10px 8px;
     text-align: center;
     vertical-align: middle;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: #333;
   }
 
   .matrix-table .question-column {
     max-width: 30%; /* wider for question text */
     white-space: normal;
-    word-break: break-word;
-    overflow-wrap: break-word;
+    word-break: normal;
+    overflow-wrap: normal;
     text-align: left;
     font-weight: 600;
     color: #222;
@@ -128,9 +183,9 @@
   /* Radio Answer Columns */
   .matrix-table th:not(:first-child),
   .matrix-table td:not(.question-column) {
-    padding: 4px 1px;
-    font-size: 0.7rem;
-    word-break: break-word;
+    padding: 4px 2px;
+    font-size: 0.85rem;
+    word-break: normal;
     text-align: center;
   }
 
@@ -157,21 +212,8 @@
     width: 100%;
   }
 
-  /* ===== ERROR MESSAGE STYLES (matching second page) ===== */
-  .error-message {
-    color: red !important;
-    font-size: 0.75rem !important;
-    padding: 4px 6px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    display: block !important;
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-    margin-top: 4px;
-    min-height: 16px;
-  }
-
-  /* Validation highlighting styles (matching second page) */
+  /* ===== ERROR STYLING (matching other pages) ===== */
+  /* Validation highlighting styles */
   .missing-answer {
     background-color: #ffebee !important;
     border: 2px solid #f44336 !important;
@@ -187,11 +229,6 @@
   }
 
   .missing-answer .question-label {
-    color: #d32f2f !important;
-    font-weight: bold;
-  }
-
-  .missing-answer .question-text {
     color: #d32f2f !important;
     font-weight: bold;
   }
@@ -323,11 +360,12 @@
       font-size: 0.6rem;
     }
   }
+
 </style>
 
 <div class="form-field" id="age-field">
   <label class="question-label" for="age">
-    How old are you?
+    What is your age?
   </label>
   {{ form.age }}
 </div>
@@ -348,7 +386,7 @@
 
 <div class="form-field" id="race-field">
   <label class="question-label" for="race">
-    What is your race?
+    Choose the group listed below that best captures what you consider yourself to be.
   </label>
   {{ form.race }}
 </div>
@@ -362,7 +400,7 @@
 
 <div class="form-field" id="income-field">
   <label class="question-label" for="income">
-    What is your combined household income?
+    What is your current annual household income before taxes?
   </label>
   {{ form.income }}
 </div>

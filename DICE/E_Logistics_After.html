@@ -184,19 +184,19 @@
     <div class="options-container">
       <div class="option">
         <input type="radio" id="interaction_yes" name="interaction" value="1">
-        <label for="interaction_yes">Yes, I tried and was able to interact.</label>
+        <label for="interaction_yes">Yes, I tried and was able to interact</label>
       </div>
       <div class="option">
         <input type="radio" id="interaction_no" name="interaction" value="2">
-        <label for="interaction_no">No, I tried but could not interact.</label>
+        <label for="interaction_no">No, I tried but could not interact</label>
       </div>
       <div class="option">
         <input type="radio" id="interaction_didnottry" name="interaction" value="3">
-        <label for="interaction_didnottry">I did not try to interact.</label>
+        <label for="interaction_didnottry">I did not try to interact</label>
       </div>
       <div class="option">
         <input type="radio" id="interaction_unsure" name="interaction" value="4">
-        <label for="interaction_unsure">Not sure/Don't remember</label>
+        <label for="interaction_unsure">Not sure/don't remember</label>
       </div>
     </div>
   </div>
@@ -258,14 +258,14 @@
 
 <!-- Follow-up watermark images -->
 <div class="form-group" id="follow-up-question" style="display:none;">
-  <label>If you recall, which image(s) had a watermark, label, or content warning?</label>
+  <label>Select all the images that had a watermark, label, or content warning.</label>
   <div class="options-container" style="gap: 15px;">
     {% for option in image_options %}
     <div>
       <!-- Add a unique ID to the checkbox -->
       <input type="checkbox" name="watermark_image_check" id="watermark_image_check_{{ forloop.counter }}" value="{{ forloop.counter }}">
       <label for="watermark_image_check_{{ forloop.counter }}">
-        <img src="{{ option }}" alt="Option {{ forloop.counter }}">
+        <img src="{{ option }}" alt="Option {{ forloop.counter }}" style="max-width: 100%">
       </label>
     </div>
     {% endfor %}

@@ -268,11 +268,12 @@ button[type="submit"]:hover {
 </style>
 
 <div class="form-field" id="study-topic-field" style="margin-bottom: 50px; font-size: 1.5rem">
-    <label for="id_study_topic">
+    <label for="id_study_topic" style="display: block; margin-bottom: 10px;">
         <strong>What do you believe this research study is about? That is, what is the purpose of this study?</strong>
-    </label><br>
+    </label>
     {{ form.study_topic }}
 </div>
+
 
 <div class="form-field" id="political-influence-field">
     <p style="margin-bottom: 40px; font-size: 1.5rem"><strong>
@@ -320,7 +321,7 @@ window.watermarksUnderstandingInteracted = false;
 function updatebenefits_understanding_watermarks(input) {
     window.watermarksUnderstandingInteracted = true;
     const labels = {
-        1: "Not at all",
+        1: "Not at All",
         2: "Slightly",
         3: "Moderately",
         4: "Very",
@@ -339,11 +340,11 @@ function updatebenefits_understanding_watermarks(input) {
 function updateinfluence_politics(input) {
     window.politicalInfluenceInteracted = true;
     const labels = {
-        1: "Not at all influential",
-        2: "Slightly influential",
-        3: "Moderately influential",
-        4: "Very influential",
-        5: "Extremely influential"
+        1: "Not at All Influential",
+        2: "Slightly Influential",
+        3: "Moderately Influential",
+        4: "Very Influential",
+        5: "Extremely Influential"
     };
     const value = parseInt(input.value);
     descriptioninfluence_politics.innerText = labels[value];

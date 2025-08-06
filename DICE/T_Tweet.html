@@ -190,21 +190,31 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
 
             </div>
 
+
             {{ if i.pic_available == True }}
-            <div class="watermark-container" tabindex="0" style="position: relative;"
-                 id="watermark_{{i.doc_id}}"
-                 onclick="dismissOverlaySession('{{i.doc_id}}')">
-                <img src="{{ i.media }}" class="card-img ps-0 mt-2 rounded-4 img-fluid img-tweet" alt="...">
-                <!-- Semi-transparent overlay -->
-                <div class="overlay" id="overlay_{{i.doc_id}}">
-                    <h3>Manipulated Content</h3>
-                    <p>This photo may contain manipulated media.</p>
-                    <p>Click To See Photo</p> <!-- Focusable div for accessibility -->
-                </div>
-            </div>
-            <a href="{{ i.target }}" class="link-disabled" target="_blank" style="text-decoration: none; cursor: pointer;">
-            </a>
-            {{ endif }}
+<div class="watermark-container" tabindex="0" style="position: relative;" id="watermark_{{i.doc_id}}">
+    <img src="{{ i.media }}" class="card-img ps-0 mt-2 rounded-4 img-fluid img-tweet" alt="...">
+    <!-- Semi-transparent overlay -->
+    <div class="overlay" id="overlay_{{i.doc_id}}" style="pointer-events: none;">
+ <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16">
+  <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/>
+  <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/>
+  <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/>
+</svg>
+
+        <h3 style="cursor: default;">Manipulated Content</h3>
+        <p style="cursor: default;">This photo may contain manipulated media.</p><br>
+        <p class="click-to-see-box"
+           onclick="dismissOverlaySession('{{i.doc_id}}'); event.stopPropagation();"
+           style="cursor: pointer; pointer-events: auto;">Uncover Photo</p>
+    </div>
+</div>
+
+<a href="{{ i.target }}" class="link-disabled" target="_blank" style="text-decoration: none; cursor: pointer;">
+</a>
+{{ endif }}
+
+
 
             <div class="d-flex border-top-0 mt-3 ms-5">
                 <div class="reply-button col" data-bs-toggle="modal" data-bs-target="#replyModal_{{i.doc_id}}" id="reply_button_{{i.doc_id}}">
@@ -428,7 +438,7 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                         <!-- Warning label with an anchor id -->
                         <div class="option3-warning-label d-flex align-items-center mt-2">
                             <!-- Inline SVG for yellow caution icon -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="yellow" viewBox="0 0 24 24" class="me-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="yellow" viewBox="0 0 24 24" class="me-2">
                                 <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="yellow"></circle>
                                 <text x="12" y="16" font-size="12" font-weight="bold" text-anchor="middle" fill="black">!</text>
                             </svg>
@@ -600,6 +610,72 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
 </div>
 
 <style>
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, .95);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 16px; /* Match the img border-radius */
+}
+
+.overlay h3,
+.overlay p:not(.click-to-see-box) {
+    cursor: default !important;
+    pointer-events: none !important;
+    user-select: none; /* Prevent text selection */
+    color: white !important; /* Force white color */
+}
+
+.overlay h3:hover,
+.overlay p:not(.click-to-see-box):hover {
+    color: white !important; /* Prevent blue hover color */
+    text-decoration: none !important;
+}
+/* Additional specificity to override any parent link styles */
+.overlay p:not(.click-to-see-box),
+.overlay p:not(.click-to-see-box):hover,
+.overlay p:not(.click-to-see-box):focus,
+.overlay p:not(.click-to-see-box):visited {
+    text-decoration: none !important;
+    color: white !important;
+}
+
+.overlay-eye-icon {
+    width: 48px; /* Adjust size as needed */
+    height: 48px; /* Adjust size as needed */
+    margin-bottom: 15px; /* Space between icon and title */
+    filter: brightness(0) invert(1); /* Makes the icon white if it's originally black */
+    pointer-events: none !important;
+}
+
+.click-to-see-box {
+    display: inline-block;
+    min-width: 180px;
+    padding: 12px 20px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    color: #000 !important;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+}
+
+.click-to-see-box:hover {
+    background-color: #e0e0e0;
+    color: #000 !important; /* Keep black text on hover */
+}
     .reply-button,
 .retweet-button,
 .like-button,
@@ -617,4 +693,23 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
 .share-button {
   margin-right: 0;
 }
+  .click-to-see-box {
+    display: inline-block;
+      min-width: 180px;
+    padding: 12px 20px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+    color: #000;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;
+  }
+
+  .click-to-see-box:hover {
+    background-color: #e0e0e0;
+  }
 </style>

@@ -12,7 +12,7 @@
   }
 
   .survey-container {
-    max-width: 700px;
+    max-width: 1400px;
     margin: 40px auto;
     background: white;
     padding: 30px 40px;
@@ -88,13 +88,65 @@
     font-weight: 600;
     color: #222;
   }
+  /* ===== Slider Styles ===== */
+  .slider-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 60px;
+    padding: 0;
+  }
+
+  .slider {
+    width: 100%;
+    height: 14px;
+    background: #ddd;
+    border-radius: 7px;
+    margin-bottom: 40px;
+    appearance: none;
+    outline: none;
+  }
+
+  .slider-value {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #444;
+    margin-top: -20px;
+  }
+
+  .slider-labels {
+    position: relative;
+    height: 80px;
+    width: 100%;
+    user-select: none;
+  }
+
+  .slider-labels span {
+    position: absolute;
+    top: 0;
+    transform: rotate(60deg) translateY(6px);
+    transform-origin: top center;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* Position slider labels */
+  .slider-labels span:nth-child(1) { left: 0%; }
+  .slider-labels span:nth-child(2) { left: 16.666%; }
+  .slider-labels span:nth-child(3) { left: 33.333%; }
+  .slider-labels span:nth-child(4) { left: 50%; }
+  .slider-labels span:nth-child(5) { left: 66.666%; }
+  .slider-labels span:nth-child(6) { left: 83.333%; }
+  .slider-labels span:nth-child(7) { left: 90%; }
+
 
   /* ----- Matrix Table Specific Styles ----- */
   .matrix-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 40px;
-    table-layout: auto;
+    table-layout: fixed;
   }
 
   .matrix-table th,
@@ -103,26 +155,29 @@
     padding: 10px 8px;
     text-align: center;
     vertical-align: middle;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: #333;
   }
 
-  .matrix-table .question-column {
-    max-width: 30%; /* wider for question text */
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    text-align: left;
-    font-weight: 600;
-    color: #222;
-  }
+.matrix-table .question-column {
+  width: 30%;
+  max-width: 30%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  text-align: left;
+  font-weight: 600;
+  color: #222;
+}
+
 
   /* Radio Answer Columns */
   .matrix-table th:not(:first-child),
   .matrix-table td:not(.question-column) {
-    padding: 4px 1px;
-    font-size: 0.7rem;
-    word-break: break-word;
+    padding: 4px 2px;
+    font-size: 0.85rem;
+    word-break: normal;
     text-align: center;
   }
 
@@ -279,7 +334,7 @@
 
     /* Slightly wider question column */
     .matrix-table .question-column {
-      width: 50%;             /* Give more space for questions */
+      width: 30%;             /* Give more space for questions */
       font-size: 0.5rem;
       padding-left: 1px;
       padding-right: 1px;
@@ -297,12 +352,13 @@
       font-size: 0.6rem;
     }
   }
+
 </style>
 
 <div class="survey-container">
   <form method="post">
     <div class="form-group" id="llm-familiarity-group">
-      <label for="llm_familiarity" class="question-label">
+<label for="llm_familiarity" class="question-label" style="display: block; margin-bottom: 20px;">
         <strong>Before today, how familiar were you with large language models (LLMs) or AI chatbots like ChatGPT, Gemini, or Claude?</strong>
       </label>
       <div>
@@ -332,6 +388,14 @@
 
     <div class="matrix-wrapper" id="trust-matrix-wrapper">
       <table class="matrix-table">
+        <colgroup>
+  <col style="width: 28%;"> <!-- Question column -->
+  <col style="width: 14%;"> <!-- A lot -->
+  <col style="width: 14%;"> <!-- Some -->
+  <col style="width: 14%;"> <!-- Not too much -->
+  <col style="width: 14%;"> <!-- Not at all -->
+  <col style="width: 14%;"> <!-- No opinion -->
+</colgroup>
       <!-- Likert Scale -->
         <tr>
           <th></th>
@@ -429,6 +493,14 @@
     <!-- Likert Scale -->
     <div class="matrix-wrapper" id="smp-matrix-wrapper">
       <table class="matrix-table">
+                <colgroup>
+  <col style="width: 28%;"> <!-- Question column -->
+  <col style="width: 14%;"> <!-- A lot -->
+  <col style="width: 14%;"> <!-- Some -->
+  <col style="width: 14%;"> <!-- Not too much -->
+  <col style="width: 14%;"> <!-- Not at all -->
+  <col style="width: 14%;"> <!-- No opinion -->
+</colgroup>
         <tr>
           <th></th>
           <th>Strongly Disagree</th>
@@ -476,6 +548,14 @@
     <!-- Likert Scale -->
     <div class="matrix-wrapper" id="ai-matrix-wrapper">
       <table class="matrix-table">
+                <colgroup>
+  <col style="width: 28%;"> <!-- Question column -->
+  <col style="width: 14%;"> <!-- A lot -->
+  <col style="width: 14%;"> <!-- Some -->
+  <col style="width: 14%;"> <!-- Not too much -->
+  <col style="width: 14%;"> <!-- Not at all -->
+  <col style="width: 14%;"> <!-- No opinion -->
+</colgroup>
         <tr>
           <th></th>
           <th>Strongly Disagree</th>

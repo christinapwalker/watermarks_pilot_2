@@ -216,9 +216,9 @@
         document.getElementById('accurate_all_input').value = input.value;
         const aiGenerated = parseInt(input.value);
         const display = document.getElementById('description-aigen');
-        if (aiGenerated === 0) display.innerText = 'No images were AI-generated.';
-        else if (aiGenerated === 1) display.innerText = '1 image was AI-generated';
-        else display.innerText = `${aiGenerated} images were AI-generated`;
+        if (aiGenerated === 0) display.innerText = 'No Images were AI-generated';
+        else if (aiGenerated === 1) display.innerText = '1 Image was AI-generated';
+        else display.innerText = `${aiGenerated} Images were AI-generated`;
 
         // Clear error highlighting when slider is moved
         clearError('accurate_all');
@@ -239,7 +239,7 @@
         document.getElementById('share_input').value = input.value;
         const share = parseInt(input.value);
         const display = document.getElementById('description-share');
-        display.innerText = share === 1 ? "1 post" : `${share} posts`;
+        display.innerText = share === 1 ? "1 Post" : `${share} Posts`;
 
         // Clear error highlighting when slider is moved
         clearError('share');

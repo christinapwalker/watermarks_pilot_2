@@ -466,7 +466,7 @@
 
   <!-- Follow-up watermark images -->
   <div class="form-group" id="follow-up-question" style="display:none;">
-  <label>If you recall, which image(s) had a watermark, label, or content warning?</label>
+  <label>Select all the images that had a watermark, label, or content warning.</label>
   {{ formfield_errors 'watermark_image_check' }}
   <div class="options-container" style="gap: 15px;">
     {% for option in image_options %}
@@ -477,7 +477,7 @@
              id="watermark_image_check_{{ forloop.counter }}"
              value="{{ forloop.counter }}">
       <label for="watermark_image_check_{{ forloop.counter }}">
-        <img src="{{ option }}" alt="Option {{ forloop.counter }}">
+        <img src="{{ option }}" alt="Option {{ forloop.counter }}" style="max-width: 100%">
       </label>
     </div>
     {% endfor %}

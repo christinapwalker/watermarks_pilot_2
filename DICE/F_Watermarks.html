@@ -3,6 +3,15 @@
 {% block content %}
 
 <style>
+
+  .matrix-row.missing-answer td {
+  background-color: #ffebee !important;
+  border: 2px solid #f44336 !important;
+  border-radius: 4px;
+  color: #d32f2f;
+  font-weight: bold;
+}
+
   body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     color: #222;
@@ -119,6 +128,7 @@
     color: #d32f2f !important;
     font-weight: bold;
 }
+
 
 .missing-answer .matrix-instructions {
     color: #d32f2f !important;
@@ -268,92 +278,102 @@
 </label>
 
   <!-- Likert Scale Table -->
-    <div class="matrix-table-wrapper" id="matrix-wrapper">
+<div class="matrix-table-wrapper" id="matrix-wrapper">
   <table class="matrix-table">
-    <tr>
-      <th></th>
-      <th>Not at all</th>
-      <th>Slightly</th>
-      <th>Moderately</th>
-      <th>Very</th>
-      <th>Extremely</th>
-    </tr>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Not at all</th>
+        <th>Slightly</th>
+        <th>Moderately</th>
+        <th>Very</th>
+        <th>Extremely</th>
+      </tr>
+    </thead>
 
-    <tr>
-      <td class="question-column">
-        The
-        {% if player.watermark_condition == "cr_watermark" %}
-          watermark
-        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-          label
-        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-          watermark and information
-        {% else %}
-          watermark or label
-        {% endif %}
-        is clear.
-      </td>
-      {% for choice in form.clarity_watermarks %}
-        <td>{{ choice }}</td>
-      {% endfor %}
-    </tr>
+    <tbody class="matrix-row" id="row-clarity_watermarks">
+      <tr>
+        <td class="question-column">
+          The
+          {% if player.watermark_condition == "cr_watermark" %}
+            watermark
+          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+            label
+          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+            watermark and information
+          {% else %}
+            watermark or label
+          {% endif %}
+          is clear
+        </td>
+        {% for choice in form.clarity_watermarks %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+    </tbody>
 
-    <tr>
-      <td class="question-column">
-        The
-        {% if player.watermark_condition == "cr_watermark" %}
-          watermark
-        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-          label
-        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-          watermark and information
-        {% else %}
-          watermark or label
-        {% endif %}
-        is informative.
-      </td>
-      {% for choice in form.informative_watermarks %}
-        <td>{{ choice }}</td>
-      {% endfor %}
-    </tr>
+    <tbody class="matrix-row" id="row-informative_watermarks">
+      <tr>
+        <td class="question-column">
+          The
+          {% if player.watermark_condition == "cr_watermark" %}
+            watermark
+          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+            label
+          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+            watermark and information
+          {% else %}
+            watermark or label
+          {% endif %}
+          is informative
+        </td>
+        {% for choice in form.informative_watermarks %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+    </tbody>
 
-    <tr>
-      <td class="question-column">
-        The
-        {% if player.watermark_condition == "cr_watermark" %}
-          watermark
-        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-          label
-        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-          watermark and information
-        {% else %}
-          watermark or label
-        {% endif %}
-        is trustworthy.
-      </td>
-      {% for choice in form.trustworthy_watermarks %}
-        <td>{{ choice }}</td>
-      {% endfor %}
-    </tr>
+    <tbody class="matrix-row" id="row-trustworthy_watermarks">
+      <tr>
+        <td class="question-column">
+          The
+          {% if player.watermark_condition == "cr_watermark" %}
+            watermark
+          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+            label
+          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+            watermark and information
+          {% else %}
+            watermark or label
+          {% endif %}
+          is trustworthy
+        </td>
+        {% for choice in form.trustworthy_watermarks %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+    </tbody>
 
-    <tr>
-      <td class="question-column">
-        The
-        {% if player.watermark_condition == "cr_watermark" %}
-          watermark
-        {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-          label
-        {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-          watermark and information
-        {% else %}
-          watermark or label
-        {% endif %}
-        is biased.
-      </td>
-      {% for choice in form.biased_watermarks %}
-        <td>{{ choice }}</td>
-      {% endfor %}
-    </tr>
+    <tbody class="matrix-row" id="row-biased_watermarks">
+      <tr>
+        <td class="question-column">
+          The
+          {% if player.watermark_condition == "cr_watermark" %}
+            watermark
+          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+            label
+          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+            watermark and information
+          {% else %}
+            watermark or label
+          {% endif %}
+          is biased
+        </td>
+        {% for choice in form.biased_watermarks %}
+          <td>{{ choice }}</td>
+        {% endfor %}
+      </tr>
+    </tbody>
   </table>
 </div>
 
@@ -365,8 +385,9 @@
   {{ formfield_errors 'biased_watermarks' }}
 </div>
 
+
 <div class="form-group" id="creates-watermark-group">
-  <label for="creates_watermarks"><strong>Who do you believe creates the
+  <label for="creates_watermarks" style="margin-bottom: 10px;"><strong>Who do you believe creates the
     {% if player.watermark_condition == "cr_watermark" %}watermark{%
     elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}label{%
     elif player.watermark_condition == "cr_watermark_plus_label" %}watermark and information{%
@@ -448,9 +469,10 @@ function validateForm() {
                 isAnswered = checked !== null;
 
                 // Only add to missing if this is the first unanswered matrix question
-                if (!isAnswered && !unansweredFields.some(field => ['clarity_watermarks', 'informative_watermarks', 'trustworthy_watermarks', 'biased_watermarks'].some(matrixField => requiredFields[matrixField] === field))) {
-                    fieldContainer = document.getElementById('matrix-wrapper');
+                if (!isAnswered) {
+                    fieldContainer = document.getElementById(`row-${fieldName}`);
                 }
+
             }
         } else if (fieldName === 'creates_watermarks') {
             // Check creates_watermarks selection
@@ -547,8 +569,11 @@ function validateForm() {
         allInputs.forEach(function(input) {
             input.addEventListener('change', function() {
                 // Remove highlighting when question is answered
-                const container = this.closest('#matrix-wrapper') ||
-                                this.closest('#creates-watermark-group');
+                let container = this.closest('tbody.matrix-row');
+                  if (!container) {
+                      container = this.closest('#creates-watermark-group');
+                  }
+
                 if (container && container.classList.contains('missing-answer')) {
                     container.classList.remove('missing-answer');
                 }
