@@ -1,5 +1,5 @@
 {% block content %}
-<form method="post">
+<form method="post" id="main-form">
 
 <style>
 /* Container for image and marker */
@@ -303,7 +303,6 @@ button[type="submit"]:hover {
     </div>
 </div>
 
-
 </form>
 
 <script>
@@ -352,9 +351,9 @@ function updateinfluence_politics(input) {
     }
 }
 
-// Enhanced validation function matching other pages
-function validateForm() {
-    console.log('validateForm() called');
+// Enhanced validation function matching other pages - BUT ONLY FOR THE MAIN FORM
+function validateMainForm() {
+    console.log('validateMainForm() called');
 
     // Define field names with their user-friendly labels
     const requiredFields = {
@@ -363,9 +362,9 @@ function validateForm() {
         'benefits_understanding_watermarks': 'How much this study helped you understand watermarks'
     };
 
-    const form = document.querySelector('form');
+    const form = document.getElementById('main-form');
     if (!form) {
-        console.log('Form not found');
+        console.log('Main form not found');
         return true; // Let it submit if we can't find form
     }
 
@@ -452,7 +451,7 @@ window.onload = function() {
     if (slider2) updatebenefits_understanding_watermarks(slider2);
 };
 
-// Enhanced event listeners matching other pages
+// Enhanced event listeners - BUT ONLY FOR THE MAIN FORM
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, setting up validation...');
 
@@ -460,25 +459,25 @@ document.addEventListener('DOMContentLoaded', function() {
     window.politicalInfluenceInteracted = false;
     window.watermarksUnderstandingInteracted = false;
 
-    const forms = document.querySelectorAll('form');
-    forms.forEach(function(form) {
-        // Try to intercept with capturing phase
-        form.addEventListener('submit', function(e) {
-            console.log('Event listener caught submit');
-            if (!validateForm()) {
+    // Only validate the main form, not the thank you form
+    const mainForm = document.getElementById('main-form');
+    if (mainForm) {
+        mainForm.addEventListener('submit', function(e) {
+            console.log('Main form submit event listener caught');
+            if (!validateMainForm()) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 return false;
             }
-        }, true); // Use capturing phase
-    });
+        }, true);
+    }
 
-    // Add real-time validation feedback
+    // Add real-time validation feedback ONLY to main form
     function addRealTimeValidation() {
-        const form = document.querySelector('form');
+        const form = document.getElementById('main-form');
         if (!form) return;
 
-        // Add change listeners to all form inputs
+        // Add change listeners to all form inputs in main form only
         const allInputs = form.querySelectorAll('input, select, textarea');
         allInputs.forEach(function(input) {
             input.addEventListener('change', function() {
@@ -503,15 +502,20 @@ document.addEventListener('DOMContentLoaded', function() {
     addRealTimeValidation();
 });
 
-// Also try intercepting all clicks on submit elements
+// Only intercept clicks on submit elements within the main form
 document.addEventListener('click', function(e) {
     if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
-        console.log('Submit element clicked, validating...');
-        if (!validateForm()) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            return false;
+        // Check if this submit button is in the main form
+        const mainForm = document.getElementById('main-form');
+        if (mainForm && mainForm.contains(e.target)) {
+            console.log('Main form submit element clicked, validating...');
+            if (!validateMainForm()) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
         }
+        // If it's not in the main form (like the thank you button), let it proceed normally
     }
 }, true);
 </script>
@@ -529,7 +533,7 @@ document.addEventListener('click', function(e) {
                     </table>
                     <p class="text-center text-secondary mb-4">
                         {% if session.prolific_completion_url == 'NA' %}
-                        <form method="post">
+                        <form method="post" id="thank-you-form">
                             <button type="submit" class="btn btn-lg shadow w-100 py-3" style="border-radius: 0; background-color: #2c7be5; border-color: #2c7be5; color: white;">
                                 Click here to complete the survey
                             </button>
