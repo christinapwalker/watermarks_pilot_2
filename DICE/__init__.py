@@ -1000,13 +1000,13 @@ def extract_first_url(text):
 # check urls
 h = httplib2.Http()
 
-def check_url_exists(url):
-    try:
-        resp = h.request(url, 'HEAD')
-        return int(resp[0]['status']) < 400
-    except Exception:
-        return False
-
+# def check_url_exists(url):
+#     try:
+#         resp = h.request(url, 'HEAD')
+#         return int(resp[0]['status']) < 400
+#     except Exception:
+#         return False
+#
 
 
 
@@ -1855,8 +1855,23 @@ class I_PostDebrief(Page):
         if player.id_in_group != 1:
             player.participant.tweets = ""
 
+class I_Redirect(Page):
+    @staticmethod
+    def is_displayed(player):
+        return len(player.session.config['survey_link']) > 0
+
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(link=create_redirect(player))
+
+    @staticmethod
+    def js_vars(player):
+        return dict(link=create_redirect(player))
+
 class EndSurvey(Page):
-    pass
+    @staticmethod
+    def is_displayed(player):
+        return len(player.session.config['survey_link']) == 0
 
 
 page_sequence = [
@@ -1881,6 +1896,7 @@ page_sequence = [
     H_Demographics,
     H_Debrief,
     I_PostDebrief,
+    I_Redirect,
     EndSurvey,
 ]
 
