@@ -303,11 +303,7 @@ button[type="submit"]:hover {
     </div>
 </div>
 
-  <div class="submit-container">
-    <button type="submit" id="submitButton" aria-label="Submit survey responses">
-      ➔
-    </button>
-  </div>
+
 </form>
 
 <script>
@@ -528,16 +524,16 @@ document.addEventListener('click', function(e) {
                     <h1 class="display-4">Thank you!</h1>
                     <p class="lead">Your participation is greatly appreciated.</p>
 
-                    <table class="table mt-5 mb-5 table-responsive">
+                    <table class="table mt-2 mb-5 table-responsive">
 
                     </table>
                     <p class="text-center text-secondary mb-4">
                         {% if session.prolific_completion_url == 'NA' %}
-                        <button class="btn btn-success shadow">
+                        <button class="btn btn-lg shadow w-100 py-3" style="border-radius: 0; background-color: #2c7be5; border-color: #2c7be5; color: white;">
                             Click here to complete the survey
                         </button>
                         {% else %}
-                        <a class="btn btn-success shadow" href="{{ session.prolific_completion_url }}" role="button">
+                        <a class="btn btn-lg shadow w-100 py-3" href="{{ session.prolific_completion_url }}" role="button" style="border-radius: 0; background-color: #2c7be5; border-color: #2c7be5; color: white;">
                             Click here to complete the survey
                         </a>
                         {% endif %}
@@ -546,6 +542,5 @@ document.addEventListener('click', function(e) {
             </div>
         </div>
     </div>
-</div>-->
-
+</div>
 {% endblock %}
