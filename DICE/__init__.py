@@ -1100,12 +1100,15 @@ def create_redirect(player):
 
     completion_code = None
 
-    if 'prolific_completion_url' in player.session.config and player.session.config['prolific_completion_url'] is not None:
-        completion_code = player.session.config['prolific_completion_url'][-8:]
+    # if 'prolific_completion_url' in player.session.config and player.session.config['prolific_completion_url'] is not None:
+        # completion_code = player.session.config['prolific_completion_url'][-8:]
 
     if 'completion_code' in player.session.vars:
         if player.session.vars['completion_code'] is not None:
             link = link + '&' + 'cc=' + player.session.vars['completion_code']
+
+    if player.feed_condition is not None:
+        link = link + '&' + 'condition=' + player.feed_condition
 
     return link
 
@@ -1217,22 +1220,22 @@ class C_Feed(Page):
             player.tweet_data = tweets_json
 
         # ✅ Existing prolific URL logic
-        player.participant.finished = True
-        if 'prolific_completion_url' in player.session.vars:
-            if player.session.vars['prolific_completion_url'] is not None:
-                if 'completion_code' in player.session.vars:
-                    if player.session.vars['completion_code'] is not None:
-                        player.session.vars[
-                            'prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + \
-                                                         player.session.vars['C12LYO01']
-                    else:
-                        player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-                else:
-                    player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-            else:
-                player.session.vars['prolific_completion_url'] = 'NA'
-        else:
-            player.session.vars['prolific_completion_url'] = 'NA'
+        # player.participant.finished = True
+        # if 'prolific_completion_url' in player.session.vars:
+        #     if player.session.vars['prolific_completion_url'] is not None:
+        #         if 'completion_code' in player.session.vars:
+        #             if player.session.vars['completion_code'] is not None:
+        #                 player.session.vars[
+        #                     'prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + \
+        #                                                  player.session.vars['C12LYO01']
+        #             else:
+        #                 player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
+        #         else:
+        #             player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
+        #     else:
+        #         player.session.vars['prolific_completion_url'] = 'NA'
+        # else:
+        #     player.session.vars['prolific_completion_url'] = 'NA'
 
 
 class D_ItemCountQuestions_First(Page):
@@ -1832,6 +1835,25 @@ class H_Debrief(Page):
 class I_PostDebrief(Page):
     form_model = "player"
     form_fields = ['study_topic', 'ethics_influence_political_prefs', 'benefits_understanding_watermarks']
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.participant.finished = True
+        if 'prolific_completion_url' in player.session.vars:
+            if player.session.vars['prolific_completion_url'] is not None:
+                if 'completion_code' in player.session.vars:
+                    if player.session.vars['completion_code'] is not None:
+                        player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + player.session.vars['completion_code']
+                    else:
+                        player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
+                else: player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
+            else:
+                player.session.vars['prolific_completion_url'] = 'NA'
+        else:
+            player.session.vars['prolific_completion_url'] = 'NA'
+
+        if player.id_in_group != 1:
+            player.participant.tweets = ""
 
 class EndSurvey(Page):
     pass
