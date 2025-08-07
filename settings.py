@@ -8,8 +8,6 @@ SESSION_CONFIGS = [ # defining a session
         display_name="User Engagement with Social Media Posts",
         app_sequence=['DICE'],
         num_demo_participants=3,
-        completionlink=
-        'https://app.prolific.com/submissions/complete?cc=C12LYO01',
     )
 ]
 

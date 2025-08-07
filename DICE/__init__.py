@@ -53,7 +53,6 @@ class Player(BasePlayer):
     itemcount_first = models.BooleanField(blank=True, initial=False)
     second_question = models.StringField(blank=True)
     question_order = models.StringField(blank=True)
-    prolific_id = models.StringField(blank=True)
     logistics_early = models.BooleanField(blank=True, initial=False)
     creates_watermarks_other = models.StringField(blank=True)
     moreposts_image_check_1 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
@@ -1159,9 +1158,7 @@ class B_SMPsTrust(Page):
     #                "use_youtube", "use_tiktok", "use_bluesky", "use_truthsocial"]
     #
 
-    @staticmethod
-    def before_next_page(self, timeout_happened):
-        self.prolific_id = self.participant.label
+
 
 
 
@@ -1836,25 +1833,25 @@ class I_PostDebrief(Page):
     form_model = "player"
     form_fields = ['study_topic', 'ethics_influence_political_prefs', 'benefits_understanding_watermarks']
 
-class EndSurvey(Page):
-    form_model = 'player'
-
-    @staticmethod
-    def is_displayed(player):
-        return player.participant.vars.get('consent') == 'yes'
-
-    @staticmethod
-    def js_vars(player):
-        return dict(
-            completionlink=
-            player.subsession.session.config['completionlink']
-        )
-        # Set a timeout to automatically advance after showing the thank you message
-        timeout_seconds = 5  # Page will auto-advance after 5 seconds
-
-    def before_next_page(self, timeout_happened):
-            # You could log completion, set flags, etc.
-        pass
+# class EndSurvey(Page):
+#     form_model = 'player'
+#
+#     @staticmethod
+#     def is_displayed(player):
+#         return player.participant.vars.get('consent') == 'yes'
+#
+#     @staticmethod
+#     def js_vars(player):
+#         return dict(
+#             completionlink=
+#             player.subsession.session.config['completionlink']
+#         )
+#         # Set a timeout to automatically advance after showing the thank you message
+#         timeout_seconds = 5  # Page will auto-advance after 5 seconds
+#
+#     def before_next_page(self, timeout_happened):
+#             # You could log completion, set flags, etc.
+#         pass
 
 page_sequence = [
     A_Consent,
