@@ -623,6 +623,7 @@ document.addEventListener('click', function(e) {
     <input type="hidden" name="saw_own_claim_ai" value="0">
 {% endif %}
 
+
 <div class="question">
         <p><strong>Based on your own assessment, is the image in the post above AI-generated?</strong></p>
         <div class="multiple-choice">
@@ -681,7 +682,7 @@ document.addEventListener('click', function(e) {
     <div class="question" id="feels-true-question">
         <p><strong>Regardless of whether you think the claim of the post is literally true, to what extent do you think the post represents something that feels true about the world?</strong></p>
 
-        {% if show_slider %}
+        {% if show_slider_ai %}
   <div class="multiple-choice vertical">
     <label><input type="radio" name="image_feelstrue_ai" value="Definitely does not feel true"> Definitely does not feel true</label>
     <label><input type="radio" name="image_feelstrue_ai" value="Mostly does not feel true"> Mostly does not feel true</label>
@@ -767,7 +768,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        {% if saw_own_claim_ai %}
+        {% if show_own_claim_ai %}
         const label = document.createElement('label');
         const input = document.createElement('input');
         input.type = 'radio';

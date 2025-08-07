@@ -49,12 +49,24 @@ class Group(BaseGroup):
 
 # Create variables to capture:
 class Player(BasePlayer):
+    first_question = models.StringField(blank=True)
+    itemcount_first = models.BooleanField(blank=True, initial=False)
+    second_question = models.StringField(blank=True)
+    question_order = models.StringField(blank=True)
+    prolific_id = models.StringField(blank=True)
+    logistics_early = models.BooleanField(blank=True, initial=False)
     creates_watermarks_other = models.StringField(blank=True)
     moreposts_image_check_1 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
     moreposts_image_check_2 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
     moreposts_image_check_3 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
     moreposts_image_check_4 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
     moreposts_image_check_5 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
+
+    show_own_claim_real = models.BooleanField()
+    show_slider_real = models.BooleanField()
+    show_slider_ai = models.BooleanField()
+    show_own_claim_ai = models.BooleanField()
+
 
     saw_own_claim_real = models.BooleanField()
     saw_own_claim_ai = models.BooleanField()
@@ -838,6 +850,7 @@ def creating_session(subsession):
         player.participant.vars['first_question'] = order[0]
         player.participant.vars['second_question'] = order[1]
 
+
         player.participant.vars['logistics_early'] = random.random() < 0.1
         player.participant.tweets = tweets  # initial full tweets dataframe
 
@@ -1136,6 +1149,9 @@ class B_SMPsTrust(Page):
     #                "use_youtube", "use_tiktok", "use_bluesky", "use_truthsocial"]
     #
 
+    @staticmethod
+    def before_next_page(self, timeout_happened):
+        self.prolific_id = self.participant.label
 
 
 
@@ -1220,12 +1236,23 @@ class D_ItemCountQuestions_First(Page):
     def is_displayed(player):
         return player.participant.vars.get('itemcount_first', False)
 
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'itemcount_first' in self.participant.vars:
+            self.itemcount_first = self.participant.vars['itemcount_first']
+
+
 class D_ItemCountQuestions_Last(Page):
     form_model = 'player'
     form_fields = ['accurate_all', 'confidence_accurate', 'share']
     @staticmethod
     def is_displayed(player):
         return not player.participant.vars.get('itemcount_first', False)
+
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'itemcount_first' in self.participant.vars:
+            self.itemcount_first = self.participant.vars['itemcount_first']
 
 class D_DirectQuestions_AI_First(Page):
     form_model = 'player'
@@ -1246,33 +1273,49 @@ class D_DirectQuestions_AI_First(Page):
         'why_click_ai'
     ]
 
-
     @staticmethod
     def is_displayed(player):
         return player.participant.vars.get('first_question') == 'AI'
 
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'first_question' in self.participant.vars:
+            self.first_question = self.participant.vars['first_question']
+        if 'show_slider_ai' in self.participant.vars:
+            self.show_slider_ai = self.participant.vars['show_slider_ai']
+        if 'show_own_claim_ai' in self.participant.vars:
+            self.show_own_claim_ai = self.participant.vars['show_own_claim_ai']
+        if 'question_order' in self.participant.vars:
+            self.question_order = json.dumps(self.participant.vars['question_order'])
+
     @staticmethod
     def vars_for_template(player):
-        row_data = json.loads(player.feed_condition_row)[0]
 
-        claims = [row_data[f'Claim {i}'] for i in range(1, 6)
-                  if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
+        row_json_ai = player.control_feed_condition_row
+        if not row_json_ai:
+            return dict(
+                claim_choices_ai=[],
+                show_slider_ai=False,
+                show_own_claim_ai=False,
+                show_feels_true_q=False,
+                show_feels_not_true_q=False,
+            )
 
-        show_slider = random.choice([True, False])
-        show_own = random.choice([True, False])
+        row_data_ai = json.loads(row_json_ai)[0]
 
-        # Save to player and participant.vars
-        player.saw_own_claim_ai = show_own
-        player.participant.vars['show_own_claim_ai'] = show_own
-        player.participant.vars['show_slider_ai'] = show_slider
+        claims = [row_data_ai[f'Claim {i}'] for i in range(1, 6)
+                  if f'Claim {i}' in row_data_ai and pd.notna(row_data_ai[f'Claim {i}'])]
 
-        player.shown_claims_ai = json.dumps(claims)
+        player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+
+        # Generate and STORE both random values
+        player.participant.vars['show_slider_ai'] = random.choice([True, False])
+        player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
 
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
-            show_slider=show_slider,
-            show_own_claim_ai=show_own,
-            saw_own_claim_ai=show_own
+            show_slider_ai=random.choice([True, False]),
+            show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
         )
 
 
@@ -1295,6 +1338,18 @@ class D_DirectQuestions_Real_First(Page):
     def is_displayed(player):
         return player.participant.vars.get('first_question') == 'Real'
 
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'first_question' in self.participant.vars:
+            self.first_question = self.participant.vars['first_question']
+        if 'show_slider_real' in self.participant.vars:
+            self.show_slider_real = self.participant.vars['show_slider_real']
+        if 'show_own_claim_real' in self.participant.vars:
+            self.show_own_claim_real = self.participant.vars['show_own_claim_real']
+        if 'question_order' in self.participant.vars:
+            self.question_order = json.dumps(self.participant.vars['question_order'])
+
+
     @staticmethod
     def vars_for_template(player):
 
@@ -1314,6 +1369,10 @@ class D_DirectQuestions_Real_First(Page):
         claims = [row_data_real[f'Claim {i}'] for i in range(1, 6)
                   if f'Claim {i}' in row_data_real and pd.notna(row_data_real[f'Claim {i}'])]
 
+        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+
+        # Generate and STORE both random values
+        player.participant.vars['show_slider_real'] = random.choice([True, False])
         player.participant.vars['show_own_claim_real'] = random.choice([True, False])
 
         return dict(
@@ -1361,6 +1420,16 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
             print("Page skipped because real round != does not feel true")
             return False
 
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'second_question' in self.participant.vars:
+            self.second_question = self.participant.vars['second_question']
+        if 'show_slider_ai' in self.participant.vars:
+            self.show_slider_ai = self.participant.vars['show_slider_ai']
+        if 'show_own_claim_ai' in self.participant.vars:
+            self.show_own_claim_ai = self.participant.vars['show_own_claim_ai']
+
+
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.feed_condition_row)[0]
@@ -1369,9 +1438,10 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
             if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
         ]
         player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
-            show_slider=random.choice([True, False]),
+            show_slider_ai=random.choice([True, False]),
             show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
         )
 
@@ -1408,6 +1478,16 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
             print("AI_Second_DoesNotFeelTrue: skipped because real round != feels true")
             return False
 
+
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'second_question' in self.participant.vars:
+            self.second_question = self.participant.vars['second_question']
+        if 'show_slider_ai' in self.participant.vars:
+            self.show_slider_ai = self.participant.vars['show_slider_ai']
+        if 'show_own_claim_ai' in self.participant.vars:
+            self.show_own_claim_ai = self.participant.vars['show_own_claim_ai']
+
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.feed_condition_row)[0]
@@ -1416,9 +1496,11 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
             if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
         ]
         player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+        player.participant.vars['show_slider_ai'] = random.choice([True, False])
+
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
-            show_slider=random.choice([True, False]),
+            show_slider_ai=random.choice([True, False]),
             show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
         )
 class D_DirectQuestions_Real_Second_FeelTrue(Page):
@@ -1464,11 +1546,24 @@ class D_DirectQuestions_Real_Second_FeelTrue(Page):
             print("Page skipped because AI round != does not feel true")
             return False
 
+
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'second_question' in self.participant.vars:
+            self.second_question = self.participant.vars['second_question']
+        if 'show_slider_real' in self.participant.vars:
+            self.show_slider_real = self.participant.vars['show_slider_real']
+        if 'show_own_claim_real' in self.participant.vars:
+            self.show_own_claim_real = self.participant.vars['show_own_claim_real']
+
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.control_feed_condition_row)[0]
         claims = [row_data[f'Claim {i}'] for i in range(1, 6)
                   if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
+        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+        # Generate and STORE both random values
+        player.participant.vars['show_slider_real'] = random.choice([True, False])
         player.participant.vars['show_own_claim_real'] = random.choice([True, False])
         return dict(
             claim_choices_real=list(enumerate(claims, start=1)),
@@ -1509,11 +1604,23 @@ class D_DirectQuestions_Real_Second_DoesNotFeelTrue(Page):
         else:
             print("Real_Second_DoesNotFeelTrue: skipped because AI round != feels true")
             return False
+
+    def before_next_page(self, timeout_happened):
+        # Only save if the value actually exists
+        if 'second_question' in self.participant.vars:
+            self.second_question = self.participant.vars['second_question']
+        if 'show_slider_real' in self.participant.vars:
+            self.show_slider_real = self.participant.vars['show_slider_real']
+        if 'show_own_claim_real' in self.participant.vars:
+            self.show_own_claim_real = self.participant.vars['show_own_claim_real']
     @staticmethod
     def vars_for_template(player):
         row_data = json.loads(player.control_feed_condition_row)[0]
         claims = [row_data[f'Claim {i}'] for i in range(1, 6)
                   if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
+        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+        # Generate and STORE both random values
+        player.participant.vars['show_slider_real'] = random.choice([True, False])
         player.participant.vars['show_own_claim_real'] = random.choice([True, False])
         return dict(
             claim_choices_real=list(enumerate(claims, start=1)),
@@ -1546,6 +1653,12 @@ class E_Logistics_Early(Page):
     @staticmethod
     def is_displayed(player):
         return player.participant.vars.get('logistics_early', True)
+
+
+    # In any page that all players see, or in creating_session
+    def before_next_page(self, timeout_happened):
+        if 'logistics_early' in self.participant.vars:
+            self.logistics_early = self.participant.vars['logistics_early']
 
     @staticmethod
     def vars_for_template(player):
@@ -1586,6 +1699,10 @@ class E_Logistics_After(Page):
     @staticmethod
     def is_displayed(player):
         return not player.participant.vars.get('logistics_early', False)
+
+    def before_next_page(self, timeout_happened):
+        if 'logistics_early' in self.participant.vars:
+            self.logistics_early = self.participant.vars['logistics_early']
 
     @staticmethod
     def vars_for_template(player):
@@ -1710,7 +1827,24 @@ class I_PostDebrief(Page):
     form_fields = ['study_topic', 'ethics_influence_political_prefs', 'benefits_understanding_watermarks']
 
 class EndSurvey(Page):
-    pass
+    form_model = 'player'
+
+    @staticmethod
+    def is_displayed(player):
+        return player.participant.vars.get('consent') == 'yes'
+
+    @staticmethod
+    def js_vars(player):
+        return dict(
+            completionlink=
+            player.subsession.session.config['completionlink']
+        )
+        # Set a timeout to automatically advance after showing the thank you message
+        timeout_seconds = 5  # Page will auto-advance after 5 seconds
+
+    def before_next_page(self, timeout_happened):
+            # You could log completion, set flags, etc.
+        pass
 
 page_sequence = [
     A_Consent,

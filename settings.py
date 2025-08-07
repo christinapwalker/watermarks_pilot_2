@@ -4,17 +4,19 @@ DEBUG = True
 
 SESSION_CONFIGS = [ # defining a session
     dict(
-        name='Watermarks_Experiment',
-        display_name="Watermarks Experiment",
+        name='User_Engagement_with_Social_Media_Posts',
+        display_name="User Engagement with Social Media Posts",
         app_sequence=['DICE'],
-        num_demo_participants=3
+        num_demo_participants=3,
+        completionlink=
+        'https://app.prolific.com/submissions/complete?cc=C12LYO01',
     )
 ]
 
 ROOMS = [
     dict(
-        name='watermark_room_test',          # unique room name (used in URLs)
-        display_name='Watermark Study', # friendly room name shown in admin
+        name='users_socialmedia',          # unique room name (used in URLs)
+        display_name='User Engagement with Social Media Posts', # friendly room name shown in admin
     ),
 ]
 
