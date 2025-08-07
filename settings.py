@@ -8,6 +8,7 @@ SESSION_CONFIGS = [ # defining a session
         display_name="User Engagement with Social Media Posts",
         app_sequence=['DICE'],
         num_demo_participants=3,
+        completionlink='https://app.prolific.com/submissions/complete?cc=C12LYO01',
     )
 ]
 
@@ -33,7 +34,7 @@ SESSION_CONFIG_DEFAULTS = dict(
     full_name = '',
     eMail = '',
     survey_link = 'https://your-link-here.com',
-    url_param = 'PROLIFIC_PID',
+    # url_param = 'PROLIFIC_PID',
     briefing = '', # '<h5>This could be your briefing</h5><p>Use HTML syntax to format your content to your liking.</p>',
     data_path='DICE/static/data/tweets.csv', # 'https://raw.githubusercontent.com/Howquez/oFeeds/main/software/DICE/DICE/static/data/tweets.csv', #'DICE/DICE/data/tweets.csv',
     sort_by='datetime',
@@ -52,7 +53,7 @@ SESSION_CONFIG_DEFAULTS = dict(
 
 
 PARTICIPANT_FIELDS = ['tweets', 'finished']
-SESSION_FIELDS = ['prolific_completion_url', 'completion_code']
+# SESSION_FIELDS = ['prolific_completion_url', 'completion_code']
 
 # ISO-639 code
 # for example: de, fr, ja, ko, zh-hans

@@ -1092,25 +1092,24 @@ def preprocessing(df):
 
 
 
-def create_redirect(player):
-    if player.participant.label:
-        link = player.session.config['survey_link'] + '?' + player.session.config['url_param'] + '=' + player.participant.label
-    else:
-        link = player.session.config['survey_link'] + '?' + player.session.config['url_param'] + '=' + player.participant.code
+# def create_redirect(player):
+#     config = player.session.config
+#     participant_label = player.participant.label or player.participant.code
+#
+#     link = f"{config['survey_link']}?{config['url_param']}={participant_label}"
+#
+#     # Optional completion code (from session.vars)
+#     completion_code = player.session.vars.get('completion_code')
+#     if completion_code:
+#         link += f"&cc={completion_code}"
+#
+#     # Optional condition
+#     feed_condition = getattr(player, 'feed_condition', None)
+#     if feed_condition:
+#         link += f"&condition={feed_condition}"
+#
+#     return link
 
-    completion_code = None
-
-    # if 'prolific_completion_url' in player.session.config and player.session.config['prolific_completion_url'] is not None:
-        # completion_code = player.session.config['prolific_completion_url'][-8:]
-
-    if 'completion_code' in player.session.vars:
-        if player.session.vars['completion_code'] is not None:
-            link = link + '&' + 'cc=' + player.session.vars['completion_code']
-
-    if player.feed_condition is not None:
-        link = link + '&' + 'condition=' + player.feed_condition
-
-    return link
 
 
 
@@ -1121,15 +1120,15 @@ class A_Consent(Page):
     form_model = 'player'
     form_fields = ['consent']
 
-    def before_next_page(player, timeout_happened): # this is from original template, it should return them to prolific, but unclear if it does
-        if player.consent == 'no':
-            player.participant.vars['consent'] = 'no'
-            player.participant.vars['completed'] = True
-            player._payoff = c(0)
-            return
+    # def before_next_page(player, timeout_happened): # this is from original template, it should return them to prolific, but unclear if it does
+    #     if player.consent == 'no':
+    #         player.participant.vars['consent'] = 'no'
+    #         player.participant.vars['completed'] = True
+    #         player._payoff = c(0)
+    #         return
 
-    def is_displayed(player):
-        return not player.participant.vars.get('completed', False)
+    # def is_displayed(player):
+    #     return not player.participant.vars.get('completed', False)
 
 
 
@@ -1153,6 +1152,9 @@ class B_SMPsTrust(Page):
         'smp_news_pre',
     ]
 
+    @staticmethod
+    def before_next_page(self, timeout_happened):
+        self.prolific_id = self.participant.label
 
 
 
@@ -1836,42 +1838,53 @@ class I_PostDebrief(Page):
     form_model = "player"
     form_fields = ['study_topic', 'ethics_influence_political_prefs', 'benefits_understanding_watermarks']
 
-    @staticmethod
-    def before_next_page(player, timeout_happened):
-        player.participant.finished = True
-        if 'prolific_completion_url' in player.session.vars:
-            if player.session.vars['prolific_completion_url'] is not None:
-                if 'completion_code' in player.session.vars:
-                    if player.session.vars['completion_code'] is not None:
-                        player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + player.session.vars['completion_code']
-                    else:
-                        player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-                else: player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-            else:
-                player.session.vars['prolific_completion_url'] = 'NA'
-        else:
-            player.session.vars['prolific_completion_url'] = 'NA'
+    # @staticmethod
+    # def before_next_page(player, timeout_happened):
+    #     player.participant.finished = True
+    #     if 'prolific_completion_url' in player.session.vars:
+    #         if player.session.vars['prolific_completion_url'] is not None:
+    #             if 'completion_code' in player.session.vars:
+    #                 if player.session.vars.get('completion_code') is not None:
+    #                     player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + player.session.vars['completion_code']
+    #                 else:
+    #                     player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
+    #             else: player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
+    #         else:
+    #             player.session.vars['prolific_completion_url'] = 'NA'
+    #     else:
+    #         player.session.vars['prolific_completion_url'] = 'NA'
+    #
+    #     if player.id_in_group != 1:
+    #         player.participant.tweets = ""
 
-        if player.id_in_group != 1:
-            player.participant.tweets = ""
+# class I_Redirect(Page):
+#     @staticmethod
+#     def is_displayed(player):
+#         return len(player.session.config['survey_link']) > 0
+#
+#     @staticmethod
+#     def vars_for_template(player: Player):
+#         return dict(link=create_redirect(player))
+#
+#     @staticmethod
+#     def js_vars(player):
+#         return dict(link=create_redirect(player))
 
-class I_Redirect(Page):
-    @staticmethod
+class EndSurvey(Page):
+    form_model = 'player'
+
     def is_displayed(player):
-        return len(player.session.config['survey_link']) > 0
-
-    @staticmethod
-    def vars_for_template(player: Player):
-        return dict(link=create_redirect(player))
+        participant = player.participant
+        return participant.consent == True
 
     @staticmethod
     def js_vars(player):
-        return dict(link=create_redirect(player))
+        return dict(
+            completionlink=
+            player.subsession.session.config['completionlink']
+        )
 
-class EndSurvey(Page):
-    @staticmethod
-    def is_displayed(player):
-        return len(player.session.config['survey_link']) == 0
+    pass
 
 
 page_sequence = [
@@ -1896,7 +1909,6 @@ page_sequence = [
     H_Demographics,
     H_Debrief,
     I_PostDebrief,
-    I_Redirect,
     EndSurvey,
 ]
 
