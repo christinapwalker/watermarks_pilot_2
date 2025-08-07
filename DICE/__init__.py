@@ -1833,25 +1833,9 @@ class I_PostDebrief(Page):
     form_model = "player"
     form_fields = ['study_topic', 'ethics_influence_political_prefs', 'benefits_understanding_watermarks']
 
-# class EndSurvey(Page):
-#     form_model = 'player'
-#
-#     @staticmethod
-#     def is_displayed(player):
-#         return player.participant.vars.get('consent') == 'yes'
-#
-#     @staticmethod
-#     def js_vars(player):
-#         return dict(
-#             completionlink=
-#             player.subsession.session.config['completionlink']
-#         )
-#         # Set a timeout to automatically advance after showing the thank you message
-#         timeout_seconds = 5  # Page will auto-advance after 5 seconds
-#
-#     def before_next_page(self, timeout_happened):
-#             # You could log completion, set flags, etc.
-#         pass
+class EndSurvey(Page):
+    pass
+
 
 page_sequence = [
     A_Consent,
@@ -1875,6 +1859,7 @@ page_sequence = [
     H_Demographics,
     H_Debrief,
     I_PostDebrief,
+    EndSurvey,
 ]
 
 

@@ -1,5 +1,5 @@
 {% block content %}
-<form method="post" id="main-form">
+<form method="post">
 
 <style>
 /* Container for image and marker */
@@ -303,6 +303,11 @@ button[type="submit"]:hover {
     </div>
 </div>
 
+  <div class="submit-container">
+    <button type="submit" id="submitButton" aria-label="Submit survey responses">
+      ➔
+    </button>
+  </div>
 </form>
 
 <script>
@@ -351,9 +356,9 @@ function updateinfluence_politics(input) {
     }
 }
 
-// Enhanced validation function matching other pages - BUT ONLY FOR THE MAIN FORM
-function validateMainForm() {
-    console.log('validateMainForm() called');
+// Enhanced validation function matching other pages
+function validateForm() {
+    console.log('validateForm() called');
 
     // Define field names with their user-friendly labels
     const requiredFields = {
@@ -362,9 +367,9 @@ function validateMainForm() {
         'benefits_understanding_watermarks': 'How much this study helped you understand watermarks'
     };
 
-    const form = document.getElementById('main-form');
+    const form = document.querySelector('form');
     if (!form) {
-        console.log('Main form not found');
+        console.log('Form not found');
         return true; // Let it submit if we can't find form
     }
 
@@ -451,7 +456,7 @@ window.onload = function() {
     if (slider2) updatebenefits_understanding_watermarks(slider2);
 };
 
-// Enhanced event listeners - BUT ONLY FOR THE MAIN FORM
+// Enhanced event listeners matching other pages
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, setting up validation...');
 
@@ -459,25 +464,25 @@ document.addEventListener('DOMContentLoaded', function() {
     window.politicalInfluenceInteracted = false;
     window.watermarksUnderstandingInteracted = false;
 
-    // Only validate the main form, not the thank you form
-    const mainForm = document.getElementById('main-form');
-    if (mainForm) {
-        mainForm.addEventListener('submit', function(e) {
-            console.log('Main form submit event listener caught');
-            if (!validateMainForm()) {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+        // Try to intercept with capturing phase
+        form.addEventListener('submit', function(e) {
+            console.log('Event listener caught submit');
+            if (!validateForm()) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 return false;
             }
-        }, true);
-    }
+        }, true); // Use capturing phase
+    });
 
-    // Add real-time validation feedback ONLY to main form
+    // Add real-time validation feedback
     function addRealTimeValidation() {
-        const form = document.getElementById('main-form');
+        const form = document.querySelector('form');
         if (!form) return;
 
-        // Add change listeners to all form inputs in main form only
+        // Add change listeners to all form inputs
         const allInputs = form.querySelectorAll('input, select, textarea');
         allInputs.forEach(function(input) {
             input.addEventListener('change', function() {
@@ -502,51 +507,45 @@ document.addEventListener('DOMContentLoaded', function() {
     addRealTimeValidation();
 });
 
-// Only intercept clicks on submit elements within the main form
+// Also try intercepting all clicks on submit elements
 document.addEventListener('click', function(e) {
     if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
-        // Check if this submit button is in the main form
-        const mainForm = document.getElementById('main-form');
-        if (mainForm && mainForm.contains(e.target)) {
-            console.log('Main form submit element clicked, validating...');
-            if (!validateMainForm()) {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                return false;
-            }
+        console.log('Submit element clicked, validating...');
+        if (!validateForm()) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
         }
-        // If it's not in the main form (like the thank you button), let it proceed normally
     }
 }, true);
 </script>
 
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-sm-10 col-md-10 col-lg-8">
-            <div class="card rounded mt-3 shadow-lg">
-                <div class="card-body">
-                    <h1 class="display-4">Thank you!</h1>
-                    <p class="lead">Your participation is greatly appreciated.</p>
+<!--<div class="container">-->
+<!--    <div class="row justify-content-center mt-5">-->
+<!--        <div class="col-sm-10 col-md-10 col-lg-8">-->
+<!--            <div class="card rounded mt-3 shadow-lg">-->
+<!--                <div class="card-body">-->
+<!--                    <h1 class="display-4">Thank you!</h1>-->
+<!--                    <p class="lead">Your participation is greatly appreciated.</p>-->
 
-                    <table class="table mt-2 mb-5 table-responsive">
+<!--                    <table class="table mt-5 mb-5 table-responsive">-->
 
-                    </table>
-                    <p class="text-center text-secondary mb-4">
-                        {% if session.prolific_completion_url == 'NA' %}
-                        <form method="post" id="thank-you-form">
-                            <button type="submit" class="btn btn-lg shadow w-100 py-3" style="border-radius: 0; background-color: #2c7be5; border-color: #2c7be5; color: white;">
-                                Click here to complete the survey
-                            </button>
-                        </form>
-                        {% else %}
-                        <a class="btn btn-lg shadow w-100 py-3" href="{{ session.prolific_completion_url }}" role="button" style="border-radius: 0; background-color: #2c7be5; border-color: #2c7be5; color: white;">
-                            Click here to complete the survey
-                        </a>
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<!--                    </table>-->
+<!--                    <p class="text-center text-secondary mb-4">-->
+<!--                        {% if session.prolific_completion_url == 'NA' %}-->
+<!--                        <button class="btn btn-success shadow">-->
+<!--                            Click here to complete the survey-->
+<!--                        </button>-->
+<!--                        {% else %}-->
+<!--                        <a class="btn btn-success shadow" href="{{ session.prolific_completion_url }}" role="button">-->
+<!--                            Click here to complete the survey-->
+<!--                        </a>-->
+<!--                        {% endif %}-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
 {% endblock %}
