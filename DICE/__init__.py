@@ -49,6 +49,7 @@ class Group(BaseGroup):
 
 # Create variables to capture:
 class Player(BasePlayer):
+    prolific_id = models.StringField(default=str(" "))
     first_question = models.StringField(blank=True)
     itemcount_first = models.BooleanField(blank=True, initial=False)
     second_question = models.StringField(blank=True)
@@ -1873,9 +1874,7 @@ class I_PostDebrief(Page):
 class EndSurvey(Page):
     form_model = 'player'
 
-    def is_displayed(player):
-        participant = player.participant
-        return participant.consent == True
+
 
     @staticmethod
     def js_vars(player):

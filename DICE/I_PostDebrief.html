@@ -451,10 +451,16 @@ function validateForm() {
 // Optional: initialize descriptions on page load
 window.onload = function() {
     const slider1 = document.querySelector('input[name="ethics_influence_political_prefs"]');
-    if (slider1) updateinfluence_politics(slider1);
+    if (slider1 && window.politicalInfluenceInteracted) {
+        updateinfluence_politics(slider1);
+    }
+
     const slider2 = document.querySelector('input[name="benefits_understanding_watermarks"]');
-    if (slider2) updatebenefits_understanding_watermarks(slider2);
+    if (slider2 && window.watermarksUnderstandingInteracted) {
+        updatebenefits_understanding_watermarks(slider2);
+    }
 };
+
 
 // Enhanced event listeners matching other pages
 document.addEventListener('DOMContentLoaded', function() {
@@ -519,5 +525,6 @@ document.addEventListener('click', function(e) {
     }
 }, true);
 </script>
+
 
 {% endblock %}

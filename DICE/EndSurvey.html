@@ -2,37 +2,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-sm-10 col-md-10 col-lg-8">
-            <div class="card rounded mt-3 shadow-lg">
-                <div class="card-body">
-                    <h1 class="display-4">Thank you!</h1>
-                    <p class="lead">Your participation is greatly appreciated.</p>
 
-                    <table class="table mt-2 mb-5 table-responsive">
-                        <!-- Add table content here if needed -->
-                    </table>
-
-                    <p class="text-center text-secondary mb-4">
-                        {% if session.prolific_completion_url == 'NA' %}
-                        <form method="post" id="thank-you-form">
-                            <button type="submit" class="btn btn-lg shadow w-100 py-3" style="border-radius: 0; background-color: #2c7be5; border-color: #2c7be5; color: white;">
-                                Click here to complete the survey
-                            </button>
-                        </form>
-                        {% else %}
-                        <a class="btn btn-lg shadow w-100 py-3" href="{{ session.prolific_completion_url }}" role="button" style="border-radius: 0; background-color: #2c7be5; border-color: #2c7be5; color: white;">
-                            Click here to complete the survey
-                        </a>
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
 
 <script>
     let completionlink = js_vars.completionlink;
@@ -41,3 +11,5 @@
         window.location.href=completionlink;
     }
 </script>
+{% endblock %}
+
