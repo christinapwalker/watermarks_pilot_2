@@ -1101,8 +1101,8 @@ def create_redirect(player):
 
     completion_code = None
 
-    # if 'prolific_completion_url' in player.session.config and player.session.config['prolific_completion_url'] is not None:
-        # completion_code = player.session.config['prolific_completion_url'][-8:]
+    if 'prolific_completion_url' in player.session.config and player.session.config['prolific_completion_url'] is not None:
+        completion_code = player.session.config['prolific_completion_url'][-8:]
 
     if 'completion_code' in player.session.vars:
         if player.session.vars['completion_code'] is not None:
@@ -1118,6 +1118,16 @@ def create_redirect(player):
 class A_Consent(Page):
     form_model = 'player'
     form_fields = ['consent']
+
+    def before_next_page(player, timeout_happened): # this is from original template, it should return them to prolific, but unclear if it does
+        if player.consent == 'no':
+            player.participant.vars['consent'] = 'no'
+            player.participant.vars['completed'] = True
+            player._payoff = c(0)
+            return
+
+    def is_displayed(player):
+        return not player.participant.vars.get('completed', False)
 
 
 
@@ -1217,7 +1227,7 @@ class C_Feed(Page):
                     if player.session.vars['completion_code'] is not None:
                         player.session.vars[
                             'prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + \
-                                                         player.session.vars['completion_code']
+                                                         player.session.vars['C12LYO01']
                     else:
                         player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
                 else:
@@ -1868,7 +1878,6 @@ page_sequence = [
     H_Demographics,
     H_Debrief,
     I_PostDebrief,
-    EndSurvey,
 ]
 
 
