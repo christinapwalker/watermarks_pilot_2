@@ -270,7 +270,7 @@
         window.sliderInteractions['confidence_accurate'] = true;
 
         document.getElementById('confidence_input').value = input.value;
-        const percentageConfidence = (parseInt(input.value) / 10) * 100;
+        const percentageConfidence = parseInt(input.value);
         document.getElementById('description-confidence').innerText = `${percentageConfidence}% Confident`;
 
         // Clear error styling when user interacts
@@ -379,7 +379,7 @@
 
     <div class="slider-container" id="confidence-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" min="0" max="10" oninput="updateConfidence(this)" id="confidence-slider">
+        <input type="range" min="0" max="100" oninput="updateConfidence(this)" id="confidence-slider">
         <span class="slider-label-right">100% Confidence</span>
     </div>
     <input type="hidden" name="confidence_accurate" id="confidence_input">

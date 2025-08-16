@@ -3,21 +3,11 @@ from otree.api import *
 import pandas as pd
 import numpy as np
 import re
-import os
 import random
-import httplib2
-from itertools import cycle
 from collections import defaultdict
 from . import image_utils
-import pytz
 import json
-
-# from otree.api import (
-#     models, widgets, BaseConstants, BaseSubsession, BaseGroup, BasePlayer, Currency as c, currency_range
-# )
-# from django.utils.translation import ugettext_lazy as _
-# from django.template.loader import render_to_string
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 doc = """
 Mimic social media feeds with DICE template. 
@@ -41,14 +31,14 @@ class Subsession(BaseSubsession):
     pass
 
 
-
 class Group(BaseGroup):
     pass
-
-
-
 # Create variables to capture:
+
+
 class Player(BasePlayer):
+    tweets_json = models.StringField()
+    image_options_json = models.StringField()
     prolific_id = models.StringField(default=str(" "))
     first_question = models.StringField(blank=True)
     itemcount_first = models.BooleanField(blank=True, initial=False)
@@ -66,22 +56,14 @@ class Player(BasePlayer):
     show_slider_real = models.BooleanField()
     show_slider_ai = models.BooleanField()
     show_own_claim_ai = models.BooleanField()
-
-
-    saw_own_claim_real = models.BooleanField()
-    saw_own_claim_ai = models.BooleanField()
-    shown_claims_ai = models.LongStringField(blank=True)
-    image_feelstrue_followup = models.LongStringField(blank=True, null=True)
-
-    image_feelsnottrue_followup = models.LongStringField(blank=True, null=True)
-    image_feelstrue = models.StringField(blank=True)
+    image_feelstrue_followup = models.StringField(blank=True, null=True)
+    image_feelsnottrue_followup = models.StringField(blank=True, null=True)
     image_feelsnottrue_answered = models.BooleanField(initial=False)
     image_feelstrue_answered = models.BooleanField(initial=False)
 
     # ad_condition = models.StringField(doc='indicates the ad condition a player is randomly assigned to') delete?
     # Metadata variables:
     disclaimer = models.StringField(blank=True, null=True)
-    page_sequence = models.StringField()
     screenshot_control = models.StringField()
     screenshot_treatment = models.StringField(blank=True, null=True)
     click_x_real = models.FloatField(blank=True)
@@ -94,20 +76,17 @@ class Player(BasePlayer):
     feed_condition = models.StringField(doc='indicates the feed condition a player is randomly assigned to')
     watermark_condition = models.StringField(doc='indicates the watermark condition a player is randomly assigned to')
     sequence = models.StringField(doc='prints the sequence of tweets based on doc_id')
-    image1 = models.IntegerField(doc='indicates the first tweet shown based on doc_id')
-    image2 = models.IntegerField(doc='indicates the second tweet shown based on doc_id')
-    image3 = models.IntegerField(doc='indicates the third tweet shown based on doc_id')
-    image4 = models.IntegerField(doc='indicates the fourth tweet shown based on doc_id')
-    image5 = models.IntegerField(doc='indicates the fifth tweet shown based on doc_id')
-    # cta = models.BooleanField(doc='indicates whether CTA was clicked or not') is this the watermark?
+    # cta = models.BooleanField(doc='indicates whether CTA was clicked or not') # is this the watermark?
     scroll_sequence = models.LongStringField(doc='tracks the sequence of feed items a participant scrolled through.')
     viewport_data = models.LongStringField(doc='tracks the time feed items were visible in a participants viewport.')
     likes_data = models.LongStringField(doc='tracks likes.', blank=True)
     replies_data = models.LongStringField(doc='tracks replies.', blank=True)
+    retweets_data = models.LongStringField(doc='tracks retweets.', blank=True)
+
     touch_capability = models.BooleanField(doc="indicates whether a participant uses a touch device to access survey.",
                                            blank=True)
     device_type = models.StringField(doc="indicates the participant's device type based on screen width.",
-                                           blank=True)
+                                     blank=True)
     # Consent
     consent = models.StringField(
         choices=[
@@ -134,11 +113,6 @@ class Player(BasePlayer):
     )
 
     # AI/SMP questions pre-treatment:
-    smp_trust_users_pre = models.StringField(
-        choices=['Not at all', 'Slightly', 'Moderately', 'Very', 'Extremely'],
-        widget=widgets.RadioSelect,
-        label='I generally trust that users on social media platforms will post accurate information.'
-    )
 
     smp_entertaining_pre = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
@@ -146,11 +120,6 @@ class Player(BasePlayer):
         label="I find the content on social media platforms entertaining"
     )
 
-    smp_trust_execs_pre = models.StringField(
-        choices=['Not at all', 'Slightly', 'Moderately', 'Very', 'Extremely'],
-        widget=widgets.RadioSelect,
-        label='I trust social media executives to ensure accurate information'
-    )
     smp_accuracy_pre = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
@@ -176,42 +145,20 @@ class Player(BasePlayer):
     )
     # How much, if at all, do you trust the information you get from... need to randomize order
     # from pew https://www.pewresearch.org/wp-content/uploads/sites/20/2024/10/SR_24.10.16_media-trust-topline.pdf
-
-
     # Assessment of All Images (item count questions):
     accurate_all = models.IntegerField(
         label="How many of the images on the previous social media page do you believe are accurate?",
-        choices=list(range(0,6))
+        choices=list(range(0, 6))
     )
     confidence_accurate = models.IntegerField(
         label="How confident are you in your assessment of accurate images?",
-        choices=list(range(0,11))
-    )
-    aigen_all = models.IntegerField(
-        label="How many of the images on the previous social media page do you believe are AI-generated?", # has to equal 5-accurate_all
-        choices=list(range(0,6))
-    )
-    confidence_aigen = models.IntegerField(
-        label="How confident are you in your assessment of AI-generated images?",
-        choices=list(range(0,11))
+        choices=list(range(0, 101))  # Changed from range(0, 11) to range(0, 101)
     )
     share = models.IntegerField(
         label="How many of the posts on the social media page would you share?",
-        choices=list(range(0,6))
+        choices=list(range(0, 6))
     )
-    # bot_check_1 = models.IntegerField(
-    #     choices=[1, 7, 3, 13, -7],
-    #     widget=widgets.RadioSelect,
-    #     label="Please select the number three:")
-    #
-
-    # Image 2
-    image_accuracy_ai = models.StringField(
-        choices=[['AI-generated', 'Yes'], ['Accurate', 'No']],
-        widget=widgets.RadioSelectHorizontal,
-        label="Based on your own assessment, is the image in the post above AI-generated?"
-    )
-
+    image_accuracy_ai = models.StringField(blank=True)
     why_click_ai = models.LongStringField(
         label="Why did you click on that spot?",
         blank=False
@@ -220,130 +167,31 @@ class Player(BasePlayer):
         label="Why did you click on that spot?",
         blank=False
     )
-
-    image_claim_ai = models.IntegerField(
-        label="Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.",
-        choices=[
-            (1, 'Placeholder 1'),
-            (2, 'Placeholder 2'),
-            (3, 'Placeholder 3'),
-            (4, 'Placeholder 4'),
-            (5, 'Placeholder 5'),
-        ],
-        widget=widgets.RadioSelect,
-        blank=True,
-    )
-    image_claim_true_ai = models.StringField(
-        label="To what extent do you think that [pipe text from option they chose above] is literally true?",
-        choices=[
-            ('It is true', 'It is true'),
-            ('It is not true', 'It is not true'),
-        ],
-        widget=widgets.RadioSelect,
-        blank=True,
-    )
-    image_feelstrue_ai = models.StringField(choices=[
-            ('Definitely does not feel true', 'Definitely does not feel true'),
-        ("Mostly does not feel true", "Mostly does not feel true"),
-        ("Not sure", "Not sure"),
-        ("Mostly feels true", "Mostly feels true"),
-        ("Definitely feels true", "Definitely feels true"),
-    ],
-        blank=True,
-    )
-    image_feelstrue_binary_ai = models.StringField(
-        choices=[
-            ('Does not feel true', 'Does not feel true'),
-            ('Feels true', 'Feels true'),
-        ],
-        blank=True,
-    )
-    image_feelstrue_binary_real = models.StringField(
-        choices=[['Feels true', 'Feels true'], ['Does not feel true', 'Does not feel true']],
-        widget=widgets.RadioSelect,
-        label="Does the claim feel true?",
-        blank=True
-    )
-    image_reason_ai = models.IntegerField(
-        label="On the post above, please click on the part that makes you believe the image was {accurate/AI-generated}."
-    )
-    image_confidence_ai = models.IntegerField(blank=False, min=0, max=10)
-
-    claim_response_real = models.StringField(
-        label = "Regardless if the image in the post is an accurate image or AI-generated, what claim do you believe the post is making?",
-        blank = True,
-        required = None
-    )
-    claim_response_ai = models.StringField(
-        label="Regardless if the image in the post is an accurate image or AI-generated, what claim do you believe the post is making?",
-        blank=True,
-    )
-    claim_accuracy_ai = models.IntegerField(
-        label = "Regardless if the image in the post is a real image or not, do you believe the claim of the post is accurate?",
-        choices=['Not at all', 'Slightly', 'Moderately', 'Very', 'Extremely'],
-        widget=widgets.RadioSelect
-    )
-
-    # Image 2
-    image_accuracy_real = models.StringField(
-        choices=[['AI-generated', 'Yes'], ['Accurate', 'No']],
-        widget=widgets.RadioSelect,
-        label="Is the image AI-generated?"
-    )
-
-    image_reason_real = models.IntegerField(
-        label="On the post above, please click on the part that makes you believe the image was {accurate/AI-generated}."
-    )
-
-    image_confidence_real = models.IntegerField(
-        label="How confident are you in your assessment of AI-generated images?",
-        choices=list(range(0,11))
-    )
-    claim_response_real = models.StringField(
-        label="Regardless if the image in the post is an accurate image or AI-generated, what claim do you believe the post is making?",
-        blank=True,
-        required=None
-    )
+    image_claim_ai = models.StringField(blank=True)
+    image_claim_true_ai = models.StringField(blank=True)
+    image_feelstrue_ai = models.StringField(blank=True)
+    image_feelstrue_binary_ai = models.StringField(blank=True)
+    image_feelstrue_binary_real = models.StringField(blank=True)
+    image_confidence_ai = models.IntegerField(blank=True)
+    claim_response_ai = models.LongStringField(blank=True)
+    claim_response_real = models.LongStringField(blank=True)
+    image_accuracy_real = models.StringField(blank=True)
+    image_confidence_real = models.IntegerField(blank=True)
+    image_claim_true_real = models.StringField(blank=True)
     image_claim_real = models.StringField(
         blank=True  # claim choices are dynamically added, so don't predefine choices
     )
-    image_claim_true_real = models.StringField(
-        choices=[['It is true', 'It is true'], ['It is not true', 'It is not true']],
-        widget=widgets.RadioSelect,
-        label="To what extent is the claim true?"
-    )
-    image_claim_feelstrue_real = models.IntegerField(
-        label="Regardless of whether you think the claim of the post is literally true, to what extent do you think the post represents something that feels true about the world?",
-        choices=['Does not feel true', 'Feels true'], widget=widgets.RadioSelect,
-    )
     image_feelstrue_real = models.StringField(choices=[
             ('Definitely does not feel true', 'Definitely does not feel true'),
-        ("Mostly does not feel true", "Mostly does not feel true"),
-        ("Not sure", "Not sure"),
-        ("Mostly feels true", "Mostly feels true"),
-        ("Definitely feels true", "Definitely feels true"),
+            ("Mostly does not feel true", "Mostly does not feel true"),
+            ("Not sure", "Not sure"),
+            ("Mostly feels true", "Mostly feels true"),
+            ("Definitely feels true", "Definitely feels true"),
     ],
         blank=True,
     )
-    claim_accuracy_real = models.IntegerField(
-        label="Regardless if the image in the post is a real image or not, do you believe the claim of the post is accurate?",
-        choices=['Not at all', 'Slightly', 'Moderately', 'Very', 'Extremely'],
-        widget=widgets.RadioSelect
-    )
 
-    # AI/SMP questions pre-treatment:
-    frequency_smps = models.StringField(
-        choices=['Several times a day', 'About once a day', 'A few days a week', 'Every few weeks', 'Less often',
-                 'Never', 'Don\'t know'],
-        label="Thinking about social media sites, how often do you visit or use the following?",
-        # from Pew, https://www.pewresearch.org/wp-content/uploads/sites/9/2015/01/SurveyQuestions.pdf
-        # Thinking about the social networking sites you use....About how often do you visit or use [insert]? Severla times a day, about once a day, a few days a aweek, every few weeks or less often?
-        widget=widgets.RadioSelect,
-    required=None)
-    # Several times a day, about once a day, a few days a week, every few weeks, less often, never, don't know.
-    # randomized platforms: twitter, instagram, pinterest, linkedin, facebook, threads, tiktok, truth social, bluesky
     tweet_data = models.LongStringField()
-
 
 # AI/SMP Questions Post-Treatment:
     llm_familiarity = models.StringField(
@@ -361,120 +209,58 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect
     )
 
-    smp_entertaining_pre = models.StringField(
-        choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
-        widget=widgets.RadioSelect,
-        label="I find the content on social media platforms entertaining"
-    )
-
     use_instagram = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="Instagram/Threads",
         widget=widgets.RadioSelect
     )
 
     use_pinterest = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="Pinterest",
         widget=widgets.RadioSelect
     )
 
     use_linkedin = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="LinkedIn",
         widget=widgets.RadioSelect
     )
 
     use_facebook = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="Facebook",
         widget=widgets.RadioSelect
     )
 
     use_youtube = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="YouTube",
         widget=widgets.RadioSelect
     )
 
     use_tiktok = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="TikTok",
         widget=widgets.RadioSelect
     )
 
     use_bluesky = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="Bluesky",
         widget=widgets.RadioSelect
     )
 
     use_truthsocial = models.StringField(
-        choices=[
-            ['several_day', 'Several times a day'],
-            ['once_day', 'About once a day'],
-            ['few_week', 'A few days a week'],
-            ['few_weeks', 'Every few weeks'],
-            ['less_often', 'Less often'],
-            ['never', 'Never'],
-            ['dont_know', "Don't know"]
-        ],
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
         label="Truth Social",
         widget=widgets.RadioSelect
     )
@@ -620,27 +406,6 @@ class Player(BasePlayer):
         choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         label='I feel confident in my ability to distinguish real from AI-generated images',
         widget=widgets.RadioSelect)
-    smp_trust_users_post = models.StringField(
-        choices=['Not at all', 'Slightly', 'Moderately', 'Very', 'Extremely'],
-        widget=widgets.RadioSelect,
-        label='I generally trust that users on social media platforms will post accurate information'
-    )
-    smp_trust_execs_post = models.StringField(
-        choices=['Not at all', 'Slightly', 'Moderately', 'Very', 'Extremely'],
-        widget=widgets.RadioSelect,
-        label='I trust social media executives to ensure accurate information'
-    )
-    smp_accuracy_post = models.StringField(
-        choices=[
-            ['not_at_all', 'Not at all'],
-            ['slightly', 'Slightly'],
-            ['moderately', 'Moderately'],
-            ['very', 'Very'],
-            ['extremely', 'Extremely']
-        ],
-        widget=widgets.RadioSelect,
-        label='I trust the accuracy of content on social media platforms'
-    )
 
     smp_entertaining_post = models.StringField(
         choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
@@ -648,11 +413,6 @@ class Player(BasePlayer):
         label="I find the content on social media platforms entertaining"
     )
 
-    smp_trust_execs_post = models.StringField(
-        choices=['Not at all', 'Slightly', 'Moderately', 'Very', 'Extremely'],
-        widget=widgets.RadioSelect,
-        label='I trust social media executives to ensure accurate information'
-    )
     smp_accuracy_post = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
@@ -677,7 +437,6 @@ class Player(BasePlayer):
         label='I get my news from social media platforms'
     )
     benefits_understanding_watermarks = models.IntegerField(min=1, max=5)
-
 
     # Demographics post-treatment:
     age = models.IntegerField(
@@ -740,11 +499,7 @@ class Player(BasePlayer):
         choices=[(1, 'Yes'), (2, 'No')],
         widget=widgets.RadioSelect
     )
-    # interaction = models.IntegerField(
-    #     label="Were you able to interact with the posts (like, repost, or reply) on the previous social media page?",
-    #     choices=[(1, 'Yes, I tried and was able to interact.'), (2, 'No, I tried but could not interact.'), (3, 'I did not try to interact.'), (4, 'Not Sure/Don\'t Remember')],
-    #     widget=widgets.RadioSelect
-    # )
+
     interaction = models.IntegerField(
         choices=[
             (1, 'Yes, I tried and was able to interact.'),
@@ -764,11 +519,7 @@ class Player(BasePlayer):
         choices=[(i, str(i)) for i in range(11)],
         widget=widgets.RadioSelect
     )
-    # watermark_familiarity = models.IntegerField(
-    #     label="Before today, how familiar were you with the idea of watermarks or warning labels on social media?",
-    #     widget=widgets.RadioSelect,
-    #     choices=[(1, 'Very Familiar'), (2, 'Somewhat Familiar'), (3, "Not Familiar At All")],
-    # )
+
     watermark_familiarity = models.IntegerField(
         choices=[
             (1, 'Very familiar'),
@@ -777,12 +528,7 @@ class Player(BasePlayer):
         ],
         widget=widgets.RadioSelect
     )
-    # watermark_manipulation_check = models.IntegerField(
-    #     label="If you recall, did any of the images on the previous social media page have a watermark, label, or content warning?",
-    #     choices=[(1, 'Yes'), (2, 'No'), (3, 'Not Sure')],
-    #     widget=widgets.RadioSelect
-    #     # choices= Select from a list of images or “Not sure/I don’t remember”
-    # )
+
     watermark_manipulation_check = models.IntegerField(
         choices=[
             (1, 'Yes'),
@@ -791,37 +537,28 @@ class Player(BasePlayer):
         ],
         widget=widgets.RadioSelect
     )
-    # watermark_image_check = models.LongStringField(
-    #     label="If you recall, which image(s) had a watermark, label, or content warning?"
-    # )
+
     watermark_image_check = models.LongStringField(blank=True)
-    moreposts_image_check = models.LongStringField(blank=True)
 
     ethics_influence_political_prefs = models.IntegerField(
-        label = 'Move the slider below to indicate to what extent do you believe the study will influence your political preferences:',
+        label='Move the slider below to indicate to what extent do you believe the study will influence your political preferences:',
         min=1, max=5
-    )
-    political_influence = models.IntegerField(
-        min=1, max=5, label ="Move the slider below to indicate to what extent this study helped you understand watermarks:"
     )
 
     # Watermark Questions
     clarity_watermarks = models.StringField(choices=['Not at all', 'Slightly', 'Moderately', 'Very', "Extremely"],
-                                                      label="The watermark/label/information is clear",
-                                                      widget=widgets.RadioSelect)
+                                            label="The watermark/label/information is clear",
+                                            widget=widgets.RadioSelect)
     informative_watermarks = models.StringField(choices=['Not at all', 'Slightly', 'Moderately', 'Very', "Extremely"],
-                                           label="The watermark/label is informative",
-                                           widget=widgets.RadioSelect)
+                                                label="The watermark/label is informative",
+                                                widget=widgets.RadioSelect)
     trustworthy_watermarks = models.StringField(choices=['Not at all', 'Slightly', 'Moderately', 'Very', "Extremely"],
-                                           label="The watermark/label is trustworthy",
-                                           widget=widgets.RadioSelect)
+                                                label="The watermark/label is trustworthy",
+                                                widget=widgets.RadioSelect)
     biased_watermarks = models.StringField(choices=['Not at all', 'Slightly', 'Moderately', 'Very', "Extremely"],
-                                               label="The watermark/label is biased",
-                                               widget=widgets.RadioSelect)
+                                           label="The watermark/label is biased",
+                                           widget=widgets.RadioSelect)
     creates_watermarks = models.StringField(blank=True)
-
-    creates_watermarks_other = models.StringField(blank=True)
-
 
     # Debrief
     understand_AI = models.LongStringField()  # or StringField
@@ -830,8 +567,6 @@ class Player(BasePlayer):
 
 
 # FUNCTIONS -----
-
-
 
 def creating_session(subsession):
     # Read data and preprocess tweets
@@ -849,19 +584,13 @@ def creating_session(subsession):
         player.participant.vars['question_order'] = order
         player.participant.vars['first_question'] = order[0]
         player.participant.vars['second_question'] = order[1]
-
-
         player.participant.vars['logistics_early'] = random.random() < 0.1
         player.participant.tweets = tweets  # initial full tweets dataframe
-
 
     # Group players by party_id to block treatment assignment
     party_id_groups = defaultdict(list)
     for player in subsession.get_players():
         party_id_groups[player.party_id].append(player)
-
-    # Calculate block size for groups (optional, you don't seem to use it after)
-    min_group_size = min(len(group) for group in party_id_groups.values())
 
     # Define treatment types and watermark options
     treatment_types = [
@@ -892,6 +621,23 @@ def creating_session(subsession):
         # Shuffle treatment types for this group
         random.shuffle(treatment_types)
 
+        # Create balanced assignment of watermarks for this group
+        group_size = len(players)
+        watermarks_needed = []
+        full_cycles = group_size // len(watermark_options)
+        remainder = group_size % len(watermark_options)
+
+        # Add full cycles of all watermark options
+        for _ in range(full_cycles):
+            watermarks_needed.extend(watermark_options)
+
+        # Add remainder randomly
+        if remainder > 0:
+            watermarks_needed.extend(random.sample(watermark_options, remainder))
+
+        # Shuffle the final assignment
+        random.shuffle(watermarks_needed)
+
         for i, player in enumerate(players):
             selected_control_posts = []
 
@@ -921,8 +667,8 @@ def creating_session(subsession):
             feed_row = df[df['doc_id'] == assigned_image_id]
             player.feed_condition_row = feed_row.to_json(orient='records') if not feed_row.empty else None
 
-            # Assign random watermark condition
-            player.watermark_condition = random.choice(watermark_options)
+            # Assign watermark from pre-balanced list (blocked by party_id)
+            player.watermark_condition = watermarks_needed[i]
             selected_treatment_post['watermark'] = player.watermark_condition
 
             # Map watermark condition to screenshot column
@@ -968,7 +714,6 @@ def creating_session(subsession):
                         print(f"Player {player.id_in_group}: politics control doc_id = {player.assigned_politics_id}")
                         print("Politics control feed condition row (JSON):", player.control_feed_condition_row)
 
-
             # Combine treatment and control posts into DataFrame
             selected_control_df = pd.DataFrame(selected_control_posts)
             selected_posts_df = pd.concat([selected_treatment_post, selected_control_df], ignore_index=True)
@@ -990,25 +735,12 @@ def creating_session(subsession):
             player.participant.tweets = selected_posts_df
 
 
-
 # make images (if any) visible
 def extract_first_url(text):
-    urls = re.findall("(?P<url>https?://[\S]+)", str(text))
+    urls = re.findall(r"(?P<url>https?://\S+)", str(text))
     if urls:
         return urls[0]
     return None
-
-# check urls
-h = httplib2.Http()
-
-# def check_url_exists(url):
-#     try:
-#         resp = h.request(url, 'HEAD')
-#         return int(resp[0]['status']) < 400
-#     except Exception:
-#         return False
-#
-
 
 
 # function that reads data
@@ -1071,7 +803,6 @@ def preprocessing(df):
     df['user_description'] = df['user_description'].str.replace('"', '')
     df['user_description'] = df['user_description'].fillna(' ')
 
-
     # Make number of followers a formatted string
     df['user_followers'] = df['user_followers'].map('{:,.0f}'.format).str.replace(',', '.')
 
@@ -1092,45 +823,10 @@ def preprocessing(df):
     return df
 
 
-
-# def create_redirect(player):
-#     config = player.session.config
-#     participant_label = player.participant.label or player.participant.code
-#
-#     link = f"{config['survey_link']}?{config['url_param']}={participant_label}"
-#
-#     # Optional completion code (from session.vars)
-#     completion_code = player.session.vars.get('completion_code')
-#     if completion_code:
-#         link += f"&cc={completion_code}"
-#
-#     # Optional condition
-#     feed_condition = getattr(player, 'feed_condition', None)
-#     if feed_condition:
-#         link += f"&condition={feed_condition}"
-#
-#     return link
-
-
-
-
-
-
 # PAGES (ordering, etc.)
 class A_Consent(Page):
     form_model = 'player'
     form_fields = ['consent']
-
-    # def before_next_page(player, timeout_happened): # this is from original template, it should return them to prolific, but unclear if it does
-    #     if player.consent == 'no':
-    #         player.participant.vars['consent'] = 'no'
-    #         player.participant.vars['completed'] = True
-    #         player._payoff = c(0)
-    #         return
-
-    # def is_displayed(player):
-    #     return not player.participant.vars.get('completed', False)
-
 
 
 class B_SMPsTrust(Page):
@@ -1158,16 +854,6 @@ class B_SMPsTrust(Page):
         self.prolific_id = self.participant.label
 
 
-
-    # form_fields = ["party_id", "smp_entertaining_pre", "smp_accuracy_pre", "smp_enjoyment_pre", "smp_community_pre",
-    #                "smp_news_pre", "use_twitter", "use_instagram", "use_pinterest", "use_linkedin", "use_facebook",
-    #                "use_youtube", "use_tiktok", "use_bluesky", "use_truthsocial"]
-    #
-
-
-
-
-
 class C_FeedInstructions(Page):
     form_model = 'player'
 
@@ -1176,14 +862,12 @@ class C_Feed(Page):
     form_model = 'player'
 
     @staticmethod
-
     def get_form_fields(player: Player):
-        fields =  ['likes_data', 'replies_data', 'touch_capability', 'device_type']
-
+        fields = ['likes_data', 'replies_data', 'touch_capability', 'device_type', 'retweets_data']
         if not player.session.config['topics'] & player.session.config['show_cta']:
-            more_fields =  ['scroll_sequence', 'viewport_data'] # , 'cta']
+            more_fields = ['scroll_sequence', 'viewport_data']   # , 'cta']
         else:
-            more_fields =  ['scroll_sequence', 'viewport_data']
+            more_fields = ['scroll_sequence', 'viewport_data']
 
         return fields + more_fields
 
@@ -1222,24 +906,6 @@ class C_Feed(Page):
             tweets_json = player.participant.tweets.to_json(orient='records')
             player.tweet_data = tweets_json
 
-        # ✅ Existing prolific URL logic
-        # player.participant.finished = True
-        # if 'prolific_completion_url' in player.session.vars:
-        #     if player.session.vars['prolific_completion_url'] is not None:
-        #         if 'completion_code' in player.session.vars:
-        #             if player.session.vars['completion_code'] is not None:
-        #                 player.session.vars[
-        #                     'prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + \
-        #                                                  player.session.vars['C12LYO01']
-        #             else:
-        #                 player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-        #         else:
-        #             player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-        #     else:
-        #         player.session.vars['prolific_completion_url'] = 'NA'
-        # else:
-        #     player.session.vars['prolific_completion_url'] = 'NA'
-
 
 class D_ItemCountQuestions_First(Page):
     form_model = 'player'
@@ -1249,6 +915,7 @@ class D_ItemCountQuestions_First(Page):
     def is_displayed(player):
         return player.participant.vars.get('itemcount_first', False)
 
+    @staticmethod
     def before_next_page(self, timeout_happened):
         # Only save if the value actually exists
         if 'itemcount_first' in self.participant.vars:
@@ -1258,18 +925,24 @@ class D_ItemCountQuestions_First(Page):
 class D_ItemCountQuestions_Last(Page):
     form_model = 'player'
     form_fields = ['accurate_all', 'confidence_accurate', 'share']
+
     @staticmethod
     def is_displayed(player):
         return not player.participant.vars.get('itemcount_first', False)
 
+    @staticmethod
     def before_next_page(self, timeout_happened):
         # Only save if the value actually exists
         if 'itemcount_first' in self.participant.vars:
             self.itemcount_first = self.participant.vars['itemcount_first']
+        for field_name in ['accurate_all', 'confidence_accurate', 'share']:
+            new_val = self.field_maybe_none(field_name)
+            if new_val and not getattr(self, field_name, None):
+                setattr(self, field_name, new_val)
+
 
 class D_DirectQuestions_AI_First(Page):
     form_model = 'player'
-
     form_fields = [
         'click_x_ai',
         'click_y_ai',
@@ -1280,7 +953,6 @@ class D_DirectQuestions_AI_First(Page):
         'image_confidence_ai',
         'claim_response_ai',
         'image_claim_true_ai',
-        'saw_own_claim_ai',
         'image_feelstrue_ai',
         'image_feelstrue_binary_ai',
         'why_click_ai'
@@ -1290,20 +962,8 @@ class D_DirectQuestions_AI_First(Page):
     def is_displayed(player):
         return player.participant.vars.get('first_question') == 'AI'
 
-    def before_next_page(self, timeout_happened):
-        # Only save if the value actually exists
-        if 'first_question' in self.participant.vars:
-            self.first_question = self.participant.vars['first_question']
-        if 'show_slider_ai' in self.participant.vars:
-            self.show_slider_ai = self.participant.vars['show_slider_ai']
-        if 'show_own_claim_ai' in self.participant.vars:
-            self.show_own_claim_ai = self.participant.vars['show_own_claim_ai']
-        if 'question_order' in self.participant.vars:
-            self.question_order = json.dumps(self.participant.vars['question_order'])
-
     @staticmethod
     def vars_for_template(player):
-
         row_json_ai = player.control_feed_condition_row
         if not row_json_ai:
             return dict(
@@ -1315,27 +975,61 @@ class D_DirectQuestions_AI_First(Page):
             )
 
         row_data_ai = json.loads(row_json_ai)[0]
-
         claims = [row_data_ai[f'Claim {i}'] for i in range(1, 6)
                   if f'Claim {i}' in row_data_ai and pd.notna(row_data_ai[f'Claim {i}'])]
 
-        player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+        # Generate random values only if not already set
+        if 'show_slider_ai' not in player.participant.vars:
+            player.participant.vars['show_slider_ai'] = random.choice([True, False])
+        if 'show_own_claim_ai' not in player.participant.vars:
+            player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
 
-        # Generate and STORE both random values
-        player.participant.vars['show_slider_ai'] = random.choice([True, False])
-        player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+        # Store in Player for CSV export
+        player.show_slider_ai = player.participant.vars['show_slider_ai']
+        player.show_own_claim_ai = player.participant.vars['show_own_claim_ai']
+
+        # Use string keys instead of integers
+        claim_choices = [(claim, claim) for claim in claims]  # (value, label) both as strings
 
         return dict(
-            claim_choices_ai=list(enumerate(claims, start=1)),
-            show_slider_ai=random.choice([True, False]),
-            show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
+            claim_choices_ai=claim_choices,
+            show_slider_ai=player.show_slider_ai,
+            show_own_claim_ai=player.show_own_claim_ai,
         )
 
+    @staticmethod
+    def before_next_page(player,
+                         timeout_happened):  # FIXED: Changed from (self, timeout_happened) to (player, timeout_happened)
+        """Process form data and save participant vars"""
 
+        # Copy first_question and question_order into Player for CSV export
+        if 'first_question' in player.participant.vars:
+            player.first_question = player.participant.vars['first_question']
+        if 'show_slider_ai' in player.participant.vars:
+            player.show_slider_ai = player.participant.vars['show_slider_ai']
+        if 'show_own_claim_ai' in player.participant.vars:
+            player.show_own_claim_ai = player.participant.vars['show_own_claim_ai']
+        if 'question_order' in player.participant.vars:
+            player.question_order = json.dumps(player.participant.vars['question_order'])
+
+        # Explicitly save follow-up questions (optional, usually automatic)
+        player.image_feelstrue_followup = player.image_feelstrue_followup
+        player.image_feelsnottrue_followup = player.image_feelsnottrue_followup
+
+        # Process all form fields using existing method
+        for field_name in ['why_click_ai', 'image_claim_ai', 'image_claim_true_ai',
+                           'image_feelstrue_ai', 'image_feelstrue_binary_ai',
+                           'image_confidence_ai', 'claim_response_ai', 'image_accuracy_ai']:
+            new_val = player.field_maybe_none(field_name)
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
+                print(f"Saved {field_name}: {new_val}")  # Debug output
+
+        print("=== AI PAGE BEFORE_NEXT_PAGE COMPLETED ===")  # Debug output
 class D_DirectQuestions_Real_First(Page):
     form_model = 'player'
-
     form_fields = [
+        # All your existing fields
         'click_x_real',
         'click_y_real',
         'image_feelstrue_followup',
@@ -1343,30 +1037,40 @@ class D_DirectQuestions_Real_First(Page):
         'image_claim_real',
         'image_feelstrue_real',
         'image_feelstrue_binary_real',
-        'saw_own_claim_real',
-        'why_click_real'
+        'why_click_real',
+        # Add the missing fields
+        'claim_response_real',
+        'image_accuracy_real',
+        'image_confidence_real',
+        'image_claim_true_real'
     ]
 
     @staticmethod
     def is_displayed(player):
         return player.participant.vars.get('first_question') == 'Real'
 
-    def before_next_page(self, timeout_happened):
-        # Only save if the value actually exists
-        if 'first_question' in self.participant.vars:
-            self.first_question = self.participant.vars['first_question']
-        if 'show_slider_real' in self.participant.vars:
-            self.show_slider_real = self.participant.vars['show_slider_real']
-        if 'show_own_claim_real' in self.participant.vars:
-            self.show_own_claim_real = self.participant.vars['show_own_claim_real']
-        if 'question_order' in self.participant.vars:
-            self.question_order = json.dumps(self.participant.vars['question_order'])
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        # Save values from participant.vars into Player fields for CSV export
+        if 'first_question' in player.participant.vars:
+            player.first_question = player.participant.vars['first_question']
+        if 'show_slider_real' in player.participant.vars:
+            player.show_slider_real = player.participant.vars['show_slider_real']
+        if 'show_own_claim_real' in player.participant.vars:
+            player.show_own_claim_real = player.participant.vars['show_own_claim_real']
+        if 'question_order' in player.participant.vars:
+            player.question_order = json.dumps(player.participant.vars['question_order'])
 
+        # Debug: Print current field values
+        print("=== FIELD VALUES AFTER FORM PROCESSING ===")
+        for field_name in ['claim_response_real', 'image_accuracy_real', 'image_confidence_real',
+                           'image_claim_true_real']:
+            value = getattr(player, field_name, 'NOT SET')
+            print(f"{field_name}: {value}")
+        print("=== END DEBUG ===")
 
     @staticmethod
     def vars_for_template(player):
-
-
         row_json_real = player.control_feed_condition_row
         if not row_json_real:
             return dict(
@@ -1378,19 +1082,25 @@ class D_DirectQuestions_Real_First(Page):
             )
 
         row_data_real = json.loads(row_json_real)[0]
+        claims = [
+            row_data_real[f'Claim {i}']
+            for i in range(1, 6)
+            if f'Claim {i}' in row_data_real and pd.notna(row_data_real[f'Claim {i}'])
+        ]
 
-        claims = [row_data_real[f'Claim {i}'] for i in range(1, 6)
-                  if f'Claim {i}' in row_data_real and pd.notna(row_data_real[f'Claim {i}'])]
+        # Generate random values only if not already set
+        if 'show_slider_real' not in player.participant.vars:
+            player.participant.vars['show_slider_real'] = random.choice([True, False])
+        if 'show_own_claim_real' not in player.participant.vars:
+            player.participant.vars['show_own_claim_real'] = random.choice([True, False])
 
-        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
-
-        # Generate and STORE both random values
-        player.participant.vars['show_slider_real'] = random.choice([True, False])
-        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+        # Store them in Player immediately for CSV export
+        player.show_slider_real = player.participant.vars['show_slider_real']
+        player.show_own_claim_real = player.participant.vars['show_own_claim_real']
 
         return dict(
             claim_choices_real=list(enumerate(claims, start=1)),
-            show_slider_real=random.choice([True, False]),
+            show_slider_real=player.participant.vars['show_slider_real'],
             show_own_claim_real=player.participant.vars['show_own_claim_real'],
         )
 
@@ -1405,19 +1115,20 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
 
     @staticmethod
     def is_displayed(player):
+        # Check second_question
         if player.participant.vars.get('second_question') != 'AI':
             print("AI_Second_FeelTrue: skipped because second_question != 'AI'")
             return False
 
+        # Check first_question
         first_q = player.participant.vars.get('first_question')
         if first_q != 'Real':
             print("AI_Second_FeelTrue: skipped because first_question != 'Real'")
             return False
 
-        # This should NOT be indented under the if above
+        # Determine if real round = "does not feel true"
         slider_val = player.field_maybe_none('image_feelstrue_real')
         binary_val = player.field_maybe_none('image_feelstrue_binary_real')
-
         feels_not_true = False
 
         if slider_val is not None:
@@ -1433,36 +1144,60 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
             print("Page skipped because real round != does not feel true")
             return False
 
-    def before_next_page(self, timeout_happened):
-        # Only save if the value actually exists
-        if 'second_question' in self.participant.vars:
-            self.second_question = self.participant.vars['second_question']
-        if 'show_slider_ai' in self.participant.vars:
-            self.show_slider_ai = self.participant.vars['show_slider_ai']
-        if 'show_own_claim_ai' in self.participant.vars:
-            self.show_own_claim_ai = self.participant.vars['show_own_claim_ai']
-
-
     @staticmethod
     def vars_for_template(player):
+        # Load claim data
         row_data = json.loads(player.feed_condition_row)[0]
         claims = [
             row_data[f'Claim {i}'] for i in range(1, 6)
             if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
         ]
-        player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+
+        # Generate random values only if not already set
+        if 'show_slider_ai' not in player.participant.vars:
+            player.participant.vars['show_slider_ai'] = random.choice([True, False])
+        if 'show_own_claim_ai' not in player.participant.vars:
+            player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+
+        # Store in Player for CSV export
+        player.show_slider_ai = player.participant.vars['show_slider_ai']
+        player.show_own_claim_ai = player.participant.vars['show_own_claim_ai']
 
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
-            show_slider_ai=random.choice([True, False]),
-            show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
+            show_slider_ai=player.show_slider_ai,
+            show_own_claim_ai=player.show_own_claim_ai,
         )
+
+    @staticmethod
+    def before_next_page(player,
+                         timeout_happened):  # FIXED: Changed from (self, timeout_happened) to (player, timeout_happened)
+        """Process form data and save participant vars"""
+
+        # Save the follow-up field
+        player.image_feelstrue_followup = player.image_feelstrue_followup
+
+        # Process all form fields
+        for field_name in ['why_click_ai', 'image_claim_ai', 'image_claim_true_ai',
+                           'image_feelstrue_ai', 'image_feelstrue_binary_ai',
+                           'image_confidence_ai', 'claim_response_ai', 'image_accuracy_ai']:
+            new_val = player.field_maybe_none(field_name)
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
+                print(f"Saved {field_name}: {new_val}")  # Debug output
+
+        print("=== AI_SECOND_FEELTRUE BEFORE_NEXT_PAGE COMPLETED ===")  # Debug output
 
 
 class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
     form_model = 'player'
-    form_fields = ['click_x_ai', 'click_y_ai', 'image_claim_ai', 'image_feelsnottrue_followup', 'why_click_ai',
-                   'image_feelstrue_ai', 'image_feelstrue_binary_ai', 'image_confidence_ai', 'claim_response_ai']
+    form_fields = [
+        'click_x_ai', 'click_y_ai', 'image_claim_ai', 'image_feelsnottrue_followup',
+        'why_click_ai', 'image_feelstrue_ai', 'image_feelstrue_binary_ai',
+        'image_confidence_ai', 'claim_response_ai',
+        # Add missing fields that might be needed
+        'image_accuracy_ai', 'image_claim_true_ai'
+    ]
 
     @staticmethod
     def is_displayed(player):
@@ -1491,31 +1226,51 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
             print("AI_Second_DoesNotFeelTrue: skipped because real round != feels true")
             return False
 
-
-    def before_next_page(self, timeout_happened):
-        # Only save if the value actually exists
-        if 'second_question' in self.participant.vars:
-            self.second_question = self.participant.vars['second_question']
-        if 'show_slider_ai' in self.participant.vars:
-            self.show_slider_ai = self.participant.vars['show_slider_ai']
-        if 'show_own_claim_ai' in self.participant.vars:
-            self.show_own_claim_ai = self.participant.vars['show_own_claim_ai']
-
     @staticmethod
     def vars_for_template(player):
+        # Load claim data
         row_data = json.loads(player.feed_condition_row)[0]
         claims = [
             row_data[f'Claim {i}'] for i in range(1, 6)
             if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
         ]
-        player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
-        player.participant.vars['show_slider_ai'] = random.choice([True, False])
+
+        # Generate random values only if not already set
+        if 'show_slider_ai' not in player.participant.vars:
+            player.participant.vars['show_slider_ai'] = random.choice([True, False])
+        if 'show_own_claim_ai' not in player.participant.vars:
+            player.participant.vars['show_own_claim_ai'] = random.choice([True, False])
+
+        # Store in Player for CSV export
+        player.show_slider_ai = player.participant.vars['show_slider_ai']
+        player.show_own_claim_ai = player.participant.vars['show_own_claim_ai']
 
         return dict(
             claim_choices_ai=list(enumerate(claims, start=1)),
-            show_slider_ai=random.choice([True, False]),
-            show_own_claim_ai=player.participant.vars['show_own_claim_ai'],
+            show_slider_ai=player.show_slider_ai,
+            show_own_claim_ai=player.show_own_claim_ai,
         )
+
+    @staticmethod
+    def before_next_page(player,
+                         timeout_happened):  # FIXED: Changed from (self, timeout_happened) to (player, timeout_happened)
+        """Process form data and save participant vars"""
+
+        # Save the follow-up field
+        player.image_feelsnottrue_followup = player.image_feelsnottrue_followup
+
+        # Process all form fields
+        for field_name in ['why_click_ai', 'image_claim_ai', 'image_claim_true_ai',
+                           'image_feelstrue_ai', 'image_feelstrue_binary_ai',
+                           'image_confidence_ai', 'claim_response_ai', 'image_accuracy_ai']:
+            new_val = player.field_maybe_none(field_name)
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
+                print(f"Saved {field_name}: {new_val}")  # Debug output
+
+        print("=== AI_SECOND_DOESNOTFEELTRUE BEFORE_NEXT_PAGE COMPLETED ===")  # Debug output
+
+
 class D_DirectQuestions_Real_Second_FeelTrue(Page):
     form_model = 'player'
     form_fields = [
@@ -1537,77 +1292,100 @@ class D_DirectQuestions_Real_Second_FeelTrue(Page):
         if player.participant.vars.get('first_question') != 'AI':
             return False
 
-        slider_val = player.field_maybe_none('image_feelstrue_ai')
-        binary_val = player.field_maybe_none('image_feelstrue_binary_ai')
+        # FIXED: Use direct field access
+        slider_val = getattr(player, 'image_feelstrue_ai', None)
+        binary_val = getattr(player, 'image_feelstrue_binary_ai', None)
 
-        # Updated logic to handle 5-option radio button values
         feels_not_true = False
 
-        # Check if we have a radio button value (assuming it's stored in a variable like 'radio_val')
-        if slider_val is not None:
-            # Show page for "does not feel true" responses
+        if slider_val is not None and slider_val != '':
             if slider_val in ["Definitely does not feel true", "Mostly does not feel true"]:
                 feels_not_true = True
-        # Fallback for legacy binary value if still needed
         elif binary_val == 'Does not feel true':
             feels_not_true = True
 
         if feels_not_true:
-            print("Page showing because AI round = does not feel true")
+            print("Real_Second_FeelTrue: showing because AI round = does not feel true")
             return True
         else:
-            print("Page skipped because AI round != does not feel true")
+            print("Real_Second_FeelTrue: skipped because AI round != does not feel true")
             return False
-
-
-    def before_next_page(self, timeout_happened):
-        # Only save if the value actually exists
-        if 'second_question' in self.participant.vars:
-            self.second_question = self.participant.vars['second_question']
-        if 'show_slider_real' in self.participant.vars:
-            self.show_slider_real = self.participant.vars['show_slider_real']
-        if 'show_own_claim_real' in self.participant.vars:
-            self.show_own_claim_real = self.participant.vars['show_own_claim_real']
 
     @staticmethod
     def vars_for_template(player):
+        # Load claim data
         row_data = json.loads(player.control_feed_condition_row)[0]
-        claims = [row_data[f'Claim {i}'] for i in range(1, 6)
-                  if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
-        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
-        # Generate and STORE both random values
-        player.participant.vars['show_slider_real'] = random.choice([True, False])
-        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+        claims = [
+            row_data[f'Claim {i}'] for i in range(1, 6)
+            if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
+        ]
+
+        # Generate random values only if not already set
+        if 'show_slider_real' not in player.participant.vars:
+            player.participant.vars['show_slider_real'] = random.choice([True, False])
+        if 'show_own_claim_real' not in player.participant.vars:
+            player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+
+        # Store in Player for CSV export
+        player.show_slider_real = player.participant.vars['show_slider_real']
+        player.show_own_claim_real = player.participant.vars['show_own_claim_real']
+
         return dict(
             claim_choices_real=list(enumerate(claims, start=1)),
-            show_slider_real=random.choice([True, False]),
-            show_own_claim_real=player.participant.vars['show_own_claim_real'],
+            show_slider_real=player.show_slider_real,
+            show_own_claim_real=player.show_own_claim_real,
         )
+
+    @staticmethod
+    def before_next_page(player,
+                         timeout_happened):  # FIXED: Changed from (self, timeout_happened) to (player, timeout_happened)
+        """Process form data and save participant vars"""
+
+        # Save the follow-up field
+        player.image_feelstrue_followup = player.image_feelstrue_followup
+
+        # Process all form fields
+        for field_name in ['why_click_real', 'image_claim_real', 'image_claim_true_real',
+                           'image_feelstrue_real', 'image_feelstrue_binary_real',
+                           'image_confidence_real', 'claim_response_real', 'image_accuracy_real']:
+            new_val = player.field_maybe_none(field_name)
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
+                print(f"Saved {field_name}: {new_val}")  # Debug output
+
+        print("=== REAL_SECOND_FEELTRUE BEFORE_NEXT_PAGE COMPLETED ===")  # Debug output
 
 
 class D_DirectQuestions_Real_Second_DoesNotFeelTrue(Page):
     form_model = 'player'
-    form_fields = ['click_x_real', 'click_y_real', 'image_claim_real', 'image_feelsnottrue_followup', 'why_click_real', 'image_confidence_real','claim_response_real']
+    form_fields = [
+        'click_x_real', 'click_y_real', 'image_claim_real', 'image_feelsnottrue_followup',
+        'why_click_real', 'image_confidence_real', 'claim_response_real',
+        # Add missing fields that are referenced in before_next_page
+        'image_claim_true_real', 'image_feelstrue_real', 'image_feelstrue_binary_real', 'image_accuracy_real'
+    ]
 
     @staticmethod
     def is_displayed(player):
         if player.participant.vars.get('second_question') != 'Real':
+            print("Real_Second_DoesNotFeelTrue: skipped because second_question != 'Real'")
             return False
         if player.participant.vars.get('first_question') != 'AI':
+            print("Real_Second_DoesNotFeelTrue: skipped because first_question != 'AI'")
             return False
 
-        slider_val = player.field_maybe_none('image_feelstrue_ai')
-        binary_val = player.field_maybe_none('image_feelstrue_binary_ai')
+        # FIXED: Use direct field access instead of field_maybe_none()
+        slider_val = getattr(player, 'image_feelstrue_ai', None)
+        binary_val = getattr(player, 'image_feelstrue_binary_ai', None)
 
-        # Updated logic to handle 5-option radio button values for "feels true"
+        print(f"DEBUG - slider_val: '{slider_val}'")
+        print(f"DEBUG - binary_val: '{binary_val}'")
+
         feels_true = False
 
-        # Check if we have a radio button value (assuming it's stored in a variable like 'radio_val')
-        if slider_val is not None:
-            # Show page for "feels true" responses (including "Not sure")
+        if slider_val is not None and slider_val != '':
             if slider_val in ["Definitely feels true", "Mostly feels true", "Not sure"]:
                 feels_true = True
-        # Fallback for legacy binary value if still needed
         elif binary_val == 'Feels true':
             feels_true = True
 
@@ -1617,39 +1395,60 @@ class D_DirectQuestions_Real_Second_DoesNotFeelTrue(Page):
         else:
             print("Real_Second_DoesNotFeelTrue: skipped because AI round != feels true")
             return False
-
-    def before_next_page(self, timeout_happened):
-        # Only save if the value actually exists
-        if 'second_question' in self.participant.vars:
-            self.second_question = self.participant.vars['second_question']
-        if 'show_slider_real' in self.participant.vars:
-            self.show_slider_real = self.participant.vars['show_slider_real']
-        if 'show_own_claim_real' in self.participant.vars:
-            self.show_own_claim_real = self.participant.vars['show_own_claim_real']
     @staticmethod
     def vars_for_template(player):
+        # Load claim data
         row_data = json.loads(player.control_feed_condition_row)[0]
-        claims = [row_data[f'Claim {i}'] for i in range(1, 6)
-                  if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])]
-        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
-        # Generate and STORE both random values
-        player.participant.vars['show_slider_real'] = random.choice([True, False])
-        player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+        claims = [
+            row_data[f'Claim {i}'] for i in range(1, 6)
+            if f'Claim {i}' in row_data and pd.notna(row_data[f'Claim {i}'])
+        ]
+
+        # Generate random values only if not already set
+        if 'show_slider_real' not in player.participant.vars:
+            player.participant.vars['show_slider_real'] = random.choice([True, False])
+        if 'show_own_claim_real' not in player.participant.vars:
+            player.participant.vars['show_own_claim_real'] = random.choice([True, False])
+
+        # Store in Player for CSV export
+        player.show_slider_real = player.participant.vars['show_slider_real']
+        player.show_own_claim_real = player.participant.vars['show_own_claim_real']
+
         return dict(
             claim_choices_real=list(enumerate(claims, start=1)),
-            show_slider_real=random.choice([True, False]),
-            show_own_claim_real=player.participant.vars['show_own_claim_real'],
+            show_slider_real=player.show_slider_real,
+            show_own_claim_real=player.show_own_claim_real,
         )
+
+    @staticmethod
+    def before_next_page(player,
+                         timeout_happened):  # FIXED: Changed from (self, timeout_happened) to (player, timeout_happened)
+        """Process form data and save participant vars"""
+
+        # Save the follow-up field
+        player.image_feelsnottrue_followup = player.image_feelsnottrue_followup
+
+        # Process all form fields
+        for field_name in ['why_click_real', 'image_claim_real', 'image_claim_true_real',
+                           'image_feelstrue_real', 'image_feelstrue_binary_real',
+                           'image_confidence_real', 'claim_response_real', 'image_accuracy_real']:
+            new_val = player.field_maybe_none(field_name)
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
+                print(f"Saved {field_name}: {new_val}")  # Debug output
+
+        print("=== REAL_SECOND_DOESNOTFEELTRUE BEFORE_NEXT_PAGE COMPLETED ===")  # Debug output
 
 class H_Demographics(Page):
     form_model = 'player'
     form_fields = ["age", "gender", "state", "race", "education", "income"]
 
 class F_SMPPostSurvey(Page):
-    def vars_for_template(player: Player):
-        return {
-            'platforms': C.PLATFORMS
-        }
+    pass
+# def vars_for_template(player: Player):
+#     return {
+#         'platforms': C.PLATFORMS
+#     }
 
 class E_Logistics_Early(Page):
     form_model = "player"
@@ -1667,7 +1466,7 @@ class E_Logistics_Early(Page):
     def is_displayed(player):
         return player.participant.vars.get('logistics_early', True)
 
-
+    @staticmethod
     # In any page that all players see, or in creating_session
     def before_next_page(self, timeout_happened):
         if 'logistics_early' in self.participant.vars:
@@ -1692,11 +1491,6 @@ class E_Logistics_Early(Page):
 
         return dict(image_options=options)
 
-    # def before_next_page(self):
-    #     # Example: get from form or participant vars or somewhere
-    #     self.player.watermark_image_check = self.player.participant.vars.get('watermark_check', '')
-    #     # or assign from a form field
-    #     # self.player.watermark_image_check = self.player.some_form_field
 
 class E_Logistics_After(Page):
     form_model = "player"
@@ -1713,10 +1507,15 @@ class E_Logistics_After(Page):
     def is_displayed(player):
         return not player.participant.vars.get('logistics_early', False)
 
+    @staticmethod
     def before_next_page(self, timeout_happened):
         if 'logistics_early' in self.participant.vars:
             self.logistics_early = self.participant.vars['logistics_early']
-
+        for field_name in ["all_images", "loading", "interaction", "political_content",
+                           "watermark_familiarity", "watermark_manipulation_check", "watermark_image_check"]:
+            new_val = self.field_maybe_none(field_name)
+            if new_val and not getattr(self, field_name, None):
+                setattr(self, field_name, new_val)
     @staticmethod
     def vars_for_template(player):
         df = player.participant.tweets  # DataFrame with post data
@@ -1760,10 +1559,15 @@ class MorePosts(Page):
         # Optional: limit to first 5 if needed
         options = options[:5]
 
+        # When you want to save:
+        player.tweets_json = player.participant.tweets.to_json()
+        player.image_options_json = json.dumps(options)
         return dict(image_options=options)
+
 
 class F_Enjoyment(Page):
     pass
+
 
 class F_Watermarks(Page):
     form_model = "player"
@@ -1776,6 +1580,7 @@ class F_Watermarks(Page):
         "creates_watermarks_other",
 
     ]
+
     @staticmethod
     def is_displayed(player):
         return player.watermark_condition != "none"
@@ -1784,11 +1589,13 @@ class F_Watermarks(Page):
 class G_AISMPQuestions(Page):
     form_model = "player"
     form_fields = ["llm_familiarity", "trust_twitter_posttreatment",
-                   "trust_instagram_posttreatment", "trust_nationalnews_posttreatment", "trust_localnews_posttreatment", "trust_friendsfamily_posttreatment",
-                   "trust_pinterest_posttreatment", "trust_linkedin_posttreatment", "trust_facebook_posttreatment",
-                   "trust_youtube_posttreatment","trust_tiktok_posttreatment", "trust_bluesky_posttreatment","trust_truthsocial_posttreatment",
-                   "trust_acquaintances_posttreatment", "smp_entertaining_post", "smp_accuracy_post",
-                   "smp_enjoyment_post", "smp_community_post", "smp_news_post", "distinguish_ability", "benefits_ai"]
+                   "trust_instagram_posttreatment", "trust_nationalnews_posttreatment", "trust_localnews_posttreatment",
+                   "trust_friendsfamily_posttreatment", "trust_pinterest_posttreatment", "trust_linkedin_posttreatment",
+                   "trust_facebook_posttreatment", "trust_youtube_posttreatment", "trust_tiktok_posttreatment",
+                   "trust_bluesky_posttreatment", "trust_truthsocial_posttreatment", "trust_acquaintances_posttreatment",
+                   "smp_entertaining_post", "smp_accuracy_post", "smp_enjoyment_post", "smp_community_post",
+                   "smp_news_post", "distinguish_ability", "benefits_ai"]
+
 
 class H_Debrief(Page):
     form_model = "player"
@@ -1804,14 +1611,6 @@ class H_Debrief(Page):
             disclaimer=player.disclaimer,
             image_screenshot_nowatermark=image
         )
-
-    # def error_message(player, values):
-    #     user_input = values.get('understand_AI', '').strip()
-    #     if not H_Debrief._looks_ok(user_input, player.disclaimer):
-    #         return "Please re-type the sentence acknowledging that the image is AI-generated."
-    def error_message(player, values):
-        # No validation error — always allow submission
-        return None
 
     @staticmethod
     def _looks_ok(text: str, disclaimer: str) -> bool:
@@ -1839,48 +1638,14 @@ class I_PostDebrief(Page):
     form_model = "player"
     form_fields = ['study_topic', 'ethics_influence_political_prefs', 'benefits_understanding_watermarks']
 
-    # @staticmethod
-    # def before_next_page(player, timeout_happened):
-    #     player.participant.finished = True
-    #     if 'prolific_completion_url' in player.session.vars:
-    #         if player.session.vars['prolific_completion_url'] is not None:
-    #             if 'completion_code' in player.session.vars:
-    #                 if player.session.vars.get('completion_code') is not None:
-    #                     player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete?cc=' + player.session.vars['completion_code']
-    #                 else:
-    #                     player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-    #             else: player.session.vars['prolific_completion_url'] = 'https://app.prolific.com/submissions/complete'
-    #         else:
-    #             player.session.vars['prolific_completion_url'] = 'NA'
-    #     else:
-    #         player.session.vars['prolific_completion_url'] = 'NA'
-    #
-    #     if player.id_in_group != 1:
-    #         player.participant.tweets = ""
-
-# class I_Redirect(Page):
-#     @staticmethod
-#     def is_displayed(player):
-#         return len(player.session.config['survey_link']) > 0
-#
-#     @staticmethod
-#     def vars_for_template(player: Player):
-#         return dict(link=create_redirect(player))
-#
-#     @staticmethod
-#     def js_vars(player):
-#         return dict(link=create_redirect(player))
 
 class EndSurvey(Page):
     form_model = 'player'
 
-
-
     @staticmethod
     def js_vars(player):
         return dict(
-            completionlink=
-            player.subsession.session.config['completionlink']
+            completionlink=player.subsession.session.config['completionlink']
         )
 
     pass
@@ -1916,12 +1681,12 @@ page_sequence = [
 def custom_export(players):
     # header row
     yield ['session', 'participant_code', 'participant_label', 'participant_in_session', 'condition', 'item_sequence',
-           'scroll_sequence', 'item_dwell_time', 'likes', 'replies']
+           'scroll_sequence', 'item_dwell_time', 'likes', 'retweets']
     for p in players:
         participant = p.participant
         session = p.session
         yield [session.code, participant.code, participant.label, p.id_in_group, p.feed_condition, p.sequence,
-               p.watermark_condition, p.scroll_sequence, p.viewport_data, p.likes_data, p.replies_data]
+               p.watermark_condition, p.scroll_sequence, p.viewport_data, p.likes_data, p.replies_data, p.retweets_data]
 
     # @staticmethod
     # def is_displayed(player):

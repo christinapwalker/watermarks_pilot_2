@@ -344,24 +344,20 @@ function validateForm() {
         }
     }
 
-    // Check claim submission
+    // Check claim submission - FIXED
     const textarea = document.getElementById('claim-response');
     const interpretationsSection = document.getElementById('interpretations-section');
-    if (textarea && !window.claimWasSubmitted) {
-        if (textarea.offsetParent !== null && !textarea.disabled && textarea.value.trim() === '') {
-            unansweredFields.push(requiredFields['claim_response_real']);
-            const container = textarea.closest('.question');
-            if (container) {
-                container.classList.add('missing-answer');
-                missingElements.push(container);
-            }
-        } else if (interpretationsSection && interpretationsSection.offsetParent === null) {
-            unansweredFields.push('Submit your claim before proceeding');
-            const container = textarea.closest('.question');
-            if (container) {
-                container.classList.add('missing-answer');
-                missingElements.push(container);
-            }
+    const isTextareaVisible = textarea && textarea.offsetParent !== null;
+    const isTextareaReadOnly = textarea && textarea.readOnly;
+    const hasClaimValue = textarea && textarea.value.trim() !== '';
+
+    // Only validate if textarea is visible, not readonly, and empty
+    if (isTextareaVisible && !isTextareaReadOnly && !hasClaimValue) {
+        unansweredFields.push(requiredFields['claim_response_real']);
+        const container = textarea.closest('.question');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
         }
     }
 
@@ -612,11 +608,11 @@ document.addEventListener('click', function(e) {
         </div>
     </div>
 
-    <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
+    <p style="margin-bottom: 40px;"><strong>How confident are you in your assessment about whether the image is AI-generated?</strong></p>
+
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="image_confidence_real" min="0" max="10" value="5" oninput="updateConfidence(this)" />
-        {{ formfield_errors 'image_confidence_real' }}
+        <input type="range" name="image_confidence_real" min="0" max="100" value="50" oninput="updateConfidence(this)">
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_real" class="slider-result"></p>
     </div>
@@ -630,28 +626,28 @@ document.addEventListener('click', function(e) {
         {{ formfield 'why_click_real' label='' }}
     </div>
 
-    <div class="question">
-        <p><strong>Regardless of whether you think the image in the post is AI-generated or not, what <em>claim</em> do you believe the post is making?</strong></p>
-        <textarea id="claim-response" name="claim_response_real" rows="4" placeholder="Type your claim here..."></textarea>
-        {{ formfield_errors 'claim_response_real' }}
-        <br />
-        <button type="button" class="btn btn-primary" onclick="submitClaim(this)">Submit Claim</button>
-    </div>
+<div class="question">
+    <label for="claim-response" style="display: block; margin-bottom: 10px;">
+        <strong>Regardless of whether you think the image in the post is AI-generated or not, what <em>claim</em> do you believe the post is making?</strong>
+    </label>
+    <textarea id="claim-response" name="claim_response_real" rows="4" placeholder="Type your claim here..."></textarea>
+    <br />
+    <button type="button" class="btn btn-primary" onclick="submitClaim(this)">Submit Claim</button>
+</div>
 
-    <div id="interpretations-section" style="display:none;">
-        <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
-        {% for value, label in claim_choices_real %}
-            <label class="claim-option">
-                <input type="radio" name="image_claim_real" value="{{ value }}"
-                       onclick="updateClaimText(this);
-                                document.getElementById('claim-truth-section').style.display='block';
-                                document.getElementById('feel-true-question').style.display='block';
-                                window.claimWasSubmitted = true;
-                                disableClaimInput();">
-                {{ label }}
-            </label><br>
-        {% endfor %}
-    </div>
+<div id="interpretations-section" style="display:none;">
+        {{ formfield_errors 'image_claim_real' }}
+    <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
+    {% for value, label in claim_choices_real %}
+        <label>
+            <input type="radio" name="image_claim_real" value="{{ value }}"
+               onclick="updateClaimText(this);
+                        document.getElementById('claim-truth-section').style.display='block';
+                        document.getElementById('feel-true-question').style.display='block';">
+            {{ label }}
+        </label><br>
+    {% endfor %}
+</div>
 
     <div id="claim-truth-section" style="display:none;">
         <p style="margin-top: 40px;"><strong>To what extent do you think that "<span id="selected-claim-text"></span>" is literally true?</strong></p>
@@ -735,54 +731,68 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     window.submitClaim = function (button) {
-        const claimText = textarea.value.trim();
-        if (!claimText) {
-            alert('Please enter a claim before submitting.');
+    const claimText = textarea.value.trim();
+    if (!claimText) {
+        alert('Please enter a claim before submitting.');
+        return;
+    }
+
+    const existingOptions = document.querySelectorAll('input[name="image_claim_real"]');
+    for (const option of existingOptions) {
+        if (option.value.trim() === claimText) {
+            alert('This claim option already exists.');
             return;
         }
+    }
 
-        const existingOptions = document.querySelectorAll('input[name="image_claim_real"]');
-        for (const option of existingOptions) {
-            if (option.value.trim() === claimText) {
-                alert('This claim option already exists.');
-                return;
-            }
-        }
+    if (showOwnClaim) {
+        const label = document.createElement('label');
+        label.className = 'claim-option';
 
-        if (showOwnClaim) {
-            const label = document.createElement('label');
-            label.className = 'claim-option';
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'image_claim_real';
+        input.value = claimText;  // Use actual text, not number
+        input.onclick = function () {
+            updateClaimText(this);
+            document.getElementById('claim-truth-section').style.display = 'block';
+            document.getElementById('feel-true-question').style.display = 'block';
+            window.claimWasSubmitted = true;
+        };
 
-            const input = document.createElement('input');
-            input.type = 'radio';
-            input.name = 'image_claim_real';
-            input.value = claimText;
-            input.onclick = function () {
-                updateClaimText(this);
-                document.getElementById('claim-truth-section').style.display = 'block';
-                document.getElementById('feel-true-question').style.display = 'block';
-                window.claimWasSubmitted = true;
-                disableClaimInput();
-            };
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(' ' + claimText));
+        label.appendChild(document.createElement('br'));
+        interpretationsSection.appendChild(label);
+    }
 
-            label.appendChild(input);
-            label.appendChild(document.createTextNode(' ' + claimText));
-            label.appendChild(document.createElement('br'));
-            interpretationsSection.appendChild(label);
-        }
+    interpretationsSection.style.display = 'block';
 
-        interpretationsSection.style.display = 'block';
-        textarea.disabled = true;
-        button.disabled = true;
-        window.claimWasSubmitted = true;
-        interpretationsSection.scrollIntoView({ behavior: 'smooth' });
+    // CRITICAL FIX: Use readOnly instead of disabled
+    textarea.readOnly = true;
+    textarea.style.backgroundColor = '#f8f9fa';
+    textarea.style.border = '1px solid #6c757d';
+    button.disabled = true;
+    window.claimWasSubmitted = true;
 
-        // Remove highlighting when claim is submitted
-        const container = textarea.closest('.question');
-        if (container && container.classList.contains('missing-answer')) {
-            container.classList.remove('missing-answer');
-        }
-    };
+    // Show submitted claim text
+    const submittedText = document.createElement('p');
+    submittedText.innerHTML = `<strong>Your submitted claim:</strong> "${claimText}"`;
+    submittedText.style.backgroundColor = '#e8f5e8';
+    submittedText.style.padding = '10px';
+    submittedText.style.borderRadius = '5px';
+    submittedText.style.border = '1px solid #28a745';
+    submittedText.style.marginBottom = '10px';
+    textarea.parentNode.insertBefore(submittedText, textarea);
+
+    interpretationsSection.scrollIntoView({ behavior: 'smooth' });
+
+    // Remove highlighting when claim is submitted
+    const container = textarea.closest('.question');
+    if (container && container.classList.contains('missing-answer')) {
+        container.classList.remove('missing-answer');
+    }
+};
 
     window.updateClaimText = function (radio) {
         let selectedText = radio.parentElement.textContent.trim();
@@ -794,11 +804,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.updateConfidence = function (input) {
         window.confidenceSliderInteracted = true;
-        const confidence = parseInt(input.value);
-        const percentage = (confidence / 10) * 100;
+        const percentage = parseInt(input.value); // Direct percentage value now (0-100)
         document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
 
-        // Remove highlighting when confidence is set
+        // Remove highlighting when user interacts with slider
         const container = input.closest('.slider-container');
         if (container && container.classList.contains('missing-answer')) {
             container.classList.remove('missing-answer');

@@ -1,15 +1,357 @@
 <script>
-const dismissedOverlays = new Set();
+(() => {
+  // ⚡ CRITICAL: Prevent multiple instances of this script
+  if (window.overlayManagerInitialized) {
+    console.warn('⚠️ Overlay manager already initialized, skipping duplicate');
+    return;
+  }
+  window.overlayManagerInitialized = true;
 
-function dismissOverlaySession(docId) {
-    const overlay = document.getElementById('overlay_' + docId);
-    dismissedOverlays.add(docId);
-    if (overlay) overlay.style.display = 'none';
-}
+  console.log('🚀 SINGLE overlay management system initializing...');
 
-function isOverlayDismissed(docId) {
-    return dismissedOverlays.has(docId);
-}
+  // ---- persistent dismissed set ----
+  if (!window.dismissedOverlays) {
+    window.dismissedOverlays = new Set();
+  }
+
+  const save = () => {
+    try {
+      localStorage.setItem('dismissedOverlays', JSON.stringify([...window.dismissedOverlays]));
+    } catch(e) {
+      console.warn('localStorage not available');
+    }
+  };
+
+  // Load dismissed overlays from localStorage on page load
+  try {
+    const saved = localStorage.getItem('dismissedOverlays');
+    if (saved) {
+      const savedArray = JSON.parse(saved);
+      savedArray.forEach(id => window.dismissedOverlays.add(String(id)));
+      console.log('📁 Loaded dismissed overlays from storage:', savedArray);
+    }
+  } catch(e) {
+    console.warn('Could not load dismissed overlays from localStorage');
+  }
+
+  // expose these if your template calls them
+  window.dismissOverlaySession = function(docId) {
+    docId = String(docId);
+    window.dismissedOverlays.add(docId);
+    const el = document.getElementById('overlay_' + docId);
+    if (el) {
+      // Hide the overlay (don't remove it yet, let the interaction cleanup handle removal)
+      el.style.display = 'none';
+      console.log('✅ Dismissed overlay for docId:', docId);
+    }
+    save();
+    console.log('💾 Current dismissed overlays:', [...window.dismissedOverlays]);
+  };
+
+  window.isOverlayDismissed = function(docId) {
+    return window.dismissedOverlays.has(String(docId));
+  };
+
+  // ---- apply HIDDEN state to dismissed overlays (don't remove on page load) ----
+  function applyDismissedState(root = document) {
+    let hiddenCount = 0;
+    window.dismissedOverlays.forEach(id => {
+      const el = document.getElementById('overlay_' + id);
+      if (el && el.style.display !== 'none') {
+        el.style.display = 'none';
+        hiddenCount++;
+        console.log('👁️ Hidden previously dismissed overlay_' + id);
+      }
+    });
+
+    // also check any overlays currently in DOM
+    root.querySelectorAll?.('[id^="overlay_"]').forEach(el => {
+      const id = el.id.slice('overlay_'.length);
+      if (window.dismissedOverlays.has(String(id)) && el.style.display !== 'none') {
+        el.style.display = 'none';
+        hiddenCount++;
+        console.log('👁️ Hidden previously dismissed overlay_' + id + ' (querySelectorAll)');
+      }
+    });
+
+    if (hiddenCount > 0) {
+      console.log(`👁️ Hidden ${hiddenCount} previously dismissed overlays`);
+    }
+  }
+
+  // ---- REMOVAL function for post-interaction cleanup ----
+  function removeOrHideDismissedOverlays(root = document) {
+    let removedCount = 0;
+    window.dismissedOverlays.forEach(id => {
+      const el = document.getElementById('overlay_' + id);
+      if (el) {
+        el.remove();
+        removedCount++;
+        console.log('🗑️ Removed overlay_' + id + ' from DOM');
+      }
+    });
+
+    // also check any overlays currently in DOM
+    root.querySelectorAll?.('[id^="overlay_"]').forEach(el => {
+      const id = el.id.slice('overlay_'.length);
+      if (window.dismissedOverlays.has(String(id))) {
+        el.remove();
+        removedCount++;
+        console.log('🗑️ Removed overlay_' + id + ' from DOM (querySelectorAll)');
+      }
+    });
+
+    if (removedCount > 0) {
+      console.log(`🧹 Cleanup complete: removed ${removedCount} dismissed overlays`);
+    }
+  }
+
+  // Run immediately when DOM is ready - ONLY HIDE, DON'T REMOVE
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM ready - hiding previously dismissed overlays');
+    applyDismissedState();
+  });
+
+  // Also run immediately if DOM is already loaded - ONLY HIDE, DON'T REMOVE
+  if (document.readyState !== 'loading') {
+    console.log('DOM already ready - hiding previously dismissed overlays');
+    applyDismissedState();
+  }
+
+  // ---- Aggressive DOM observation to catch any overlay re-creation ----
+  const observer = new MutationObserver(muts => {
+    let foundOverlayChanges = false;
+
+    for (const m of muts) {
+      if (m.type === 'childList' && m.addedNodes.length > 0) {
+        // Check if any overlay elements were added back
+        Array.from(m.addedNodes).forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            // Check if the added node is an overlay
+            if (node.id && node.id.startsWith('overlay_')) {
+              const docId = node.id.slice('overlay_'.length);
+              if (window.dismissedOverlays.has(docId)) {
+                console.log('🚨 Detected re-added overlay for dismissed docId:', docId, '- removing immediately');
+                node.remove();
+                foundOverlayChanges = true;
+              }
+            }
+
+            // Check if the added node contains overlays
+            const overlaysInNode = node.querySelectorAll?.('[id^="overlay_"]');
+            overlaysInNode?.forEach(overlay => {
+              const docId = overlay.id.slice('overlay_'.length);
+              if (window.dismissedOverlays.has(docId)) {
+                console.log('🚨 Detected re-added overlay in subtree for dismissed docId:', docId, '- removing immediately');
+                overlay.remove();
+                foundOverlayChanges = true;
+              }
+            });
+          }
+        });
+      }
+    }
+
+    // If we didn't catch everything above, do a full sweep
+    if (foundOverlayChanges) {
+      setTimeout(() => removeOrHideDismissedOverlays(), 0);
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+  // ---- Intercept any attempts to show overlays via style changes ----
+  const styleObserver = new MutationObserver(muts => {
+    muts.forEach(m => {
+      if (m.type === 'attributes' && m.attributeName === 'style') {
+        if (m.target.id && m.target.id.startsWith('overlay_')) {
+          const docId = m.target.id.slice('overlay_'.length);
+          if (window.dismissedOverlays.has(docId)) {
+            console.log('🚨 Someone tried to modify style of dismissed overlay:', docId, '- removing it');
+            m.target.remove();
+          }
+        }
+      }
+    });
+  });
+
+  styleObserver.observe(document.documentElement, {
+    attributes: true,
+    subtree: true,
+    attributeFilter: ['style']
+  });
+
+  // ---- Periodic cleanup (less frequent since we have the observers) ----
+  setInterval(() => {
+    removeOrHideDismissedOverlays();
+  }, 5000); // Check every 5 seconds
+
+  // ---- Capture and wrap interaction functions when they become available ----
+  const wrapInteractionFunction = (functionName) => {
+    const checkAndWrap = () => {
+      if (window[functionName] && !window[functionName].__overlayWrapped) {
+        const originalFunction = window[functionName];
+        window[functionName] = function(...args) {
+          console.log(`🔧 Calling wrapped ${functionName}`);
+          const result = originalFunction.apply(this, args);
+
+          // After the interaction, aggressively remove any dismissed overlays
+          setTimeout(() => {
+            console.log(`🧹 Post-${functionName} cleanup`);
+            removeOrHideDismissedOverlays();
+          }, 0);
+
+          return result;
+        };
+        window[functionName].__overlayWrapped = true;
+        console.log(`✅ Wrapped ${functionName} function`);
+        return true;
+      }
+      return false;
+    };
+
+    // Try immediately
+    if (!checkAndWrap()) {
+      // If not available yet, keep trying
+      const interval = setInterval(() => {
+        if (checkAndWrap()) {
+          clearInterval(interval);
+        }
+      }, 100);
+
+      // Give up after 10 seconds
+      setTimeout(() => clearInterval(interval), 10000);
+    }
+  };
+
+  // Wrap the main interaction functions
+  wrapInteractionFunction('toggleLike');
+  wrapInteractionFunction('toggleRetweet');
+  wrapInteractionFunction('handleLikeClick');
+
+  console.log('✅ SINGLE overlay management system loaded successfully');
+})();
+</script>
+
+<script>
+// PREVENTION-BASED OVERLAY FIX - Stop overlays from being created
+(() => {
+  if (window.overlayFixInstalled) return;
+  window.overlayFixInstalled = true;
+
+  console.log('🔧 Installing prevention-based overlay fix...');
+
+  // Create our own tracking
+  window.DISMISSED_OVERLAYS = window.DISMISSED_OVERLAYS || new Set();
+
+  // Load from localStorage
+  try {
+    const saved = localStorage.getItem('DISMISSED_OVERLAYS');
+    if (saved) {
+      JSON.parse(saved).forEach(id => window.DISMISSED_OVERLAYS.add(String(id)));
+    }
+  } catch(e) {}
+
+  // Override getElementById to prevent dismissed overlays from being found
+  const originalGetElementById = document.getElementById;
+  document.getElementById = function(id) {
+    const element = originalGetElementById.call(this, id);
+
+    // If this is a dismissed overlay, return null (pretend it doesn't exist)
+    if (id && id.startsWith('overlay_')) {
+      const docId = id.slice('overlay_'.length);
+      if (window.DISMISSED_OVERLAYS.has(docId)) {
+        console.log('🚫 Blocked access to dismissed overlay:', id);
+        return null;
+      }
+    }
+
+    return element;
+  };
+
+  // Also override querySelectorAll to filter out dismissed overlays
+  const originalQuerySelectorAll = document.querySelectorAll;
+  document.querySelectorAll = function(selector) {
+    const elements = originalQuerySelectorAll.call(this, selector);
+
+    // If querying for overlays, filter out dismissed ones
+    if (selector.includes('overlay_')) {
+      const filtered = Array.from(elements).filter(el => {
+        if (el.id && el.id.startsWith('overlay_')) {
+          const docId = el.id.slice('overlay_'.length);
+          if (window.DISMISSED_OVERLAYS.has(docId)) {
+            console.log('🚫 Filtered out dismissed overlay from query:', el.id);
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Return a NodeList-like object
+      return {
+        ...filtered,
+        length: filtered.length,
+        forEach: Array.prototype.forEach.bind(filtered),
+        [Symbol.iterator]: Array.prototype[Symbol.iterator].bind(filtered)
+      };
+    }
+
+    return elements;
+  };
+
+  // Cleanup function
+  function cleanupDismissedOverlays() {
+    window.DISMISSED_OVERLAYS.forEach(docId => {
+      const overlay = originalGetElementById.call(document, 'overlay_' + docId);
+      if (overlay) {
+        overlay.remove();
+      }
+    });
+  }
+
+  // Monitor clicks
+  document.addEventListener('click', function(event) {
+    const clickedElement = event.target;
+
+    // Track dismissals
+    let uncoverButton = null;
+    if (clickedElement.classList.contains('click-to-see-box')) {
+      uncoverButton = clickedElement;
+    } else {
+      uncoverButton = clickedElement.querySelector('.click-to-see-box');
+    }
+
+    if (uncoverButton && uncoverButton.textContent?.includes('Uncover Photo')) {
+      const onclickAttr = uncoverButton.getAttribute('onclick');
+      if (onclickAttr) {
+        const match = onclickAttr.match(/dismissOverlaySession\('(\w+)'\)/);
+        if (match) {
+          const docId = match[1];
+          window.DISMISSED_OVERLAYS.add(String(docId));
+          try {
+            localStorage.setItem('DISMISSED_OVERLAYS', JSON.stringify([...window.DISMISSED_OVERLAYS]));
+          } catch(e) {}
+          console.log('✅ Added to dismissed overlays:', docId);
+        }
+      }
+    }
+
+    // Cleanup after any interaction
+    if (clickedElement.closest('.like-button') || clickedElement.closest('.retweet-button')) {
+      setTimeout(cleanupDismissedOverlays, 0);
+      setTimeout(cleanupDismissedOverlays, 50);
+    }
+  }, true);
+
+  // Initial cleanup
+  cleanupDismissedOverlays();
+  setInterval(cleanupDismissedOverlays, 3000);
+
+  console.log('✅ Prevention-based overlay fix installed!');
+})();
 </script>
 
 {{if i.watermark == "fb_content_warning" }}
@@ -19,8 +361,8 @@ function isOverlayDismissed(docId) {
     {% if i.sponsored %}
         style="background-color: #E5E4E2;"
     {% endif %}
-    onmouseover="sequence('i' + {{i.doc_id}});" 
-    ontouchstart="sequence('i' + {{i.doc_id}});">      
+    onmouseover="sequence('i' + {{i.doc_id}});"
+    ontouchstart="sequence('i' + {{i.doc_id}});">
         <td>
         <div class="row justify-content-start">
             <div class="col-2">
@@ -62,7 +404,7 @@ function isOverlayDismissed(docId) {
                             {{i.handle}}
                         </a>
                         <small class="text-muted">
-                            {{i.username}} &middot; 
+                            {{i.username}} &middot;
                             {% if i.sponsored %}
                                 Sponsored
                             {% else %}
@@ -215,7 +557,6 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
 {{ endif }}
 
 
-
             <div class="d-flex border-top-0 mt-3 ms-5">
                 <div class="reply-button col" data-bs-toggle="modal" data-bs-target="#replyModal_{{i.doc_id}}" id="reply_button_{{i.doc_id}}">
                     <span class="bi bi-chat text-secondary reply-icon" id="reply_icon_{{i.doc_id}}" style="cursor: pointer">️</span>
@@ -225,8 +566,8 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                     <span class="bi bi-arrow-repeat text-secondary retweet-icon" style="cursor: pointer">️</span>
                     <span class="retweet-count text-secondary">{{i.retweets}}</span>
                 </div>
-                <div class="like-button col" id="like_button_{{i.doc_id}}">
-                    <span class="bi bi-heart text-secondary like-icon" style="cursor: pointer">️</span>
+            <div class="like-button col" id="like_button_{{i.doc_id}}">
+                <span class="bi bi-heart text-secondary like-icon" style="cursor: pointer">️</span>
                     <span class="like-count text-secondary">{{i.likes}}</span>
                     {{ if i.sponsored }}
                         <input class="like-field" type="hidden" name="liked_item_{{i.doc_id}}" id="liked_item_{{i.doc_id}}">
@@ -250,8 +591,8 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
     {% if i.sponsored %}
         style="background-color: #E5E4E2;"
     {% endif %}
-    onmouseover="sequence('i' + {{i.doc_id}});" 
-    ontouchstart="sequence('i' + {{i.doc_id}});">      
+    onmouseover="sequence('i' + {{i.doc_id}});"
+    ontouchstart="sequence('i' + {{i.doc_id}});">
         <td>
         <div class="row justify-content-start">
             <div class="col-2">
@@ -293,7 +634,7 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                             {{i.handle}}
                         </a>
                         <small class="text-muted">
-                            {{i.username}} &middot; 
+                            {{i.username}} &middot;
                             {% if i.sponsored %}
                                 Sponsored
                             {% else %}
@@ -348,14 +689,14 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
 </tr>
 
 {{elif i.watermark == "cr_watermark_plus_label" }}
-    
+
         <!-- ================================================ CR WATERMARK PLUS LABEL ================================================ -->
         <tr id="{{i.doc_id}}"
         {% if i.sponsored %}
             style="background-color: #E5E4E2;"
         {% endif %}
-        onmouseover="sequence('i' + {{i.doc_id}});" 
-        ontouchstart="sequence('i' + {{i.doc_id}});">      
+        onmouseover="sequence('i' + {{i.doc_id}});"
+        ontouchstart="sequence('i' + {{i.doc_id}});">
             <td>
             <div class="row justify-content-start">
                 <div class="col-2">
@@ -397,7 +738,7 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                                 {{i.handle}}
                             </a>
                             <small class="text-muted">
-                                {{i.username}} &middot; 
+                                {{i.username}} &middot;
                                 {% if i.sponsored %}
                                     Sponsored
                                 {% else %}
@@ -423,7 +764,7 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                                 <!-- Link to the warning label below -->
                                 <!-- Hidden checkbox for toggling the display of the warning label -->
                             <input type="checkbox" id="option3-toggle" class="option3-checkbox">
-                            
+
                             <!-- Label styled as the "CR" watermark -->
                             <label for="option3-toggle" class="watermark"
        data-bs-toggle="tooltip"
@@ -479,8 +820,8 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
     {% if i.sponsored %}
         style="background-color: #E5E4E2;"
     {% endif %}
-    onmouseover="sequence('i' + {{i.doc_id}});" 
-    ontouchstart="sequence('i' + {{i.doc_id}});">       
+    onmouseover="sequence('i' + {{i.doc_id}});"
+    ontouchstart="sequence('i' + {{i.doc_id}});">
         <td>
             <div class="row justify-content-start">
                 <div class="col-2">
@@ -522,7 +863,7 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                                 {{i.handle}}
                             </a>
                             <small class="text-muted">
-                                {{i.username}} &middot; 
+                                {{i.username}} &middot;
                                 {% if i.sponsored %}
                                     Sponsored
                                 {% else %}
@@ -540,7 +881,7 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                     </div>
 
                     {{ if i.pic_available == True}}
-                            <a 
+                            <a
                             {% if i.sponsored %}
                                 href="{{ i.target }}" target="_blank"
                             {% else %}
@@ -609,7 +950,10 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
     </div>
 </div>
 
+
+
 <style>
+
 .overlay {
     position: absolute;
     top: 0;
@@ -625,7 +969,6 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
     text-align: center;
     border-radius: 16px; /* Match the img border-radius */
 }
-
 .overlay h3,
 .overlay p:not(.click-to-see-box) {
     cursor: default !important;
@@ -685,9 +1028,9 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
   gap: 0.4rem;
   cursor: pointer;
   white-space: nowrap;
-
   margin-right: 1.5rem; /* add space between buttons */
 }
+
 
 /* Remove margin from last button so no extra trailing space */
 .share-button {

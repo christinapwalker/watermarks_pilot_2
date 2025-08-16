@@ -1,100 +1,181 @@
-console.log("Reactions ready!");
+// === Reactions Script (Fully Global) ===
+console.log("Reactions script loaded!");
 
-document.addEventListener('DOMContentLoaded', function() {
-    let repliesData = [];
-    let likesData = [];
+// --- Global arrays ---
+window.likesData = [];
+window.retweetsData = [];
+window.repliesData = [];
 
-    // Function to toggle the like state of a button
-    function toggleLike(button) {
-        const icon = button.querySelector('.like-icon');
-        const likeCountSpan = button.querySelector('.like-count');
-        let likeCount = parseInt(likeCountSpan.textContent);
-
-        if (icon.classList.contains('bi-heart')) {
-            icon.classList.remove('bi-heart', 'text-secondary');
-            icon.classList.add('bi-heart-fill', 'text-danger');
-            likeCount++;
-        } else {
-            icon.classList.remove('bi-heart-fill', 'text-danger');
-            icon.classList.add('bi-heart', 'text-secondary');
-            likeCount--;
-        }
-
-        likeCountSpan.textContent = likeCount.toString();
+// --- Helper: ensure DOM ready ---
+function onDOMReady(callback) {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", callback);
+    } else {
+        callback();
     }
+}
 
-    // Attach event listeners to all like buttons
+// --- Global collection functions ---
+window.collectLikes = function() {
+    window.likesData = [];
     document.querySelectorAll('.like-button').forEach(button => {
-        button.addEventListener('click', function() {
-            toggleLike(button);
-        });
+        const docId = button.id.replace('like_button_', '');
+        const icon = button.querySelector('.like-icon');
+        const isLiked = icon && icon.classList.contains('bi-heart-fill');
+        window.likesData.push({ doc_id: docId, liked: isLiked });
     });
+    console.log("Likes data:", window.likesData);
+};
 
-    // Function to handle reply submission and class change
-    function replyOneUp(docId) {
-        const replyField = document.getElementById(`reply_to_item_${docId}`);
-        const replyText = replyField.value.trim();
-        const replyCountSpan = document.getElementById(`reply_count_${docId}`);
-        const replyIcon = document.getElementById(`reply_icon_${docId}`);
+// FIXED: Updated collectRetweets to check for 'retweeted' class on button
+window.collectRetweets = function() {
+    window.retweetsData = [];
+    document.querySelectorAll('.retweet-button').forEach(button => {
+        const docId = button.id.replace('retweet_button_', '');
+        const icon = button.querySelector('.retweet-icon');
 
-        if (replyText) {
-            replyIcon.classList.remove('bi-chat', 'text-secondary');
-            replyIcon.classList.add('bi-chat-fill', 'text-primary');
+        // Check multiple ways a retweet might be indicated
+        const hasTextSuccess = icon && icon.classList.contains('text-success');
+        const buttonHasRetweeted = button.classList.contains('retweeted');
 
-            let replyCount = parseInt(replyCountSpan.textContent);
-            replyCount++;
-            replyCountSpan.textContent = replyCount.toString();
+        // A retweet is indicated by text-success OR by the button having 'retweeted' class
+        const isRetweeted = hasTextSuccess || buttonHasRetweeted;
 
-            replyField.value = '';
-            repliesData.push({ doc_id: docId, reply: replyText });
-        }
+        window.retweetsData.push({ doc_id: docId, retweeted: isRetweeted });
+    });
+    console.log("Retweets data:", window.retweetsData);
+};
+
+window.collectData = function() {
+    window.collectLikes();
+    window.collectRetweets();
+    console.log("=== COLLECTED DATA ===");
+    console.log("Likes:", window.likesData);
+    console.log("Retweets:", window.retweetsData);
+    console.log("Replies:", window.repliesData);
+};
+
+// --- Toggle functions with auto-updating arrays ---
+window.toggleLike = function(button) {
+    const icon = button.querySelector('.like-icon');
+    const count = button.querySelector('.like-count');
+    let n = parseInt(count.textContent);
+
+    if (icon.classList.contains('bi-heart')) {
+        icon.classList.replace('bi-heart', 'bi-heart-fill');
+        n++;
+    } else {
+        icon.classList.replace('bi-heart-fill', 'bi-heart');
+        n--;
+    }
+    count.textContent = n;
+
+    const docId = button.id.replace('like_button_', '');
+    const index = window.likesData.findIndex(x => x.doc_id === docId);
+    const isLiked = icon.classList.contains('bi-heart-fill');
+
+    if (index !== -1) {
+        window.likesData[index].liked = isLiked;
+    } else {
+        window.likesData.push({ doc_id: docId, liked: isLiked });
+    }
+};
+
+// UPDATED: toggleRetweet to match the detection logic
+window.toggleRetweet = function(button) {
+    const icon = button.querySelector('.retweet-icon');
+    const count = button.querySelector('.retweet-count');
+    let n = parseInt(count.textContent);
+
+    // Check current state using the same logic as collectRetweets
+    const hasTextSuccess = icon.classList.contains('text-success');
+    const buttonHasRetweeted = button.classList.contains('retweeted');
+    const isCurrentlyRetweeted = hasTextSuccess || buttonHasRetweeted;
+
+    if (!isCurrentlyRetweeted) {
+        // Add retweet
+        icon.classList.add('text-success');
+        button.classList.add('retweeted');
+        n++;
+    } else {
+        // Remove retweet
+        icon.classList.remove('text-success');
+        button.classList.remove('retweeted');
+        n--;
     }
 
-    // Attach event listeners to reply modal buttons
-    document.querySelectorAll('.reply-modal-button').forEach(button => {
-        button.addEventListener('click', function() {
+    count.textContent = n;
+
+    const docId = button.id.replace('retweet_button_', '');
+    const index = window.retweetsData.findIndex(x => x.doc_id === docId);
+    const isRetweeted = icon.classList.contains('text-success') || button.classList.contains('retweeted');
+
+    if (index !== -1) {
+        window.retweetsData[index].retweeted = isRetweeted;
+    } else {
+        window.retweetsData.push({ doc_id: docId, retweeted: isRetweeted });
+    }
+};
+
+// --- Reply tracking ---
+window.addReply = function(docId, replyText) {
+    if (!replyText.trim()) return;
+    const index = window.repliesData.findIndex(x => x.doc_id === docId);
+    if (index !== -1) {
+        window.repliesData[index].reply = replyText;
+    } else {
+        window.repliesData.push({ doc_id: docId, reply: replyText });
+    }
+    console.log("Replies updated:", window.repliesData);
+};
+
+// --- Attach listeners after DOM is ready ---
+onDOMReady(() => {
+    // --- Event Listeners for Tweet Buttons ---
+    document.querySelectorAll('.like-button').forEach(btn =>
+        btn.addEventListener('click', () => window.toggleLike(btn))
+    );
+    document.querySelectorAll('.retweet-button').forEach(btn =>
+        btn.addEventListener('click', () => window.toggleRetweet(btn))
+    );
+    document.querySelectorAll('.reply-modal-button').forEach(btn =>
+        btn.addEventListener('click', function() {
             const docId = this.id.replace('reply_modal_button_', '');
-            replyOneUp(docId);
-        });
-    });
+            const replyField = document.getElementById(`reply_to_item_${docId}`);
+            if (replyField) window.addReply(docId, replyField.value.trim());
+        })
+    );
 
-    // Function to collect likes
-    function collectLikes() {
-        document.querySelectorAll('.like-button').forEach(button => {
-            let docId = button.getAttribute('id').replace('like_button_', '');
-            let icon = button.querySelector('.like-icon');
-            let isLiked = icon.classList.contains('bi-heart-fill');
-            likesData.push({ doc_id: docId, liked: isLiked });
+    // --- Submission Logic ---
+    const submitButton = document.getElementById('submitButton');
+    if (submitButton) {
+        submitButton.addEventListener('click', function(event) {
+            // Collect final data
+            window.collectLikes();
+            window.collectRetweets();
+
+            // Prepare data for submission
+            const likesToSave = window.likesData.filter(item => item.liked).map(item => item.doc_id);
+            const retweetsToSave = window.retweetsData.filter(item => item.retweeted).map(item => item.doc_id);
+
+            // Populate the hidden input fields
+            const likesField = document.querySelector('input[name="likes_data"]');
+            const retweetsField = document.querySelector('input[name="retweets_data"]');
+
+            if (likesField) {
+                likesField.value = JSON.stringify(likesToSave);
+            }
+
+            if (retweetsField) {
+                retweetsField.value = JSON.stringify(retweetsToSave);
+            }
+
+            console.log("Submitting - Likes:", likesToSave);
+            console.log("Submitting - Retweets:", retweetsToSave);
         });
     }
 
-    // Function to collect data
-    function collectData() {
-        collectLikes();  // Populates the likesData array
-        return { likes: JSON.stringify(likesData), replies: JSON.stringify(repliesData) };
-    }
-
-    // Event listener for the submit button
-    document.getElementById('submitButton').addEventListener('click', function(event) {
-        //event.preventDefault();
-        let data = collectData();
-        document.getElementById('likes_data').value = data.likes;
-        document.getElementById('replies_data').value = data.replies;
-        console.log("Data to send:", data);
-    });
-
-    // Function to display tweet content in the modal
-    function displayTweetContent(docId, tweetContent) {
-        const replyingTweetDiv = document.getElementById(`replying_tweet_${docId}`);
-        replyingTweetDiv.textContent = tweetContent;
-    }
-
-    // Attach event listeners to open modal and display tweet content
-    document.querySelectorAll('.reply-button').forEach(button => {
-        button.addEventListener('click', function() {
-            const docId = this.id.replace('reply_button_', '');
-            let yourTweetContent = document.getElementById("tweet_text_" + docId).textContent;
-            displayTweetContent(docId, yourTweetContent);
-        });
-    });
+    // --- Initialize arrays with current page state ---
+    window.collectLikes();
+    window.collectRetweets();
 });

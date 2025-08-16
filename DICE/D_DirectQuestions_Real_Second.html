@@ -22,11 +22,11 @@
         </div>
     </div>
 
+    <!-- HTML - Updated for 1% increments (0-100 range) -->
     <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
-
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="confidence" min="0" max="10" value="5" oninput="updateConfidence(this)">
+        <input type="range" name="image_confidence_real" min="0" max="100" value="50" oninput="updateConfidence(this)">
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_real" class="slider-result"></p>
     </div>
@@ -356,11 +356,11 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('selected-claim-text').textContent = selectedText;
     };
 
-    window.updateConfidence = function (input) {
-        const confidence = parseInt(input.value);
-        const percentage = (confidence / 10) * 100;
-        document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
-    };
+// JavaScript - Simplified for direct percentage storage
+window.updateConfidence = function (input) {
+    const percentage = parseInt(input.value);
+    document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
+};
 
     window.updateFeelTrueLabel = function (input) {
         const description = document.getElementById('feeltrue-description');
@@ -426,6 +426,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
+        // Form validation - Updated to match the correct field name
         const confidenceSlider = document.querySelector('input[name="image_confidence_real"]');
         if (confidenceSlider && isVisible(confidenceSlider)) {
             if (confidenceSlider.value === '' || confidenceSlider.value === null) {

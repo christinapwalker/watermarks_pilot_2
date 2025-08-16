@@ -1,4 +1,8 @@
 from os import environ
+import os
+
+STATIC_URL = '/static/'
+
 
 DEBUG = True
 

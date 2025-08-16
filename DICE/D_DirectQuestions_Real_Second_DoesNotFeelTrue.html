@@ -340,34 +340,29 @@ function validateForm() {
 
     // Check claim textarea submission
     const textarea = document.getElementById('claim-response');
+    if (textarea && textarea.offsetParent !== null && !textarea.readOnly && textarea.value.trim() === '') {
+        unansweredFields.push(requiredFields['claim_response_real']);
+        const container = textarea.closest('.question');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+    // Check claim selection
+    const claimRadios = form.querySelectorAll('input[name="image_claim_real"]');
     const interpretationsSection = document.getElementById('interpretations-section');
-    if (textarea && !window.claimWasSubmitted) {
-        if (textarea.offsetParent !== null && !textarea.disabled && textarea.value.trim() === '') {
-            unansweredFields.push(requiredFields['claim_response_real']);
-            const container = textarea.closest('.question');
-            if (container) {
-                container.classList.add('missing-answer');
-                missingElements.push(container);
-            }
-        } else if (interpretationsSection && interpretationsSection.offsetParent === null) {
-            unansweredFields.push('Submit your claim before proceeding');
-            const container = textarea.closest('.question');
-            if (container) {
-                container.classList.add('missing-answer');
-                missingElements.push(container);
+    if (interpretationsSection && interpretationsSection.offsetParent !== null) {
+        const claimSelected = Array.from(claimRadios).some(r => r.checked);
+        if (!claimSelected) {
+            unansweredFields.push(requiredFields['image_claim_real']);
+            if (interpretationsSection) {
+                interpretationsSection.classList.add('missing-answer');
+                missingElements.push(interpretationsSection);
             }
         }
     }
 
-    // Check claim radio selection
-    const claimRadios = form.querySelectorAll('input[name="image_claim_real"]');
-    if (interpretationsSection && interpretationsSection.offsetParent !== null) {
-        if (!Array.from(claimRadios).some(r => r.checked)) {
-            unansweredFields.push(requiredFields['image_claim_real']);
-            interpretationsSection.classList.add('missing-answer');
-            missingElements.push(interpretationsSection);
-        }
-    }
+
 
     // Check claim truth radios
     const claimTrueRadios = form.querySelectorAll('input[name="image_claim_true_real"]');
@@ -573,11 +568,11 @@ document.addEventListener('click', function(e) {
         </div>
     </div>
 
-    <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
+    <p style="margin-bottom: 40px;"><strong>How confident are you in your assessment about whether the image is AI-generated?</strong></p>
+
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="image_confidence_real" min="0" max="10" value="5" oninput="updateConfidence(this)" />
-        {{ formfield_errors 'image_confidence_real' }}
+        <input type="range" name="image_confidence_real" min="0" max="100" value="50" oninput="updateConfidence(this)">
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_real" class="slider-result"></p>
     </div>
@@ -600,15 +595,14 @@ document.addEventListener('click', function(e) {
     </div>
 
     <div id="interpretations-section" style="display:none;">
+            {{ formfield_errors 'image_claim_real' }}
         <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
         {% for value, label in claim_choices_real %}
-            <label class="claim-option">
-                <input type="radio" name="image_claim_real" value="{{ value }}"
-                       onclick="updateClaimText(this);
-                                document.getElementById('claim-truth-section').style.display='block';
-                                document.getElementById('feel-true-question').style.display='block';
-                                window.claimWasSubmitted = true;
-                                disableClaimInput();">
+            <label>
+            <input type="radio" name="image_claim_real" value="{{ label }}"
+                onclick="updateClaimText(this);
+                            document.getElementById('claim-truth-section').style.display='block';
+                            document.getElementById('feel-true-question').style.display='block';">
                 {{ label }}
             </label><br>
         {% endfor %}
@@ -733,7 +727,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         interpretationsSection.style.display = 'block';
-        textarea.disabled = true;
+    // Change disabled to readonly so the value is still submitted
+        textarea.readOnly = true;
+        textarea.style.backgroundColor = '#f8f9fa'; // Visual indication it's readonly
         button.disabled = true;
         window.claimWasSubmitted = true;
         interpretationsSection.scrollIntoView({ behavior: 'smooth' });
@@ -755,11 +751,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.updateConfidence = function (input) {
         window.confidenceSliderInteracted = true;
-        const confidence = parseInt(input.value);
-        const percentage = (confidence / 10) * 100;
+        const percentage = parseInt(input.value); // Direct percentage value now (0-100)
         document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
 
-        // Remove highlighting when confidence is set
+        // Remove highlighting when user interacts with slider
         const container = input.closest('.slider-container');
         if (container && container.classList.contains('missing-answer')) {
             container.classList.remove('missing-answer');
@@ -863,7 +858,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.disableClaimInput = function() {
         const textarea = document.getElementById('claim-response');
         const button = document.querySelector('button[onclick="submitClaim(this)"]');
-        if (textarea) textarea.disabled = true;
+        if (textarea) textarea.readOnly = true;
         if (button) button.disabled = true;
     };
 });

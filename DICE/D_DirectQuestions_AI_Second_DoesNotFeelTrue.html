@@ -69,6 +69,18 @@
     border: 2px solid white;
     display: none;
 }
+       /* Demo styling */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .coordinates {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
 
 /* Question styling */
 .question {
@@ -284,9 +296,13 @@ function validateForm() {
         el.classList.remove('missing-answer');
     });
 
-    // Check image accuracy radios
+    // Check image accuracy selection
     const imageAccuracyRadios = form.querySelectorAll('input[name="image_accuracy_ai"]');
-    if (!Array.from(imageAccuracyRadios).some(r => r.checked)) {
+    let imageAccuracyAnswered = false;
+    if (imageAccuracyRadios.length > 0) {
+        imageAccuracyAnswered = Array.from(imageAccuracyRadios).some(r => r.checked);
+    }
+    if (!imageAccuracyAnswered) {
         unansweredFields.push(requiredFields['image_accuracy_ai']);
         const container = document.querySelector('.question');
         if (container) {
@@ -369,14 +385,17 @@ function validateForm() {
         }
     }
 
-    // Check claim truth radios
+    // Check claim truth selection
     const claimTrueRadios = form.querySelectorAll('input[name="image_claim_true_ai"]');
     const claimTruthSection = document.getElementById('claim-truth-section');
     if (claimTruthSection && claimTruthSection.offsetParent !== null) {
-        if (!Array.from(claimTrueRadios).some(r => r.checked)) {
+        const claimTruthSelected = Array.from(claimTrueRadios).some(r => r.checked);
+        if (!claimTruthSelected) {
             unansweredFields.push(requiredFields['image_claim_true_ai']);
-            claimTruthSection.classList.add('missing-answer');
-            missingElements.push(claimTruthSection);
+            if (claimTruthSection) {
+                claimTruthSection.classList.add('missing-answer');
+                missingElements.push(claimTruthSection);
+            }
         }
     }
 
@@ -465,8 +484,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         form.addEventListener('submit', function(e) {
-            console.log('Form submit event detected');
-            if (!validateForm()) {
+        console.log('Form submit event detected');
+
+        // FIXED: Re-enable textarea before validation/submission
+        const textarea = document.getElementById('claim-response');
+        if (textarea && textarea.disabled) {
+            textarea.disabled = false;
+        }
+
+        if (!validateForm()) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 return false;
@@ -480,28 +506,38 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!form) return;
 
         // Image click handler (removes highlight)
-        const img = document.getElementById("clickable-image");
-        const inputX = document.getElementById("click_x_ai");
-        const inputY = document.getElementById("click_y_ai");
-        const marker = document.getElementById("click-marker");
-        if (img) {
-            img.addEventListener("click", function () {
-                if (inputX) inputX.value = inputX.value || '0';
-                if (inputY) inputY.value = inputY.value || '0';
+        // Image click handler (removes highlight)
+const img = document.getElementById("clickable-image");
+const inputX = document.getElementById("click_x_ai");
+const inputY = document.getElementById("click_y_ai");
+const marker = document.getElementById("click-marker");
+if (img) {
+    img.addEventListener("click", function (event) {
+        const rect = img.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
 
-                marker.style.display = "block";
+        inputX.value = xPercent.toFixed(2);
+        inputY.value = yPercent.toFixed(2);
 
-                const container = img.closest('.image-container');
-                if (container && container.classList.contains('missing-answer')) {
-                    container.classList.remove('missing-answer');
-                }
+        marker.style.left = `${xPercent}%`;
+        marker.style.top = `${yPercent}%`;
+        marker.style.transform = "translate(-50%, -50%)";
+        marker.style.display = "block";
 
-                const clickInstruction = document.getElementById('click-instruction');
-                if (clickInstruction && clickInstruction.classList.contains('missing-answer')) {
-                    clickInstruction.classList.remove('missing-answer');
-                }
-            });
+        const container = img.closest('.image-container');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
         }
+
+        const clickInstruction = document.getElementById('click-instruction');
+        if (clickInstruction && clickInstruction.classList.contains('missing-answer')) {
+            clickInstruction.classList.remove('missing-answer');
+        }
+    });
+}
 
         // All inputs: remove highlight on input/change
         const allInputs = form.querySelectorAll('input, select, textarea');
@@ -542,6 +578,13 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('click', function(e) {
     if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
         console.log('Submit button clicked, validating...');
+
+        // FIXED: Re-enable textarea before validation/submission
+        const textarea = document.getElementById('claim-response');
+        if (textarea && textarea.disabled) {
+            textarea.disabled = false;
+        }
+
         if (!validateForm()) {
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -554,8 +597,10 @@ document.addEventListener('click', function(e) {
 
 <div class="survey-container">
 <div class="image-container">
-    <img src="{{ player.screenshot_treatment }}" id="clickable-image" alt="Screenshot" />
-    <div id="click-marker"></div>
+    <img src="{{ player.screenshot_treatment }}" id="clickable-image"
+    style="width: 100%; max-width: 600px; cursor: crosshair; display: block;">
+    <div id="click-marker" style="position: absolute; width: 12px; height: 12px; background: red;
+         border-radius: 50%; pointer-events: none; display: none; border: 2px solid white;"></div>
 </div>
 
 <form method="post" novalidate>
@@ -573,11 +618,11 @@ document.addEventListener('click', function(e) {
         </div>
     </div>
 
-    <p class="subtitle">How confident are you in your assessment about whether the image is AI-generated?</p>
+    <p style="margin-bottom: 40px;"><strong>How confident are you in your assessment about whether the image is AI-generated?</strong></p>
+
     <div class="slider-container">
         <span class="slider-label-left">0% Confidence</span>
-        <input type="range" name="image_confidence_ai" min="0" max="10" value="5" oninput="updateConfidence(this)" />
-        {{ formfield_errors 'image_confidence_ai' }}
+        <input type="range" name="image_confidence_ai" min="0" max="100" value="50" oninput="updateConfidence(this)">
         <span class="slider-label-right">100% Confidence</span>
         <p id="description-image_confidence_ai" class="slider-result"></p>
     </div>
@@ -600,15 +645,14 @@ document.addEventListener('click', function(e) {
     </div>
 
     <div id="interpretations-section" style="display:none;">
+            {{ formfield_errors 'image_claim_ai' }}
         <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
         {% for value, label in claim_choices_ai %}
-            <label class="claim-option">
-                <input type="radio" name="image_claim_ai" value="{{ value }}"
-                       onclick="updateClaimText(this);
-                                document.getElementById('claim-truth-section').style.display='block';
-                                document.getElementById('feel-true-question').style.display='block';
-                                window.claimWasSubmitted = true;
-                                disableClaimInput();">
+            <label>
+            <input type="radio" name="image_claim_ai" value="{{ label }}"
+                            onclick="updateClaimText(this);
+                            document.getElementById('claim-truth-section').style.display='block';
+                            document.getElementById('feel-true-question').style.display='block';">
                 {{ label }}
             </label><br>
         {% endfor %}
@@ -733,7 +777,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         interpretationsSection.style.display = 'block';
-        textarea.disabled = true;
+        // FIXED: Don't disable the textarea anymore - just disable the button
         button.disabled = true;
         window.claimWasSubmitted = true;
         interpretationsSection.scrollIntoView({ behavior: 'smooth' });
@@ -755,11 +799,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.updateConfidence = function (input) {
         window.confidenceSliderInteracted = true;
-        const confidence = parseInt(input.value);
-        const percentage = (confidence / 10) * 100;
+        const percentage = parseInt(input.value); // Direct percentage value now (0-100)
         document.getElementById('description-image_confidence_ai').innerText = `${percentage}% Confident`;
 
-        // Remove highlighting when confidence is set
+        // Remove highlighting when user interacts with slider
         const container = input.closest('.slider-container');
         if (container && container.classList.contains('missing-answer')) {
             container.classList.remove('missing-answer');
@@ -868,5 +911,6 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 });
 </script>
+
 
 {% endblock %}
