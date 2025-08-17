@@ -936,9 +936,9 @@ class D_ItemCountQuestions_Last(Page):
         if 'itemcount_first' in self.participant.vars:
             self.itemcount_first = self.participant.vars['itemcount_first']
         for field_name in ['accurate_all', 'confidence_accurate', 'share']:
-            new_val = self.field_maybe_none(field_name)
-            if new_val and not getattr(self, field_name, None):
-                setattr(self, field_name, new_val)
+            new_val = getattr(player, field_name, None)  # CHANGED THIS LINE
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
 
 
 class D_DirectQuestions_AI_First(Page):
@@ -1127,8 +1127,8 @@ class D_DirectQuestions_AI_Second_FeelTrue(Page):
             return False
 
         # Determine if real round = "does not feel true"
-        slider_val = player.field_maybe_none('image_feelstrue_real')
-        binary_val = player.field_maybe_none('image_feelstrue_binary_real')
+        slider_val = getattr(player, 'image_feelstrue_real', None)
+        binary_val = getattr(player, 'image_feelstrue_binary_real', None)
         feels_not_true = False
 
         if slider_val is not None:
@@ -1209,8 +1209,8 @@ class D_DirectQuestions_AI_Second_DoesNotFeelTrue(Page):
             print("AI_Second_DoesNotFeelTrue: skipped because first_question != 'Real'")
             return False
 
-        slider_val = player.field_maybe_none('image_feelstrue_real')
-        binary_val = player.field_maybe_none('image_feelstrue_binary_real')
+        slider_val = getattr(player, 'image_feelstrue_real', None)
+        binary_val = getattr(player, 'image_feelstrue_binary_real', None)
 
         answered_feels_true = False
         if slider_val is not None:
