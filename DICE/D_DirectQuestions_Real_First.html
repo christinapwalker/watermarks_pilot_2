@@ -220,7 +220,7 @@ button[type="submit"]:hover {
 </style>
 
 <script>
-// Enhanced validation function with highlighting and detailed messages (from first page)
+// Enhanced validation function with highlighting and detailed messages
 function validateForm() {
     console.log('validateForm() called');
 
@@ -274,7 +274,6 @@ function validateForm() {
         }
     }
 
-
     // Check click coordinates
     const clickX = document.getElementById('click_x_real')?.value;
     const clickY = document.getElementById('click_y_real')?.value;
@@ -309,19 +308,47 @@ function validateForm() {
         }
     }
 
-    // Check claim submission
+    // Check claim submission - FIXED VERSION
     const textarea = document.getElementById('claim-response');
-    if (textarea && textarea.offsetParent !== null && !textarea.readOnly && textarea.value.trim() === '') {
-    // Only validate if textarea is visible, not readonly, and empty
-        } else if (textarea && textarea.readOnly && textarea.value.trim() !== '') {
-            // Textarea is readonly but has content - this is fine, don't validate
-            // The claim was submitted
-        }
+    const interpretationsSection = document.getElementById('interpretations-section');
 
+    // Check if the textarea exists and is visible
+    if (textarea && textarea.offsetParent !== null) {
+        // If textarea is visible and NOT readonly (meaning user hasn't submitted claim yet)
+        if (!textarea.readOnly) {
+            // User hasn't clicked "Submit Claim" button yet
+            if (textarea.value.trim() === '') {
+                unansweredFields.push('Enter a claim in the text box');
+                const container = textarea.closest('.question');
+                if (container) {
+                    container.classList.add('missing-answer');
+                    missingElements.push(container);
+                }
+            } else {
+                unansweredFields.push('Click the "Submit Claim" button to proceed');
+                const container = textarea.closest('.question');
+                if (container) {
+                    container.classList.add('missing-answer');
+                    missingElements.push(container);
+                }
+            }
+        }
+        // If textarea is readonly, check that interpretations section is properly displayed
+        else if (textarea.readOnly) {
+            if (!interpretationsSection || interpretationsSection.style.display === 'none') {
+                // This shouldn't happen, but handle edge case
+                unansweredFields.push('Please complete the claim submission process');
+                const container = textarea.closest('.question');
+                if (container) {
+                    container.classList.add('missing-answer');
+                    missingElements.push(container);
+                }
+            }
+        }
+    }
 
     // Check claim selection
     const claimRadios = form.querySelectorAll('input[name="image_claim_real"]');
-    const interpretationsSection = document.getElementById('interpretations-section');
     if (interpretationsSection && interpretationsSection.offsetParent !== null) {
         const claimSelected = Array.from(claimRadios).some(r => r.checked);
         if (!claimSelected) {
@@ -452,20 +479,18 @@ function validateForm() {
     return true; // Allow form submission
 }
 
-// Global function definitions (moved outside conditional blocks)
-    window.updateConfidence = function (input) {
-        window.confidenceSliderInteracted = true;
-        const percentage = parseInt(input.value); // Direct percentage value now (0-100)
-        document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
+// Global function definitions
+window.updateConfidence = function (input) {
+    window.confidenceSliderInteracted = true;
+    const percentage = parseInt(input.value); // Direct percentage value now (0-100)
+    document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
 
-        // Remove highlighting when user interacts with slider
-        const container = input.closest('.slider-container');
-        if (container && container.classList.contains('missing-answer')) {
-            container.classList.remove('missing-answer');
-        }
-    };
-
-// REPLACE your submitClaim function with this fixed version:
+    // Remove highlighting when user interacts with slider
+    const container = input.closest('.slider-container');
+    if (container && container.classList.contains('missing-answer')) {
+        container.classList.remove('missing-answer');
+    }
+};
 
 window.submitClaim = function (button) {
     const textarea = document.getElementById('claim-response');
@@ -504,39 +529,27 @@ window.submitClaim = function (button) {
 
     interpretationsSection.style.display = 'block';
 
+    // Make textarea readonly instead of disabled
     textarea.readOnly = true;
     textarea.style.backgroundColor = '#f8f9fa';
     textarea.style.border = '1px solid #6c757d';
     button.disabled = true;
 
+    // Create a hidden field to ensure the value is submitted
     const hiddenInput = document.createElement('input');
     hiddenInput.type = 'hidden';
     hiddenInput.name = 'claim_response_real_backup';
     hiddenInput.value = claimText;
     document.querySelector('form').appendChild(hiddenInput);
 
-    // const submittedText = document.createElement('p');
-    // submittedText.innerHTML = `<strong>Your submitted claim:</strong> "${claimText}"`;
-    // submittedText.style.backgroundColor = '#e8f5e8';
-    // submittedText.style.padding = '10px';
-    // submittedText.style.borderRadius = '5px';
-    // submittedText.style.border = '1px solid #28a745';
-    // submittedText.style.marginBottom = '10px';
-    // textarea.parentNode.insertBefore(submittedText, textarea);
-
     interpretationsSection.scrollIntoView({ behavior: 'smooth' });
 
+    // Remove highlighting when claim is submitted
     const container = textarea.closest('.question');
     if (container && container.classList.contains('missing-answer')) {
         container.classList.remove('missing-answer');
     }
 };
-
-// ALSO UPDATE your validation function to handle readonly fields:
-// FIND this line in your validateForm() function:
-// if (textarea && textarea.offsetParent !== null && !textarea.readOnly && textarea.value.trim() === '') {
-
-// REPLACE with:
 
 window.updateClaimText = function (radio) {
     let selectedText = radio.parentElement.textContent.trim();
@@ -589,7 +602,7 @@ window.markFeelsNotTrueAnswered = function () {
     document.getElementById('image_feelsnottrue_answered').value = 'True';
 };
 
-// Backup: Also try the event listener approach
+// Event listeners
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, setting up additional event listeners...');
 
@@ -710,6 +723,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('image_feelstrue_answered').value = 'False';
                     document.getElementById('image_feelsnottrue_answered').value = 'True';
                 }
+            }
+
+            // Remove highlighting when user interacts
+            const container = this.closest('#feel-true-question');
+            if (container && container.classList.contains('missing-answer')) {
+                container.classList.remove('missing-answer');
             }
         });
     });

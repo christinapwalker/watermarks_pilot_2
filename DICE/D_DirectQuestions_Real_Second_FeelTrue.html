@@ -731,68 +731,75 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     window.submitClaim = function (button) {
-    const claimText = textarea.value.trim();
-    if (!claimText) {
-        alert('Please enter a claim before submitting.');
-        return;
-    }
-
-    const existingOptions = document.querySelectorAll('input[name="image_claim_real"]');
-    for (const option of existingOptions) {
-        if (option.value.trim() === claimText) {
-            alert('This claim option already exists.');
+        const claimText = textarea.value.trim();
+        if (!claimText) {
+            alert('Please enter a claim before submitting.');
             return;
         }
-    }
 
-    if (showOwnClaim) {
-        const label = document.createElement('label');
-        label.className = 'claim-option';
+        const existingOptions = document.querySelectorAll('input[name="image_claim_real"]');
+        for (const option of existingOptions) {
+            if (option.value.trim() === claimText) {
+                alert('This claim option already exists.');
+                return;
+            }
+        }
 
-        const input = document.createElement('input');
-        input.type = 'radio';
-        input.name = 'image_claim_real';
-        input.value = claimText;  // Use actual text, not number
-        input.onclick = function () {
-            updateClaimText(this);
-            document.getElementById('claim-truth-section').style.display = 'block';
-            document.getElementById('feel-true-question').style.display = 'block';
-            window.claimWasSubmitted = true;
-        };
+        if (showOwnClaim) {
+            const label = document.createElement('label');
+            label.className = 'claim-option';
 
-        label.appendChild(input);
-        label.appendChild(document.createTextNode(' ' + claimText));
-        label.appendChild(document.createElement('br'));
-        interpretationsSection.appendChild(label);
-    }
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'image_claim_real';
+            input.value = claimText;
+            input.onclick = function () {
+                updateClaimText(this);
+                document.getElementById('claim-truth-section').style.display = 'block';
+                document.getElementById('feel-true-question').style.display = 'block';
+                window.claimWasSubmitted = true;
+            };
 
-    interpretationsSection.style.display = 'block';
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(' ' + claimText));
+            label.appendChild(document.createElement('br'));
+            interpretationsSection.appendChild(label);
+        }
 
-    // CRITICAL FIX: Use readOnly instead of disabled
-    textarea.readOnly = true;
-    textarea.style.backgroundColor = '#f8f9fa';
-    textarea.style.border = '1px solid #6c757d';
-    button.disabled = true;
-    window.claimWasSubmitted = true;
+        interpretationsSection.style.display = 'block';
 
-    // Show submitted claim text
-    const submittedText = document.createElement('p');
-    submittedText.innerHTML = `<strong>Your submitted claim:</strong> "${claimText}"`;
-    submittedText.style.backgroundColor = '#e8f5e8';
-    submittedText.style.padding = '10px';
-    submittedText.style.borderRadius = '5px';
-    submittedText.style.border = '1px solid #28a745';
-    submittedText.style.marginBottom = '10px';
-    textarea.parentNode.insertBefore(submittedText, textarea);
+        // Use readOnly instead of disabled to ensure form submission
+        textarea.readOnly = true;
+        textarea.style.backgroundColor = '#f8f9fa';
+        textarea.style.border = '1px solid #6c757d';
+        button.disabled = true;
+        window.claimWasSubmitted = true;
 
-    interpretationsSection.scrollIntoView({ behavior: 'smooth' });
+        // Create hidden backup field
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'claim_response_real_backup';
+        hiddenInput.value = claimText;
+        document.querySelector('form').appendChild(hiddenInput);
 
-    // Remove highlighting when claim is submitted
-    const container = textarea.closest('.question');
-    if (container && container.classList.contains('missing-answer')) {
-        container.classList.remove('missing-answer');
-    }
-};
+        // Show submitted claim text
+        const submittedText = document.createElement('p');
+        submittedText.innerHTML = `<strong>Your submitted claim:</strong> "${claimText}"`;
+        submittedText.style.backgroundColor = '#e8f5e8';
+        submittedText.style.padding = '10px';
+        submittedText.style.borderRadius = '5px';
+        submittedText.style.border = '1px solid #28a745';
+        submittedText.style.marginBottom = '10px';
+        textarea.parentNode.insertBefore(submittedText, textarea);
+
+        interpretationsSection.scrollIntoView({ behavior: 'smooth' });
+
+        // Remove highlighting when claim is submitted
+        const container = textarea.closest('.question');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
+        }
+    };
 
     window.updateClaimText = function (radio) {
         let selectedText = radio.parentElement.textContent.trim();
@@ -804,7 +811,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.updateConfidence = function (input) {
         window.confidenceSliderInteracted = true;
-        const percentage = parseInt(input.value); // Direct percentage value now (0-100)
+        const percentage = parseInt(input.value);
         document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
 
         // Remove highlighting when user interacts with slider
@@ -814,7 +821,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    // CORRECTED: Updated function for 5-option radio buttons
+    // Updated function for 5-option radio buttons (shows "feels true" follow-up)
     window.updateFeelTrueLabel = function (input) {
         window.feelsTrueSliderInteracted = true;
         const value = input.value;
@@ -853,7 +860,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 
-    // CORRECTED: Handle binary version of "feels true"
+    // Handle binary version of "feels true"
     const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_binary_real"]');
     binaryRadios.forEach(radio => {
         radio.addEventListener('change', function () {
@@ -915,7 +922,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.disableClaimInput = function() {
         const textarea = document.getElementById('claim-response');
         const button = document.querySelector('button[onclick="submitClaim(this)"]');
-        if (textarea) textarea.disabled = true;
+        if (textarea) textarea.readOnly = true;
         if (button) button.disabled = true;
     };
 });

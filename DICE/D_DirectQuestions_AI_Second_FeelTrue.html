@@ -333,25 +333,47 @@ function validateForm() {
         }
     }
 
-    // Check claim submission - FIXED validation logic
+    // Check claim submission - FIXED VERSION
     const textarea = document.getElementById('claim-response');
-    const isTextareaVisible = textarea && textarea.offsetParent !== null;
-    const isTextareaReadOnly = textarea && textarea.readOnly;
-    const hasClaimValue = textarea && textarea.value.trim() !== '';
+    const interpretationsSection = document.getElementById('interpretations-section');
 
-    // Only validate if textarea is visible, not readonly, and empty
-    if (isTextareaVisible && !isTextareaReadOnly && !hasClaimValue) {
-        unansweredFields.push(requiredFields['claim_response_ai']);
-        const container = textarea.closest('.question');
-        if (container) {
-            container.classList.add('missing-answer');
-            missingElements.push(container);
+    // Check if the textarea exists and is visible
+    if (textarea && textarea.offsetParent !== null) {
+        // If textarea is visible and NOT readonly (meaning user hasn't submitted claim yet)
+        if (!textarea.readOnly) {
+            // User hasn't clicked "Submit Claim" button yet
+            if (textarea.value.trim() === '') {
+                unansweredFields.push('Enter a claim in the text box');
+                const container = textarea.closest('.question');
+                if (container) {
+                    container.classList.add('missing-answer');
+                    missingElements.push(container);
+                }
+            } else {
+                unansweredFields.push('Click the "Submit Claim" button to proceed');
+                const container = textarea.closest('.question');
+                if (container) {
+                    container.classList.add('missing-answer');
+                    missingElements.push(container);
+                }
+            }
+        }
+        // If textarea is readonly, check that interpretations section is properly displayed
+        else if (textarea.readOnly) {
+            if (!interpretationsSection || interpretationsSection.style.display === 'none') {
+                // This shouldn't happen, but handle edge case
+                unansweredFields.push('Please complete the claim submission process');
+                const container = textarea.closest('.question');
+                if (container) {
+                    container.classList.add('missing-answer');
+                    missingElements.push(container);
+                }
+            }
         }
     }
 
     // Check claim selection
     const claimRadios = form.querySelectorAll('input[name="image_claim_ai"]');
-    const interpretationsSection = document.getElementById('interpretations-section');
     if (interpretationsSection && interpretationsSection.offsetParent !== null) {
         const claimSelected = Array.from(claimRadios).some(r => r.checked);
         if (!claimSelected) {
@@ -412,7 +434,7 @@ function validateForm() {
             feelTrueQuestion.classList.add('missing-answer');
             missingElements.push(feelTrueQuestion);
         } else {
-            // Check follow-up questions - only "feels true" follow-up should be possible
+            // Check follow-up questions - this page shows "feels true" follow-up
             const followUpFeelsTrue = document.getElementById('follow-up-question');
 
             if (feelsTrueValue !== null && feelsTrueValue >= 50) {
@@ -506,7 +528,7 @@ window.submitClaim = function (button) {
     const input = document.createElement('input');
     input.type = 'radio';
     input.name = 'image_claim_ai';
-    input.value = claimText;  // Use the actual text, not a number
+    input.value = claimText;
     input.onclick = function () {
         updateClaimText(this);
         document.getElementById('claim-truth-section').style.display = 'block';
@@ -520,22 +542,19 @@ window.submitClaim = function (button) {
 
     interpretationsSection.style.display = 'block';
 
-    // CRITICAL FIX: Use readOnly instead of disabled to ensure form submission
+    // Make textarea readonly instead of disabled
     textarea.readOnly = true;
     textarea.style.backgroundColor = '#f8f9fa';
     textarea.style.border = '1px solid #6c757d';
     button.disabled = true;
     window.claimWasSubmitted = true;
 
-    // Show submitted claim text
-    // const submittedText = document.createElement('p');
-    // submittedText.innerHTML = `<strong>Your submitted claim:</strong> "${claimText}"`;
-    // submittedText.style.backgroundColor = '#e8f5e8';
-    // submittedText.style.padding = '10px';
-    // submittedText.style.borderRadius = '5px';
-    // submittedText.style.border = '1px solid #28a745';
-    // submittedText.style.marginBottom = '10px';
-    // textarea.parentNode.insertBefore(submittedText, textarea);
+    // Create a hidden field to ensure the value is submitted
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'claim_response_ai_backup';
+    hiddenInput.value = claimText;
+    document.querySelector('form').appendChild(hiddenInput);
 
     interpretationsSection.scrollIntoView({ behavior: 'smooth' });
 
@@ -615,40 +634,82 @@ document.addEventListener('DOMContentLoaded', function() {
         }, true);
     });
 
-    // Image click handling
-    const img = document.getElementById("clickable-image");
-    const inputX = document.getElementById("click_x_ai");
-    const inputY = document.getElementById("click_y_ai");
-    const marker = document.getElementById("click-marker");
+    // Add real-time validation feedback
+    function addRealTimeValidation() {
+        const form = document.querySelector('form');
+        if (!form) return;
 
-    if (img) {
-        img.addEventListener("click", function (event) {
-            const rect = img.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            const xPercent = (x / rect.width) * 100;
-            const yPercent = (y / rect.height) * 100;
+        // Image click handler
+        const img = document.getElementById("clickable-image");
+        const inputX = document.getElementById("click_x_ai");
+        const inputY = document.getElementById("click_y_ai");
+        const marker = document.getElementById("click-marker");
 
-            inputX.value = xPercent.toFixed(2);
-            inputY.value = yPercent.toFixed(2);
+        if (img) {
+            img.addEventListener("click", function (event) {
+                const rect = img.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const xPercent = (x / rect.width) * 100;
+                const yPercent = (y / rect.height) * 100;
 
-            marker.style.left = `${xPercent}%`;
-            marker.style.top = `${yPercent}%`;
-            marker.style.transform = "translate(-50%, -50%)";
-            marker.style.display = "block";
+                inputX.value = xPercent.toFixed(2);
+                inputY.value = yPercent.toFixed(2);
 
-            // Remove highlighting when user clicks on image
-            const imageContainer = img.closest('.image-container');
-            if (imageContainer && imageContainer.classList.contains('missing-answer')) {
-                imageContainer.classList.remove('missing-answer');
-            }
+                marker.style.left = `${xPercent}%`;
+                marker.style.top = `${yPercent}%`;
+                marker.style.transform = "translate(-50%, -50%)";
+                marker.style.display = "block";
 
-            const clickInstruction = document.getElementById('click-instruction');
-            if (clickInstruction && clickInstruction.classList.contains('missing-answer')) {
-                clickInstruction.classList.remove('missing-answer');
-            }
+                // Remove highlighting when user clicks on image
+                const imageContainer = img.closest('.image-container');
+                if (imageContainer && imageContainer.classList.contains('missing-answer')) {
+                    imageContainer.classList.remove('missing-answer');
+                }
+
+                const clickInstruction = document.getElementById('click-instruction');
+                if (clickInstruction && clickInstruction.classList.contains('missing-answer')) {
+                    clickInstruction.classList.remove('missing-answer');
+                }
+            });
+        }
+
+        // Add change listeners to all form inputs
+        const allInputs = form.querySelectorAll('input, select, textarea');
+        allInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('.question') ||
+                                this.closest('.slider-container') ||
+                                this.closest('#interpretations-section') ||
+                                this.closest('#claim-truth-section') ||
+                                this.closest('#feel-true-question') ||
+                                this.closest('#follow-up-question') ||
+                                this.closest('#follow-up-question_doesnot') ||
+                                this.closest('.image-container');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                // Remove highlighting when question is answered
+                const container = this.closest('.question') ||
+                                this.closest('.slider-container') ||
+                                this.closest('#interpretations-section') ||
+                                this.closest('#claim-truth-section') ||
+                                this.closest('#feel-true-question') ||
+                                this.closest('#follow-up-question') ||
+                                this.closest('#follow-up-question_doesnot') ||
+                                this.closest('.image-container');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            });
         });
     }
+
+    addRealTimeValidation();
 
     // Binary radio button handling
     const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_binary_ai"]');
@@ -668,6 +729,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Always hide does not feel true follow-up
             if (followUpDoesNotFeelTrue) followUpDoesNotFeelTrue.style.display = 'none';
             document.getElementById('image_feelsnottrue_answered').value = 'False';
+
+            // Remove highlighting
+            const container = this.closest('#feel-true-question');
+            if (container && container.classList.contains('missing-answer')) {
+                container.classList.remove('missing-answer');
+            }
         });
     });
 

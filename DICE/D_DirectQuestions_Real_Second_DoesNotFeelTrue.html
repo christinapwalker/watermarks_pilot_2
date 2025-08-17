@@ -716,8 +716,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateClaimText(this);
                 document.getElementById('claim-truth-section').style.display = 'block';
                 document.getElementById('feel-true-question').style.display = 'block';
-                window.claimWasSubmitted = true;
-                disableClaimInput();
             };
 
             label.appendChild(input);
@@ -727,11 +725,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         interpretationsSection.style.display = 'block';
-    // Change disabled to readonly so the value is still submitted
+
+        // Use readonly instead of disabled to ensure form submission
         textarea.readOnly = true;
-        textarea.style.backgroundColor = '#f8f9fa'; // Visual indication it's readonly
+        textarea.style.backgroundColor = '#f8f9fa';
+        textarea.style.border = '1px solid #6c757d';
         button.disabled = true;
         window.claimWasSubmitted = true;
+
+        // Create hidden backup field
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'claim_response_real_backup';
+        hiddenInput.value = claimText;
+        document.querySelector('form').appendChild(hiddenInput);
+
         interpretationsSection.scrollIntoView({ behavior: 'smooth' });
 
         // Remove highlighting when claim is submitted
@@ -751,7 +759,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.updateConfidence = function (input) {
         window.confidenceSliderInteracted = true;
-        const percentage = parseInt(input.value); // Direct percentage value now (0-100)
+        const percentage = parseInt(input.value);
         document.getElementById('description-image_confidence_real').innerText = `${percentage}% Confident`;
 
         // Remove highlighting when user interacts with slider
@@ -851,7 +859,6 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     window.markFeelsNotTrueAnswered = function () {
-        // Probably not used anymore but kept for compatibility
         document.getElementById('image_feelsnottrue_answered').value = 'True';
     };
 
