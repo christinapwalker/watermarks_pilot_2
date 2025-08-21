@@ -339,15 +339,26 @@ function validateForm() {
     }
 
     // Check claim textarea submission
-    const textarea = document.getElementById('claim-response');
-    if (textarea && textarea.offsetParent !== null && !textarea.readOnly && textarea.value.trim() === '') {
-        unansweredFields.push(requiredFields['claim_response_real']);
+// Replace the claim textarea validation section with this more robust version:
+
+// Check claim textarea submission
+const textarea = document.getElementById('claim-response');
+if (textarea && textarea.offsetParent !== null) {
+    if (!textarea.readOnly) {
+        // User hasn't clicked "Submit Claim" button yet
+        if (textarea.value.trim() === '') {
+            unansweredFields.push('Enter a claim in the text box');
+        } else {
+            unansweredFields.push('Click the "Submit Claim" button to proceed');
+        }
         const container = textarea.closest('.question');
         if (container) {
             container.classList.add('missing-answer');
             missingElements.push(container);
         }
     }
+    // If textarea.readOnly === true, then claim was submitted successfully
+}
     // Check claim selection
     const claimRadios = form.querySelectorAll('input[name="image_claim_real"]');
     const interpretationsSection = document.getElementById('interpretations-section');

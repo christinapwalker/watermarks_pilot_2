@@ -700,31 +700,55 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize real-time validation
     addRealTimeValidation();
 
-    const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_binary_ai"]');
-    binaryRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            const followUpFeelsTrue = document.getElementById('follow-up-question');
-            const followUpDoesNotFeelTrue = document.getElementById('follow-up-question_doesnot');
-            const feelsTrueTextarea = followUpFeelsTrue?.querySelector('textarea');
-            const feelsNotTrueTextarea = followUpDoesNotFeelTrue?.querySelector('textarea');
+    // Replace the existing binary radio handler in the second page with this:
 
-            if (this.checked) {
-                if (this.value === 'Feels true') {
-                    if (followUpFeelsTrue) followUpFeelsTrue.style.display = 'block';
-                    if (followUpDoesNotFeelTrue) followUpDoesNotFeelTrue.style.display = 'none';
-                    if (feelsNotTrueTextarea) feelsNotTrueTextarea.value = '';
-                    document.getElementById('image_feelstrue_answered').value = 'True';
-                    document.getElementById('image_feelsnottrue_answered').value = 'False';
-                } else {
-                    if (followUpFeelsTrue) followUpFeelsTrue.style.display = 'none';
-                    if (followUpDoesNotFeelTrue) followUpDoesNotFeelTrue.style.display = 'block';
-                    if (feelsTrueTextarea) feelsTrueTextarea.value = '';
-                    document.getElementById('image_feelstrue_answered').value = 'False';
-                    document.getElementById('image_feelsnottrue_answered').value = 'True';
-                }
+const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_binary_ai"]');
+binaryRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+        const followUpFeelsTrue = document.getElementById('follow-up-question');
+        const followUpDoesNotFeelTrue = document.getElementById('follow-up-question_doesnot');
+        const feelsTrueTextarea = followUpFeelsTrue?.querySelector('textarea');
+        const feelsNotTrueTextarea = followUpDoesNotFeelTrue?.querySelector('textarea');
+
+        if (this.checked) {
+            // CREATE OR UPDATE HIDDEN FIELD - This was missing!
+            let hiddenField = document.getElementById('image_feelstrue_ai_hidden');
+            if (!hiddenField) {
+                hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.id = 'image_feelstrue_ai_hidden';
+                hiddenField.name = 'image_feelstrue_ai';
+                document.querySelector('form').appendChild(hiddenField);
             }
-        });
+
+            if (this.value === 'Feels true') {
+                // Map binary "Feels true" to 5-option equivalent
+                hiddenField.value = 'Mostly feels true';
+
+                if (followUpFeelsTrue) followUpFeelsTrue.style.display = 'block';
+                if (followUpDoesNotFeelTrue) followUpDoesNotFeelTrue.style.display = 'none';
+                if (feelsNotTrueTextarea) feelsNotTrueTextarea.value = '';
+                document.getElementById('image_feelstrue_answered').value = 'True';
+                document.getElementById('image_feelsnottrue_answered').value = 'False';
+            } else {
+                // Map binary "Does not feel true" to 5-option equivalent
+                hiddenField.value = 'Mostly does not feel true';
+
+                if (followUpFeelsTrue) followUpFeelsTrue.style.display = 'none';
+                if (followUpDoesNotFeelTrue) followUpDoesNotFeelTrue.style.display = 'block';
+                if (feelsTrueTextarea) feelsTrueTextarea.value = '';
+                document.getElementById('image_feelstrue_answered').value = 'False';
+                document.getElementById('image_feelsnottrue_answered').value = 'True';
+            }
+        }
+
+        // Remove highlighting when user interacts
+        const container = this.closest('#feel-true-question');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
+        }
     });
+});
 
     // Handle 5-option radio buttons for "feels true"
     const feelTrueRadios = document.querySelectorAll('input[name="image_feelstrue_ai"]');

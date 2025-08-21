@@ -152,202 +152,179 @@
 </style>
 
 <script>
-  // Enhanced validation function with highlighting and popup messages
-  function validateForm() {
-    console.log('validateForm() called');
+ function toggleFollowUp(show) {
+  const followUpDiv = document.getElementById("follow-up-question");
+  followUpDiv.style.display = show ? "block" : "none";
 
-    // Define field names with their user-friendly labels
-    const requiredFields = {
-      'all_images': 'How many images you saw on the previous page',
-      'loading': 'Whether the images loaded quickly enough',
-      'interaction': 'Whether you were able to interact with the posts',
-      'political_content': 'How many images contained political content',
-      'watermark_familiarity': 'Your familiarity with watermarks or warning labels',
-      'watermark_manipulation_check': 'Whether any images had a watermark, label, or content warning'
-    };
+  // Remove highlighting when toggling follow-up
+  if (followUpDiv.classList.contains('missing-answer')) {
+    followUpDiv.classList.remove('missing-answer');
+  }
+}
 
-    const form = document.querySelector('form');
-    if (!form) {
-      console.log('Form not found');
-      return true; // Let it submit if we can't find form
-    }
+// Enhanced validation function
+function validateForm() {
+  console.log('validateForm() called');
 
-    let unansweredFields = [];
-    let missingElements = [];
+  const requiredFields = {
+    'all_images': 'How many images did you see',
+    'loading': 'Did the images load quickly enough',
+    'interaction': 'Were you able to interact with the posts',
+    'political_content': 'How many images contained political content',
+    'watermark_familiarity': 'How familiar were you with watermarks',
+    'watermark_manipulation_check': 'Did any images have watermarks',
+    'watermark_image_check[]': 'Which images had watermarks'
+  };
 
-    // Clear any previous highlighting
-    document.querySelectorAll('.missing-answer').forEach(el => {
-      el.classList.remove('missing-answer');
-    });
-
-    // Check each required field and collect missing ones
-    Object.keys(requiredFields).forEach(function(fieldName) {
-      let isAnswered = false;
-
-      // Check if it's a radio button group
-      const radioInputs = form.querySelectorAll(`input[name="${fieldName}"][type="radio"]`);
-      if (radioInputs.length > 0) {
-        // It's a radio group - check if any is selected
-        const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
-        isAnswered = checked !== null;
-      }
-
-      if (!isAnswered) {
-        unansweredFields.push(requiredFields[fieldName]);
-
-        // Find and highlight the question container
-        const fieldContainer = radioInputs[0].closest('.form-group');
-        if (fieldContainer) {
-          fieldContainer.classList.add('missing-answer');
-          missingElements.push(fieldContainer);
-        }
-      }
-    });
-
-    // Special validation for follow-up watermark question
-    const followUpQuestion = document.getElementById('follow-up-question');
-    const watermarkAnswer = document.querySelector('input[name="watermark_manipulation_check"]:checked');
-
-    if (followUpQuestion && followUpQuestion.style.display !== 'none' && watermarkAnswer && watermarkAnswer.value === '1') {
-      const anyChecked = Array.from(document.querySelectorAll('.watermark-checkbox')).some(cb => cb.checked);
-
-      if (!anyChecked) {
-        unansweredFields.push('Selection of which image(s) had a watermark');
-        followUpQuestion.classList.add('missing-answer');
-        missingElements.push(followUpQuestion);
-      }
-    }
-
-    if (unansweredFields.length > 0) {
-      console.log('Validation failed. Unanswered fields:', unansweredFields);
-
-      // Create detailed popup error message
-      let message = 'Please answer the following question';
-      if (unansweredFields.length > 1) {
-        message += 's';
-      }
-      message += ' before submitting:\n\n';
-
-      unansweredFields.forEach(function(fieldLabel, index) {
-        message += '• ' + fieldLabel;
-        if (index < unansweredFields.length - 1) {
-          message += '\n';
-        }
-      });
-
-      alert(message);
-
-      // Scroll to first missing question
-      if (missingElements.length > 0) {
-        missingElements[0].scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }
-
-      return false; // Prevent form submission
-    }
-
-    console.log('Validation passed');
-    return true; // Allow form submission
+  const form = document.querySelector('form');
+  if (!form) {
+    console.log('Form not found');
+    return true;
   }
 
-  // Function to show/hide follow-up question
-  function toggleFollowUp(show) {
-    const followUpQuestion = document.getElementById('follow-up-question');
-    if (show) {
-      followUpQuestion.style.display = 'block';
-    } else {
-      followUpQuestion.style.display = 'none';
-      // Clear any selections when hiding
-      document.querySelectorAll('.watermark-checkbox').forEach(cb => {
-        cb.checked = false;
+  let unansweredFields = [];
+  let missingElements = [];
+
+  // Clear any previous highlighting
+  document.querySelectorAll('.missing-answer').forEach(el => {
+    el.classList.remove('missing-answer');
+  });
+
+  // Helper functions
+  function isRadioGroupChecked(name) {
+    return document.querySelector(`input[name="${name}"]:checked`) !== null;
+  }
+
+  function isCheckboxChecked(name) {
+    return document.querySelector(`input[name="${name}"]:checked`) !== null;
+  }
+
+  // Validate required radios
+  const requiredRadioGroups = [
+    'all_images',
+    'loading',
+    'interaction',
+    'political_content',
+    'watermark_familiarity',
+    'watermark_manipulation_check'
+  ];
+
+  for (const groupName of requiredRadioGroups) {
+    if (!isRadioGroupChecked(groupName)) {
+      unansweredFields.push(requiredFields[groupName]);
+      const container = document.querySelector(`input[name="${groupName}"]`).closest('.form-group');
+      if (container) {
+        container.classList.add('missing-answer');
+        missingElements.push(container);
+      }
+    }
+  }
+
+  // Check for watermark image checkboxes - only if "Yes" was selected
+  const followUp = document.getElementById('follow-up-question');
+  const watermarkYes = document.querySelector('input[name="watermark_manipulation_check"][value="1"]');
+  if (watermarkYes && watermarkYes.checked) {
+    if (!isCheckboxChecked('watermark_image_check[]')) {
+      unansweredFields.push(requiredFields['watermark_image_check[]']);
+      followUp.classList.add('missing-answer');
+      missingElements.push(followUp);
+    }
+  }
+
+  if (unansweredFields.length > 0) {
+    console.log('Validation failed. Unanswered fields:', unansweredFields);
+
+    let message = 'Please answer the following question';
+    if (unansweredFields.length > 1) {
+      message += 's';
+    }
+    message += ' before submitting:\n\n';
+
+    unansweredFields.forEach(function(fieldLabel, index) {
+      message += '• ' + fieldLabel;
+      if (index < unansweredFields.length - 1) {
+        message += '\n';
+      }
+    });
+
+    alert(message);
+
+    if (missingElements.length > 0) {
+      missingElements[0].scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
       });
-      document.getElementById('watermark_image_check_input').value = '[]';
     }
 
-    // Remove highlighting when user makes a selection
-    const container = document.querySelector('input[name="watermark_manipulation_check"]').closest('.form-group');
+    return false;
+  }
+
+  console.log('Validation passed');
+  return true;
+}
+
+// Highlight border on selected watermark image checkboxes
+document.querySelectorAll('input[name="watermark_image_check[]"]').forEach(input => {
+  input.addEventListener('change', () => {
+    // Remove all borders first
+    document.querySelectorAll('#follow-up-question img').forEach(img => {
+      img.style.border = '2px solid transparent';
+    });
+
+    // Add borders to checked items
+    document.querySelectorAll('input[name="watermark_image_check[]"]:checked').forEach(checkedInput => {
+      const img = checkedInput.parentElement.querySelector('img');
+      if (img) img.style.border = '3px solid #2c7be5';
+    });
+
+    // Update hidden field with selected values
+    updateHiddenField();
+
+    // Remove error highlighting
+    const container = input.closest('#follow-up-question');
     if (container && container.classList.contains('missing-answer')) {
       container.classList.remove('missing-answer');
     }
-  }
-
-  // Setup event listeners when DOM loads
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, setting up validation...');
-
-    // Setup form submission validation
-    const forms = document.querySelectorAll('form');
-    forms.forEach(function(form) {
-      form.addEventListener('submit', function(e) {
-        console.log('Form submit intercepted');
-        if (!validateForm()) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return false;
-        }
-      }, true);
-    });
-
-    // Setup real-time validation feedback
-    const allInputs = document.querySelectorAll('input, select, textarea');
-    allInputs.forEach(function(input) {
-      input.addEventListener('change', function() {
-        // Remove highlighting when question is answered
-        const container = this.closest('.form-group');
-        if (container && container.classList.contains('missing-answer')) {
-          container.classList.remove('missing-answer');
-        }
-      });
-    });
-
-    // Setup checkbox handling for watermark images
-    const checkboxes = document.querySelectorAll('.watermark-checkbox');
-    const hiddenInput = document.getElementById('watermark_image_check_input');
-
-    function updateHiddenInput() {
-      const checkedValues = Array.from(checkboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-      hiddenInput.value = JSON.stringify(checkedValues);
-
-      // Remove highlighting when checkboxes are selected
-      const followUpQuestion = document.getElementById('follow-up-question');
-      if (checkedValues.length > 0 && followUpQuestion.classList.contains('missing-answer')) {
-        followUpQuestion.classList.remove('missing-answer');
-      }
-    }
-
-    // Initialize checkboxes from hidden input value
-    try {
-      const saved = JSON.parse(hiddenInput.value || '[]');
-      if (Array.isArray(saved)) {
-        checkboxes.forEach(cb => {
-          cb.checked = saved.includes(cb.value);
-        });
-      }
-    } catch(e) {
-      // ignore JSON parse errors
-    }
-    updateHiddenInput();
-
-    checkboxes.forEach(cb => {
-      cb.addEventListener('change', updateHiddenInput);
-    });
   });
+});
 
-  // Intercept submit button clicks
-  document.addEventListener('click', function(e) {
-    if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
-      console.log('Submit button clicked, validating...');
+// Function to update hidden field
+function updateHiddenField() {
+  const checkedBoxes = document.querySelectorAll('input[name="watermark_image_check[]"]:checked');
+  const values = Array.from(checkedBoxes).map(cb => cb.value);
+  document.getElementById('watermark_image_check_hidden').value = values.join(',');
+  console.log('Updated hidden field:', values.join(','));
+}
+
+// DOM Content Loaded
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, setting up validation...');
+
+  // Add form submit event listener
+  const forms = document.querySelectorAll('form');
+  forms.forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      console.log('Form submit event caught');
       if (!validateForm()) {
         e.preventDefault();
         e.stopImmediatePropagation();
         return false;
       }
+    }, true);
+  });
+});
+
+// Backup validation on submit button click
+document.addEventListener('click', function(e) {
+  if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+    console.log('Submit button clicked, validating...');
+    if (!validateForm()) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return false;
     }
-  }, true);
+  }
+}, true);
 </script>
 
 <form method="post">
@@ -464,33 +441,23 @@
     <div class="error-message" id="watermark_manipulation_check_error"></div>
   </div>
 
-  <!-- Follow-up watermark images -->
-  <div class="form-group" id="follow-up-question" style="display:none;">
+<!-- Follow-up watermark images -->
+<div class="form-group" id="follow-up-question" style="display:none;">
   <label>Select all the images that had a watermark, label, or content warning.</label>
-  {{ formfield_errors 'watermark_image_check' }}
   <div class="options-container" style="gap: 15px;">
     {% for option in image_options %}
     <div>
-      <!-- Remove [] from the name -->
-      <input type="checkbox"
-             class="watermark-checkbox"
-             id="watermark_image_check_{{ forloop.counter }}"
-             value="{{ forloop.counter }}">
+      <input type="checkbox" name="watermark_image_check[]" id="watermark_image_check_{{ forloop.counter }}" value="{{ forloop.counter }}">
       <label for="watermark_image_check_{{ forloop.counter }}">
         <img src="{{ option }}" alt="Option {{ forloop.counter }}" style="max-width: 100%">
       </label>
     </div>
     {% endfor %}
   </div>
-
-  <!-- Hidden input to store all checked values as JSON string -->
-  <input type="hidden" name="watermark_image_check" id="watermark_image_check_input"
-       value="{% if player.field_maybe_none('watermark_image_check') %}
-    <p>You selected: {{ player.watermark_image_check }}</p>
-{% endif %}
-">
-<div class="error-message" id="watermark_image_check_error"></div>
 </div>
+
+<!-- Add this hidden field before the submit button -->
+<input type="hidden" name="watermark_image_check_hidden" id="watermark_image_check_hidden" value="">
 
   <div class="submit-container">
     <button type="submit" id="submitButton" aria-label="Submit survey responses">

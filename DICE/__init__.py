@@ -37,6 +37,7 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    watermark_image_check_hidden = models.StringField(blank=True)
     tweets_json = models.StringField()
     image_options_json = models.StringField()
     prolific_id = models.StringField(default=str(" "))
@@ -930,15 +931,14 @@ class D_ItemCountQuestions_Last(Page):
     def is_displayed(player):
         return not player.participant.vars.get('itemcount_first', False)
 
-    @staticmethod
     def before_next_page(self, timeout_happened):
         # Only save if the value actually exists
         if 'itemcount_first' in self.participant.vars:
             self.itemcount_first = self.participant.vars['itemcount_first']
         for field_name in ['accurate_all', 'confidence_accurate', 'share']:
-            new_val = getattr(player, field_name, None)  # CHANGED THIS LINE
-            if new_val and not getattr(player, field_name, None):
-                setattr(player, field_name, new_val)
+            new_val = getattr(self, field_name, None)  # Changed from self.player to self
+            if new_val and not getattr(self, field_name, None):  # Changed from self.player to self
+                setattr(self, field_name, new_val)
 
 
 class D_DirectQuestions_AI_First(Page):
@@ -964,7 +964,7 @@ class D_DirectQuestions_AI_First(Page):
 
     @staticmethod
     def vars_for_template(player):
-        row_json_ai = player.control_feed_condition_row
+        row_json_ai = player.feed_condition_row
         if not row_json_ai:
             return dict(
                 claim_choices_ai=[],
@@ -1459,7 +1459,7 @@ class E_Logistics_Early(Page):
         "political_content",
         "watermark_familiarity",
         "watermark_manipulation_check",
-        "watermark_image_check",
+        "watermark_image_check_hidden",  # Same as E_Logistics_After
     ]
 
     @staticmethod
@@ -1467,29 +1467,44 @@ class E_Logistics_Early(Page):
         return player.participant.vars.get('logistics_early', True)
 
     @staticmethod
-    # In any page that all players see, or in creating_session
-    def before_next_page(self, timeout_happened):
-        if 'logistics_early' in self.participant.vars:
-            self.logistics_early = self.participant.vars['logistics_early']
-
-    @staticmethod
     def vars_for_template(player):
-        df = player.participant.tweets  # DataFrame with post data
-        # Print all non-empty 'screenshot_control'
-        # print("screenshot_control values:")
-        # print(df.loc[df['screenshot_control'].notna(), 'screenshot_control'].tolist())
-        #
-        # # Print all non-empty 'screenshot_nowatermark'
-        # print("screenshot_nowatermark values:")
-        # print(df.loc[df['screenshot_nowatermark'].notna(), 'screenshot_nowatermark'].tolist())
+        df = player.participant.tweets
+        print("screenshot_control values:")
+        print(df.loc[df['screenshot_control'].notna(), 'screenshot_control'].tolist())
+        print("screenshot_nowatermark values:")
+        print(df.loc[df['screenshot_nowatermark'].notna(), 'screenshot_nowatermark'].tolist())
 
-        # Get all non-null 'screenshot_control' and 'screenshot_nowatermark' values
         options = df['screenshot_control'].dropna().tolist() + df['screenshot_nowatermark'].dropna().tolist()
-
-        # Optional: limit to first 5 if needed
         options = options[:5]
 
         return dict(image_options=options)
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        print("=== E_LOGISTICS_EARLY BEFORE_NEXT_PAGE CALLED ===")
+
+        # Handle logistics_early if it exists
+        if 'logistics_early' in player.participant.vars:
+            player.logistics_early = player.participant.vars['logistics_early']
+            print(f"Set logistics_early: {player.logistics_early}")
+
+        # Copy hidden field data to the actual field
+        if player.watermark_image_check_hidden:
+            player.watermark_image_check = player.watermark_image_check_hidden
+            print(f"✅ Copied checkbox data: '{player.watermark_image_check}'")
+        else:
+            player.watermark_image_check = ""
+            print("No checkbox data received")
+
+        # Handle other regular form fields
+        for field_name in ["all_images", "loading", "interaction", "political_content",
+                           "watermark_familiarity", "watermark_manipulation_check"]:
+            new_val = player.field_maybe_none(field_name)
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
+                print(f"Set {field_name}: {new_val}")
+
+        print("=== E_LOGISTICS_EARLY BEFORE_NEXT_PAGE COMPLETED ===")
 
 
 class E_Logistics_After(Page):
@@ -1501,40 +1516,52 @@ class E_Logistics_After(Page):
         "political_content",
         "watermark_familiarity",
         "watermark_manipulation_check",
-        "watermark_image_check",
+        "watermark_image_check_hidden",  # Now this should work
     ]
+
     @staticmethod
     def is_displayed(player):
         return not player.participant.vars.get('logistics_early', False)
 
     @staticmethod
-    def before_next_page(self, timeout_happened):
-        if 'logistics_early' in self.participant.vars:
-            self.logistics_early = self.participant.vars['logistics_early']
-        for field_name in ["all_images", "loading", "interaction", "political_content",
-                           "watermark_familiarity", "watermark_manipulation_check", "watermark_image_check"]:
-            new_val = self.field_maybe_none(field_name)
-            if new_val and not getattr(self, field_name, None):
-                setattr(self, field_name, new_val)
-    @staticmethod
     def vars_for_template(player):
-        df = player.participant.tweets  # DataFrame with post data
-        # Print all non-empty 'screenshot_control'
+        df = player.participant.tweets
         print("screenshot_control values:")
         print(df.loc[df['screenshot_control'].notna(), 'screenshot_control'].tolist())
-
-        # Print all non-empty 'screenshot_nowatermark'
         print("screenshot_nowatermark values:")
         print(df.loc[df['screenshot_nowatermark'].notna(), 'screenshot_nowatermark'].tolist())
-        # Get all non-null 'screenshot_control' and 'screenshot_nowatermark' values
-        options = df['screenshot_control'].dropna().tolist() + df['screenshot_nowatermark'].dropna().tolist()
 
-        # Optional: limit to first 5 if needed
+        options = df['screenshot_control'].dropna().tolist() + df['screenshot_nowatermark'].dropna().tolist()
         options = options[:5]
 
         return dict(image_options=options)
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        print("=== BEFORE_NEXT_PAGE CALLED ===")
 
+        # Handle logistics_early if it exists
+        if 'logistics_early' in player.participant.vars:
+            player.logistics_early = player.participant.vars['logistics_early']
+            print(f"Set logistics_early: {player.logistics_early}")
+
+        # Copy hidden field data to the actual field
+        if player.watermark_image_check_hidden:
+            player.watermark_image_check = player.watermark_image_check_hidden
+            print(f"✅ Copied checkbox data: '{player.watermark_image_check}'")
+        else:
+            player.watermark_image_check = ""
+            print("No checkbox data received")
+
+        # Handle other regular form fields
+        for field_name in ["all_images", "loading", "interaction", "political_content",
+                           "watermark_familiarity", "watermark_manipulation_check"]:
+            new_val = player.field_maybe_none(field_name)
+            if new_val and not getattr(player, field_name, None):
+                setattr(player, field_name, new_val)
+                print(f"Set {field_name}: {new_val}")
+
+        print("=== BEFORE_NEXT_PAGE COMPLETED ===")
 class MorePosts(Page):
     form_model = 'player'
     form_fields = ['moreposts_image_check_1',

@@ -4,7 +4,7 @@ import os
 STATIC_URL = '/static/'
 
 
-DEBUG = True
+DEBUG = False
 
 SESSION_CONFIGS = [ # defining a session
     dict(

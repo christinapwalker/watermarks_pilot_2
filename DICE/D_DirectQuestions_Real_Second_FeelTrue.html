@@ -346,21 +346,24 @@ function validateForm() {
 
     // Check claim submission - FIXED
     const textarea = document.getElementById('claim-response');
-    const interpretationsSection = document.getElementById('interpretations-section');
-    const isTextareaVisible = textarea && textarea.offsetParent !== null;
-    const isTextareaReadOnly = textarea && textarea.readOnly;
-    const hasClaimValue = textarea && textarea.value.trim() !== '';
+const interpretationsSection = document.getElementById('interpretations-section');
+const isTextareaVisible = textarea && textarea.offsetParent !== null;
+const isTextareaReadOnly = textarea && textarea.readOnly;
+const hasClaimValue = textarea && textarea.value.trim() !== '';
 
-    // Only validate if textarea is visible, not readonly, and empty
-    if (isTextareaVisible && !isTextareaReadOnly && !hasClaimValue) {
-        unansweredFields.push(requiredFields['claim_response_real']);
-        const container = textarea.closest('.question');
-        if (container) {
-            container.classList.add('missing-answer');
-            missingElements.push(container);
-        }
+// More robust validation that requires clicking "Submit Claim"
+if (isTextareaVisible && !isTextareaReadOnly) {
+    if (!hasClaimValue) {
+        unansweredFields.push('Enter a claim in the text box');
+    } else {
+        unansweredFields.push('Click the "Submit Claim" button to proceed');
     }
-
+    const container = textarea.closest('.question');
+    if (container) {
+        container.classList.add('missing-answer');
+        missingElements.push(container);
+    }
+}
     // Check claim selection
     const claimRadios = form.querySelectorAll('input[name="image_claim_real"]');
     if (interpretationsSection && interpretationsSection.offsetParent !== null) {
@@ -640,7 +643,7 @@ document.addEventListener('click', function(e) {
     <p><strong>Some possible interpretations of the post and image are included below. Please select the option that you think best represents the claim of the post and image.</strong></p>
     {% for value, label in claim_choices_real %}
         <label>
-            <input type="radio" name="image_claim_real" value="{{ value }}"
+            <input type="radio" name="image_claim_real" value="{{ label }}"
                onclick="updateClaimText(this);
                         document.getElementById('claim-truth-section').style.display='block';
                         document.getElementById('feel-true-question').style.display='block';">

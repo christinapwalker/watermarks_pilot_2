@@ -385,24 +385,29 @@ function validateForm() {
         let feelsTrueValue = null;
 
         // Check if 5-option radios are present and visible
-        if (fiveOptionRadios.length > 0 && fiveOptionRadios[0].offsetParent !== null) {
-            const selectedFiveOption = Array.from(fiveOptionRadios).find(r => r.checked);
-            feelsTrueAnswered = selectedFiveOption !== undefined;
-            if (selectedFiveOption) {
-                const value = selectedFiveOption.value;
-                if (value === "Definitely feels true" || value === "Mostly feels true") {
-                    feelsTrueValue = 100;
-                } else if (value === "Not sure") {
-                    feelsTrueValue = 50;
-                } else {
-                    feelsTrueValue = 0;
-                }
-            }
-        } else if (binaryRadios.length > 0) {
-            const selectedBinary = Array.from(binaryRadios).find(r => r.checked);
-            feelsTrueAnswered = selectedBinary !== undefined;
-            feelsTrueValue = selectedBinary ? (selectedBinary.value === 'Feels true' ? 100 : 0) : null;
+        // Replace lines 155-171 in your validateForm() function with this:
+
+// Check if 5-option radios are present and visible
+if (fiveOptionRadios.length > 0 && fiveOptionRadios[0].offsetParent !== null) {
+    const selectedFiveOption = Array.from(fiveOptionRadios).find(r => r.checked);
+    feelsTrueAnswered = selectedFiveOption !== undefined;
+    if (selectedFiveOption) {
+        const value = selectedFiveOption.value;
+        if (value === "Definitely feels true" || value === "Mostly feels true") {
+            feelsTrueValue = 100;
+        } else if (value === "Not sure") {
+            feelsTrueValue = 50;
+        } else {
+            feelsTrueValue = 0;
         }
+    }
+} else if (binaryRadios.length > 0) {
+    const hiddenField = document.getElementById('image_feelstrue_real_hidden');
+    feelsTrueAnswered = hiddenField && hiddenField.value;
+    if (feelsTrueAnswered) {
+        feelsTrueValue = hiddenField.value.includes('feels true') ? 100 : 0;
+    }
+}
 
         if (!feelsTrueAnswered) {
             unansweredFields.push(requiredFields['image_feelstrue_response']);
@@ -700,6 +705,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize real-time validation
     addRealTimeValidation();
+// Add this to your existing binary radio event listener section
+// Replace the existing binaryRadios.forEach block with this:
 
     const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_binary_real"]');
     binaryRadios.forEach(radio => {
@@ -710,13 +717,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const feelsNotTrueTextarea = followUpDoesNotFeelTrue?.querySelector('textarea');
 
             if (this.checked) {
+                // Create or update the hidden field to match expected backend field name
+                let hiddenField = document.getElementById('image_feelstrue_real_hidden');
+                if (!hiddenField) {
+                    hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.id = 'image_feelstrue_real_hidden';
+                    hiddenField.name = 'image_feelstrue_real';
+                    document.querySelector('form').appendChild(hiddenField);
+                }
+
                 if (this.value === 'Feels true') {
+                    // Map binary "Feels true" to 5-option equivalent
+                    hiddenField.value = 'Mostly feels true';
+
                     if (followUpFeelsTrue) followUpFeelsTrue.style.display = 'block';
                     if (followUpDoesNotFeelTrue) followUpDoesNotFeelTrue.style.display = 'none';
                     if (feelsNotTrueTextarea) feelsNotTrueTextarea.value = '';
                     document.getElementById('image_feelstrue_answered').value = 'True';
                     document.getElementById('image_feelsnottrue_answered').value = 'False';
                 } else {
+                    // Map binary "Does not feel true" to 5-option equivalent
+                    hiddenField.value = 'Mostly does not feel true';
+
                     if (followUpFeelsTrue) followUpFeelsTrue.style.display = 'none';
                     if (followUpDoesNotFeelTrue) followUpDoesNotFeelTrue.style.display = 'block';
                     if (feelsTrueTextarea) feelsTrueTextarea.value = '';
@@ -732,6 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
 
     // Handle 5-option radio buttons for "feels true"
     const feelTrueRadios = document.querySelectorAll('input[name="image_feelstrue_real"]');

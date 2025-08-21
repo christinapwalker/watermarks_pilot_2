@@ -263,15 +263,18 @@
     {% for option in image_options %}
     <div>
       <!-- Add a unique ID to the checkbox -->
-      <input type="checkbox" name="watermark_image_check" id="watermark_image_check_{{ forloop.counter }}" value="{{ forloop.counter }}">
+      <input type="checkbox" name="watermark_image_check[]" id="watermark_image_check_{{ forloop.counter }}" value="{{ forloop.counter }}">
       <label for="watermark_image_check_{{ forloop.counter }}">
         <img src="{{ option }}" alt="Option {{ forloop.counter }}" style="max-width: 100%">
       </label>
     </div>
     {% endfor %}
   </div>
-  {{ formfield_errors 'watermark_image_check' }}
 </div>
+
+  <!-- Add this hidden field before the submit button -->
+<input type="hidden" name="watermark_image_check_hidden" id="watermark_image_check_hidden" value="">
+
 
   <div class="submit-container">
     <button type="submit" id="submitButton" aria-label="Submit survey responses">
@@ -295,7 +298,6 @@
   function validateForm() {
     console.log('validateForm() called');
 
-    // Define field names with their user-friendly labels
     const requiredFields = {
       'all_images': 'How many images did you see',
       'loading': 'Did the images load quickly enough',
@@ -303,7 +305,7 @@
       'political_content': 'How many images contained political content',
       'watermark_familiarity': 'How familiar were you with watermarks',
       'watermark_manipulation_check': 'Did any images have watermarks',
-      'watermark_image_check': 'Which images had watermarks'
+      'watermark_image_check[]': 'Which images had watermarks'  // Fixed to match HTML
     };
 
     const form = document.querySelector('form');
@@ -320,12 +322,11 @@
       el.classList.remove('missing-answer');
     });
 
-    // Helper to check if a radio group has a checked input
+    // Helper functions
     function isRadioGroupChecked(name) {
       return document.querySelector(`input[name="${name}"]:checked`) !== null;
     }
 
-    // Helper to check if any checkboxes in a container are checked
     function isCheckboxChecked(name) {
       return document.querySelector(`input[name="${name}"]:checked`) !== null;
     }
@@ -351,20 +352,21 @@
       }
     }
 
-    // If follow-up watermark images are shown, require at least one checked
+    // Check for watermark image checkboxes
+    // Check for watermark image checkboxes - only if "Yes" was selected
     const followUp = document.getElementById('follow-up-question');
-    if (followUp && followUp.style.display !== 'none') {
-      if (!isCheckboxChecked('watermark_image_check')) {
-        unansweredFields.push(requiredFields['watermark_image_check']);
+    const watermarkYes = document.querySelector('input[name="watermark_manipulation_check"][value="1"]');
+    if (watermarkYes && watermarkYes.checked) {
+      if (!isCheckboxChecked('watermark_image_check[]')) {
+        unansweredFields.push(requiredFields['watermark_image_check[]']);
         followUp.classList.add('missing-answer');
         missingElements.push(followUp);
       }
     }
-
+    // Rest of validation logic stays the same...
     if (unansweredFields.length > 0) {
       console.log('Validation failed. Unanswered fields:', unansweredFields);
 
-      // Create detailed popup error message
       let message = 'Please answer the following question';
       if (unansweredFields.length > 1) {
         message += 's';
@@ -380,7 +382,6 @@
 
       alert(message);
 
-      // Scroll to first missing question
       if (missingElements.length > 0) {
         missingElements[0].scrollIntoView({
           behavior: 'smooth',
@@ -388,31 +389,47 @@
         });
       }
 
-      return false; // Prevent form submission
+      return false;
     }
 
     console.log('Validation passed');
-    return true; // Allow form submission
-  }
+    return true;
+}
+
 
   // Highlight border on selected watermark image checkboxes
-  document.querySelectorAll('input[name="watermark_image_check"]').forEach(input => {
+// Highlight border on selected watermark image checkboxes
+document.querySelectorAll('input[name="watermark_image_check[]"]').forEach(input => {
     input.addEventListener('change', () => {
-      document.querySelectorAll('#follow-up-question img').forEach(img => {
-        img.style.border = '2px solid transparent';
-      });
-      document.querySelectorAll('input[name="watermark_image_check"]:checked').forEach(checkedInput => {
-        const img = checkedInput.parentElement.querySelector('img');
-        if (img) img.style.border = '3px solid #2c7be5';
-      });
+        // Remove all borders first
+        document.querySelectorAll('#follow-up-question img').forEach(img => {
+            img.style.border = '2px solid transparent';
+        });
 
-      // Remove highlighting when user makes selection
-      const container = input.closest('#follow-up-question');
-      if (container && container.classList.contains('missing-answer')) {
-        container.classList.remove('missing-answer');
-      }
+        // Add borders to checked items
+        document.querySelectorAll('input[name="watermark_image_check[]"]:checked').forEach(checkedInput => {
+            const img = checkedInput.parentElement.querySelector('img');
+            if (img) img.style.border = '3px solid #2c7be5';
+        });
+
+        // NEW: Update hidden field with selected values
+        updateHiddenField();
+
+        // Remove error highlighting
+        const container = input.closest('#follow-up-question');
+        if (container && container.classList.contains('missing-answer')) {
+            container.classList.remove('missing-answer');
+        }
     });
-  });
+});
+
+// NEW: Function to update hidden field
+function updateHiddenField() {
+    const checkedBoxes = document.querySelectorAll('input[name="watermark_image_check[]"]:checked');
+    const values = Array.from(checkedBoxes).map(cb => cb.value);
+    document.getElementById('watermark_image_check_hidden').value = values.join(',');
+    console.log('Updated hidden field:', values.join(','));
+}
 
   // Add real-time validation feedback - removes red highlighting when answered
   function addRealTimeValidation() {
