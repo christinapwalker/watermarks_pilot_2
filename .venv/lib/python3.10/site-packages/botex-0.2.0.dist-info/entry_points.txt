@@ -1,0 +1,2 @@
+[console_scripts]
+botex = botex.cli:run_botex
