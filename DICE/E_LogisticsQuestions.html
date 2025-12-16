@@ -1,7 +1,3 @@
-{% block title %}
-<!-- Your Page Title -->
-{% endblock %}
-
 {% block content %}
 <style>
   /* Container for the form - center and responsive max width */
@@ -148,61 +144,7 @@
     <strong>Previously in the survey, we showed you a page with a feed from a simulated social media platform. We next have a few questions about that feed that you saw.</strong>
   </p>
 
-  <!-- Question 1 -->
-  <div class="form-group">
-    <label>How many images did you see on the previous simulated social media page?</label>
-    <div class="options-container">
-      {% for i in range(11) %}
-      <div class="option">
-        <input type="radio" id="all_images_{{i}}" name="all_images" value="{{i}}">
-        <label for="all_images_{{i}}">{{i}}</label>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-  {{ formfield_errors 'all_images' }}
 
-  <!-- Question 2 -->
-  <div class="form-group">
-    <label>Did the images load quickly enough for you on the previous social media page?</label>
-    <div class="options-container">
-      <div class="option">
-        <input type="radio" id="loading_yes" name="loading" value="1">
-        <label for="loading_yes">Yes</label>
-      </div>
-      <div class="option">
-        <input type="radio" id="loading_no" name="loading" value="2">
-        <label for="loading_no">No</label>
-      </div>
-    </div>
-  </div>
-  {{ formfield_errors 'loading' }}
-
-  <!-- Question 3 -->
-  <div class="form-group">
-    <label>Were you able to interact with the posts (like, repost, or reply) on the previous social media page?</label>
-    <div class="options-container">
-      <div class="option">
-        <input type="radio" id="interaction_yes" name="interaction" value="1">
-        <label for="interaction_yes">Yes, I tried and was able to interact</label>
-      </div>
-      <div class="option">
-        <input type="radio" id="interaction_no" name="interaction" value="2">
-        <label for="interaction_no">No, I tried but could not interact</label>
-      </div>
-      <div class="option">
-        <input type="radio" id="interaction_didnottry" name="interaction" value="3">
-        <label for="interaction_didnottry">I did not try to interact</label>
-      </div>
-      <div class="option">
-        <input type="radio" id="interaction_unsure" name="interaction" value="4">
-        <label for="interaction_unsure">Not sure/don't remember</label>
-      </div>
-    </div>
-  </div>
-  {{ formfield_errors 'interaction' }}
-
-  <!-- Question 4 -->
   <div class="form-group">
     <label>In your opinion, how many of the images on the previous social media page contained political content?</label>
     <div class="options-container">
@@ -216,7 +158,6 @@
   </div>
   {{ formfield_errors 'political_content' }}
 
-  <!-- Question 5 -->
   <div class="form-group">
     <label>Before today, how familiar were you with the idea of watermarks or warning labels on social media?</label>
     <div class="options-container">
@@ -236,46 +177,6 @@
   </div>
   {{ formfield_errors 'watermark_familiarity' }}
 
-  <!-- Question 6 -->
-  <div class="form-group">
-    <label>If you recall, did any of the images on the previous social media page have a watermark, label, or content warning?</label>
-    <div class="options-container">
-      <div class="option">
-        <input type="radio" name="watermark_manipulation_check" value="1" id="wm_yes" onclick="toggleFollowUp(true)">
-        <label for="wm_yes">Yes</label>
-      </div>
-      <div class="option">
-        <input type="radio" name="watermark_manipulation_check" value="2" id="wm_no" onclick="toggleFollowUp(false)">
-        <label for="wm_no">No</label>
-      </div>
-      <div class="option">
-        <input type="radio" name="watermark_manipulation_check" value="3" id="wm_not_sure" onclick="toggleFollowUp(false)">
-        <label for="wm_not_sure">Not sure</label>
-      </div>
-    </div>
-  </div>
-  {{ formfield_errors 'watermark_manipulation_check' }}
-
-<!-- Follow-up watermark images -->
-<div class="form-group" id="follow-up-question" style="display:none;">
-  <label>Select all the images that had a watermark, label, or content warning.</label>
-  <div class="options-container" style="gap: 15px;">
-    {% for option in image_options %}
-    <div>
-      <!-- Add a unique ID to the checkbox -->
-      <input type="checkbox" name="watermark_image_check[]" id="watermark_image_check_{{ forloop.counter }}" value="{{ forloop.counter }}">
-      <label for="watermark_image_check_{{ forloop.counter }}">
-        <img src="{{ option }}" alt="Option {{ forloop.counter }}" style="max-width: 100%">
-      </label>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-
-  <!-- Add this hidden field before the submit button -->
-<input type="hidden" name="watermark_image_check_hidden" id="watermark_image_check_hidden" value="">
-
-
   <div class="submit-container">
     <button type="submit" id="submitButton" aria-label="Submit survey responses">
       ➔
@@ -284,28 +185,13 @@
 </form>
 
 <script>
-  function toggleFollowUp(show) {
-    const followUpDiv = document.getElementById("follow-up-question");
-    followUpDiv.style.display = show ? "block" : "none";
-
-    // Remove highlighting when toggling follow-up
-    if (followUpDiv.classList.contains('missing-answer')) {
-      followUpDiv.classList.remove('missing-answer');
-    }
-  }
-
   // Enhanced validation function with highlighting and popup messages
   function validateForm() {
     console.log('validateForm() called');
 
     const requiredFields = {
-      'all_images': 'How many images did you see',
-      'loading': 'Did the images load quickly enough',
-      'interaction': 'Were you able to interact with the posts',
       'political_content': 'How many images contained political content',
       'watermark_familiarity': 'How familiar were you with watermarks',
-      'watermark_manipulation_check': 'Did any images have watermarks',
-      'watermark_image_check[]': 'Which images had watermarks'  // Fixed to match HTML
     };
 
     const form = document.querySelector('form');
@@ -333,12 +219,8 @@
 
     // Validate required radios
     const requiredRadioGroups = [
-      'all_images',
-      'loading',
-      'interaction',
       'political_content',
       'watermark_familiarity',
-      'watermark_manipulation_check'
     ];
 
     for (const groupName of requiredRadioGroups) {
@@ -352,17 +234,6 @@
       }
     }
 
-    // Check for watermark image checkboxes
-    // Check for watermark image checkboxes - only if "Yes" was selected
-    const followUp = document.getElementById('follow-up-question');
-    const watermarkYes = document.querySelector('input[name="watermark_manipulation_check"][value="1"]');
-    if (watermarkYes && watermarkYes.checked) {
-      if (!isCheckboxChecked('watermark_image_check[]')) {
-        unansweredFields.push(requiredFields['watermark_image_check[]']);
-        followUp.classList.add('missing-answer');
-        missingElements.push(followUp);
-      }
-    }
     // Rest of validation logic stays the same...
     if (unansweredFields.length > 0) {
       console.log('Validation failed. Unanswered fields:', unansweredFields);
@@ -396,40 +267,6 @@
     return true;
 }
 
-
-  // Highlight border on selected watermark image checkboxes
-// Highlight border on selected watermark image checkboxes
-document.querySelectorAll('input[name="watermark_image_check[]"]').forEach(input => {
-    input.addEventListener('change', () => {
-        // Remove all borders first
-        document.querySelectorAll('#follow-up-question img').forEach(img => {
-            img.style.border = '2px solid transparent';
-        });
-
-        // Add borders to checked items
-        document.querySelectorAll('input[name="watermark_image_check[]"]:checked').forEach(checkedInput => {
-            const img = checkedInput.parentElement.querySelector('img');
-            if (img) img.style.border = '3px solid #2c7be5';
-        });
-
-        // NEW: Update hidden field with selected values
-        updateHiddenField();
-
-        // Remove error highlighting
-        const container = input.closest('#follow-up-question');
-        if (container && container.classList.contains('missing-answer')) {
-            container.classList.remove('missing-answer');
-        }
-    });
-});
-
-// NEW: Function to update hidden field
-function updateHiddenField() {
-    const checkedBoxes = document.querySelectorAll('input[name="watermark_image_check[]"]:checked');
-    const values = Array.from(checkedBoxes).map(cb => cb.value);
-    document.getElementById('watermark_image_check_hidden').value = values.join(',');
-    console.log('Updated hidden field:', values.join(','));
-}
 
   // Add real-time validation feedback - removes red highlighting when answered
   function addRealTimeValidation() {

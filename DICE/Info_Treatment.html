@@ -1,0 +1,105 @@
+{% extends "global/Page.html" %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+    }
+    h1 {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    h2 {
+        color: #34495e;
+        margin-top: 30px;
+    }
+    ul {
+        margin: 15px 0;
+        padding-left: 25px;
+    }
+    li {
+        margin-bottom: 15px;
+    }
+    .image-placeholder {
+        background-color: #f0f0f0;
+        border: 2px dashed #ccc;
+        padding: 40px;
+        text-align: center;
+        margin: 20px 0;
+        color: #666;
+        font-style: italic;
+    }
+      /* Submit button container */
+    .submit-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 30px;
+    }
+
+    button[type="submit"] {
+      background-color: #2c7be5;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 5px 10px rgba(44,123,229,0.4);
+      transition: background-color 0.25s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #1a5fd9;
+    }
+
+</style>
+
+<p>During the study, you saw and heard a little bit about watermarks or labels. Please read the text below to understand a little bit more.</p>
+
+<h1>What is a watermark or label?</h1>
+
+<ul>
+    <li>
+        <strong>A watermark</strong> is a marker that shows an image may have been created or changed using AI. Some watermarks are visible, like small text, symbols, or logos placed on top of the picture. Others are invisible to the eye and are built into the image's digital file so that certain tools can detect them.
+    </li>
+</ul>
+
+<div class="image-placeholder">
+    [example image with cr watermark – can use the one from pap]
+</div>
+
+<ul>
+    <li>
+        <strong>A label</strong> is similar, but it appears next to the content rather than on the image itself. For example, a label might say "AI-generated," "Digitally altered," or provide a short explanation below a social media post.
+    </li>
+</ul>
+
+<div class="image-placeholder">
+    [example image with content warning – can use the one from pap]
+</div>
+
+<h1>Why are they used?</h1>
+
+<ul>
+    <li>
+        Watermarks and labels are used to help people understand when something they see online may not be a real photograph or an authentic piece of media. As AI-generated images become more realistic, these signals can make it easier to notice when content might be misleading, manipulated, or artificial.
+    </li>
+    <li>
+        AI developers, social media companies, and fact-checkers also use them to improve transparency, support media or digital literacy, and give viewers clearer clues about the trustworthiness of what they see.
+    </li>
+</ul>
+
+    <div class="submit-container">
+        <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
+            ➔
+        </button>
+    </div>
+
+{% endblock %}

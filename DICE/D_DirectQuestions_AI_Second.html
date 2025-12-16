@@ -218,7 +218,6 @@ button[type="submit"]:hover {
     100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
 }
 </style>
-
 <script>
 // Enhanced validation function with highlighting and detailed messages
 function validateForm() {
@@ -238,7 +237,7 @@ function validateForm() {
     const form = document.querySelector('form');
     if (!form) {
         console.log('Form not found');
-        return true; // Let it submit if we can't find form
+        return true;
     }
 
     let unansweredFields = [];
@@ -276,7 +275,6 @@ function validateForm() {
     const clickY = document.getElementById('click_y_ai')?.value;
     if (!clickX || !clickY) {
         unansweredFields.push(requiredFields['click_coordinates']);
-        // Highlight the instruction text instead of the image container
         const container = document.getElementById('click-instruction');
         if (container) {
             container.classList.add('missing-answer');
@@ -305,7 +303,6 @@ function validateForm() {
         }
     }
 
-
     // Check claim truth selection
     const claimTrueRadios = form.querySelectorAll('input[name="image_claim_true_ai"]');
     const claimTruthSection = document.getElementById('claim-truth-section');
@@ -313,51 +310,44 @@ function validateForm() {
         const claimTruthSelected = Array.from(claimTrueRadios).some(r => r.checked);
         if (!claimTruthSelected) {
             unansweredFields.push(requiredFields['image_claim_true_ai']);
-            if (claimTruthSection) {
-                claimTruthSection.classList.add('missing-answer');
-                missingElements.push(claimTruthSection);
-            }
+            claimTruthSection.classList.add('missing-answer');
+            missingElements.push(claimTruthSection);
         }
     }
 
     // Check feels true section
-const feelTrueQuestion = document.getElementById('feel-true-question');
-if (feelTrueQuestion && feelTrueQuestion.offsetParent !== null) {
-    // Check binary radios
-    const binaryRadios = form.querySelectorAll('input[name="image_feelstrue_ai"]');
+    const feelTrueQuestion = document.getElementById('feel-true-question');
+    if (feelTrueQuestion && feelTrueQuestion.offsetParent !== null) {
+        const binaryRadios = form.querySelectorAll('input[name="image_feelstrue_ai"]');
+        let feelsTrueAnswered = false;
 
-    let feelsTrueAnswered = false;
+        if (binaryRadios.length > 0) {
+            const selectedBinary = Array.from(binaryRadios).find(r => r.checked);
+            feelsTrueAnswered = selectedBinary !== undefined;
+        }
 
-    if (binaryRadios.length > 0) {
-        const selectedBinary = Array.from(binaryRadios).find(r => r.checked);
-        feelsTrueAnswered = selectedBinary !== undefined;
+        if (!feelsTrueAnswered) {
+            unansweredFields.push(requiredFields['image_feelstrue_response']);
+            feelTrueQuestion.classList.add('missing-answer');
+            missingElements.push(feelTrueQuestion);
+        }
     }
-
-    if (!feelsTrueAnswered) {
-        unansweredFields.push(requiredFields['image_feelstrue_response']);
-        feelTrueQuestion.classList.add('missing-answer');
-        missingElements.push(feelTrueQuestion);
-    }
-}
 
     // Check familiarity section
-const familiarityRadios = form.querySelectorAll('input[name="familiarity_ai"]');
-const familiaritySection = document.getElementById('familiarity-section');
-if (familiaritySection && familiaritySection.offsetParent !== null) {
-    const familiaritySelected = Array.from(familiarityRadios).some(r => r.checked);
-    if (!familiaritySelected) {
-        unansweredFields.push(requiredFields['familiarity_ai']);
-        if (familiaritySection) {
+    const familiarityRadios = form.querySelectorAll('input[name="familiarity_ai"]');
+    const familiaritySection = document.getElementById('familiarity-section');
+    if (familiaritySection && familiaritySection.offsetParent !== null) {
+        const familiaritySelected = Array.from(familiarityRadios).some(r => r.checked);
+        if (!familiaritySelected) {
+            unansweredFields.push(requiredFields['familiarity_ai']);
             familiaritySection.classList.add('missing-answer');
             missingElements.push(familiaritySection);
         }
     }
-}
 
     if (unansweredFields.length > 0) {
         console.log('Validation failed. Unanswered fields:', unansweredFields);
 
-        // Create detailed error message
         let message = 'Please answer the following question';
         if (unansweredFields.length > 1) {
             message += 's';
@@ -373,7 +363,6 @@ if (familiaritySection && familiaritySection.offsetParent !== null) {
 
         alert(message);
 
-        // Scroll to first missing question
         if (missingElements.length > 0) {
             missingElements[0].scrollIntoView({
                 behavior: 'smooth',
@@ -381,35 +370,31 @@ if (familiaritySection && familiaritySection.offsetParent !== null) {
             });
         }
 
-        return false; // Prevent form submission
+        return false;
     }
 
     console.log('Validation passed');
 
-    // Debug: Log all form values before submission
     const formData = new FormData(form);
     console.log('Form data being submitted:');
     for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
     }
 
-    return true; // Allow form submission
+    return true;
 }
 
 // Global function definitions
 window.updateConfidence = function (input) {
     window.confidenceSliderInteracted = true;
-    const percentage = parseInt(input.value); // Direct percentage value now (0-100)
+    const percentage = parseInt(input.value);
     document.getElementById('description-image_confidence_ai').innerText = `${percentage}% Confident`;
 
-    // Remove highlighting when user interacts with slider
     const container = input.closest('.slider-container');
     if (container && container.classList.contains('missing-answer')) {
         container.classList.remove('missing-answer');
     }
 };
-
-
 
 // DOM Content Loaded event listener
 document.addEventListener('DOMContentLoaded', function() {
@@ -422,7 +407,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const forms = document.querySelectorAll('form');
     forms.forEach(function(form) {
-        // Try to intercept with capturing phase
         form.addEventListener('submit', function(e) {
             console.log('Event listener caught submit');
             if (!validateForm()) {
@@ -430,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopImmediatePropagation();
                 return false;
             }
-        }, true); // Use capturing phase
+        }, true);
     });
 
     // Add real-time validation feedback
@@ -442,7 +426,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const inputX = document.getElementById("click_x_ai");
         const inputY = document.getElementById("click_y_ai");
         const marker = document.getElementById("click-marker");
-        if (img) {
+
+        if (img && inputX && inputY && marker) {
             img.addEventListener("click", function (event) {
                 const rect = img.getBoundingClientRect();
                 const x = event.clientX - rect.left;
@@ -458,13 +443,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 marker.style.transform = "translate(-50%, -50%)";
                 marker.style.display = "block";
 
-                // Remove highlighting when user clicks on image
                 const imageContainer = img.closest('.image-container');
                 if (imageContainer && imageContainer.classList.contains('missing-answer')) {
                     imageContainer.classList.remove('missing-answer');
                 }
 
-                // Also remove highlighting from click instruction text
                 const clickInstruction = document.getElementById('click-instruction');
                 if (clickInstruction && clickInstruction.classList.contains('missing-answer')) {
                     clickInstruction.classList.remove('missing-answer');
@@ -476,30 +459,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const allInputs = form.querySelectorAll('input, select, textarea');
         allInputs.forEach(function(input) {
             input.addEventListener('change', function() {
-                // Remove highlighting when question is answered
                 const container = this.closest('.question') ||
                                 this.closest('.slider-container') ||
-                                this.closest('#interpretations-section') ||
                                 this.closest('#claim-truth-section') ||
                                 this.closest('#feel-true-question') ||
-                                this.closest('#follow-up-question') ||
-                                this.closest('#follow-up-question_doesnot') ||
-                                this.closest('.image-container');
+                                this.closest('#familiarity-section');
                 if (container && container.classList.contains('missing-answer')) {
                     container.classList.remove('missing-answer');
                 }
             });
 
             input.addEventListener('input', function() {
-                // Remove highlighting when question is answered
                 const container = this.closest('.question') ||
                                 this.closest('.slider-container') ||
-                                this.closest('#interpretations-section') ||
                                 this.closest('#claim-truth-section') ||
                                 this.closest('#feel-true-question') ||
-                                this.closest('#follow-up-question') ||
-                                this.closest('#follow-up-question_doesnot') ||
-                                this.closest('.image-container');
+                                this.closest('#familiarity-section');
                 if (container && container.classList.contains('missing-answer')) {
                     container.classList.remove('missing-answer');
                 }
@@ -510,18 +485,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize real-time validation
     addRealTimeValidation();
 
-    // Simplified binary radio handler - no follow-up questions
+    // Binary radio handler
     const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_ai"]');
     binaryRadios.forEach(radio => {
         radio.addEventListener('change', function() {
-            // Remove highlighting when user interacts
             const container = this.closest('#feel-true-question');
             if (container && container.classList.contains('missing-answer')) {
                 container.classList.remove('missing-answer');
             }
         });
     });
-}); // <-- CLOSE DOMContentLoaded
+}); // Close DOMContentLoaded
 
 // Also try intercepting all clicks on submit elements
 document.addEventListener('click', function(e) {
