@@ -89,65 +89,13 @@
     font-weight: 600;
     color: #222;
   }
-  /* ===== Slider Styles ===== */
-  .slider-container {
-    position: relative;
-    width: 100%;
-    margin-bottom: 60px;
-    padding: 0;
-  }
-
-  .slider {
-    width: 100%;
-    height: 14px;
-    background: #ddd;
-    border-radius: 7px;
-    margin-bottom: 40px;
-    appearance: none;
-    outline: none;
-  }
-
-  .slider-value {
-    text-align: center;
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #444;
-    margin-top: -20px;
-  }
-
-  .slider-labels {
-    position: relative;
-    height: 80px;
-    width: 100%;
-    user-select: none;
-  }
-
-  .slider-labels span {
-    position: absolute;
-    top: 0;
-    transform: rotate(60deg) translateY(6px);
-    transform-origin: top center;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  /* Position slider labels */
-  .slider-labels span:nth-child(1) { left: 0%; }
-  .slider-labels span:nth-child(2) { left: 16.666%; }
-  .slider-labels span:nth-child(3) { left: 33.333%; }
-  .slider-labels span:nth-child(4) { left: 50%; }
-  .slider-labels span:nth-child(5) { left: 66.666%; }
-  .slider-labels span:nth-child(6) { left: 83.333%; }
-  .slider-labels span:nth-child(7) { left: 90%; }
-
 
   /* ----- Matrix Table Specific Styles ----- */
   .matrix-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 40px;
-    table-layout: auto;
+    table-layout: fixed;
   }
 
   .matrix-table th,
@@ -161,18 +109,19 @@
   }
 
   .matrix-table .question-column {
-    max-width: 30%; /* wider for question text */
+    width: 30%;
     white-space: normal;
-    word-break: normal;
-    overflow-wrap: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
     text-align: left;
     font-weight: 600;
     color: #222;
   }
 
-  /* Radio Answer Columns */
+  /* Radio Answer Columns - equal width for all */
   .matrix-table th:not(:first-child),
   .matrix-table td:not(.question-column) {
+    width: auto;
     padding: 4px 2px;
     font-size: 0.85rem;
     word-break: normal;
@@ -303,16 +252,8 @@
       margin-top: 1px;
     }
 
-    .slider-labels span {
-      font-size: 0.6rem;
-    }
-
     p, .slider-value {
       font-size: 1rem;
-    }
-
-    .slider-container {
-      padding: 0;
     }
 
     .matrix-table th,
@@ -332,7 +273,7 @@
 
     /* Slightly wider question column */
     .matrix-table .question-column {
-      width: 50%;             /* Give more space for questions */
+      width: 50%;
       font-size: 0.5rem;
       padding-left: 1px;
       padding-right: 1px;
@@ -350,41 +291,125 @@
       font-size: 0.6rem;
     }
   }
-
 </style>
 
-
-
 <script>
+// Handle color check checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    const colorCheckboxes = document.querySelectorAll('.color-checkbox');
+    const colorHiddenInput = document.getElementById('color_check');
 
+    // Update hidden input when checkboxes change
+    colorCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            const checkedValues = Array.from(colorCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
 
-  // Enhanced validation function with highlighting and detailed messages
-  function validateForm() {
+            // Store as comma-separated string
+            colorHiddenInput.value = checkedValues.join(',');
+        });
+    });
+
+    // Load pre-existing values if any (for page refresh)
+    if (colorHiddenInput.value) {
+        const values = colorHiddenInput.value.split(',');
+        colorCheckboxes.forEach(function(checkbox) {
+            if (values.includes(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        });
+    }
+});
+
+// Randomize social media rows on page load (only once!)
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('social-media-rows');
+    if (!tbody) return;
+
+    // Get all rows
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // Fisher-Yates shuffle algorithm
+    for (let i = rows.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rows[i], rows[j]] = [rows[j], rows[i]];
+    }
+
+    // Re-append rows in randomized order
+    rows.forEach(row => tbody.appendChild(row));
+});
+
+// Randomize SMP statements rows using stored order
+document.addEventListener('DOMContentLoaded', function() {
+    const smpTbody = document.getElementById('smp-statements-rows');
+    if (!smpTbody) return;
+
+    // Get the stored order from the server
+    const smpOrder = {{ participant.vars.smp_order|json }};
+
+    if (smpOrder && smpOrder.length > 0) {
+        const rows = Array.from(smpTbody.querySelectorAll('tr'));
+
+        // Create a map of field name to row
+        const rowMap = {};
+        rows.forEach(row => {
+            const errorDiv = row.querySelector('.error-message');
+            if (errorDiv && errorDiv.id) {
+                // Extract base field name
+                let fieldName = errorDiv.id
+                    .replace('error', '')
+                    .replace('Pre', '')
+                    .replace('Post', '')
+                    .replace(/([A-Z])/g, '_$1')
+                    .toLowerCase()
+                    .replace(/^_/, '');
+
+                rowMap[fieldName] = row;
+            }
+        });
+
+        // Clear tbody
+        smpTbody.innerHTML = '';
+
+        // Append rows in the stored order
+        smpOrder.forEach(fieldName => {
+            if (rowMap[fieldName]) {
+                smpTbody.appendChild(rowMap[fieldName]);
+            }
+        });
+    }
+});
+
+// Enhanced validation function with highlighting and detailed messages
+function validateForm() {
     console.log('validateForm() called');
 
     // Define field names with their user-friendly labels
     const requiredFields = {
-      'party_id': 'Political party identification',
-      'use_twitter': 'How often you use Twitter/X',
-      'use_instagram': 'How often you use Instagram',
-      'use_pinterest': 'How often you use Pinterest',
-      'use_linkedin': 'How often you use LinkedIn',
-      'use_facebook': 'How often you use Facebook',
-      'use_youtube': 'How often you use YouTube',
-      'use_tiktok': 'How often you use TikTok',
-      'use_bluesky': 'How often you use Bluesky',
-      'use_truthsocial': 'How often you use Truth Social',
-      'smp_entertaining_pre': 'Social media platforms are entertaining',
-      'smp_accuracy_pre': 'Social media platform accuracy statement',
-      'smp_enjoyment_pre': 'Social media enjoyment statement',
-      'smp_community_pre': 'Social media community statement',
-      'smp_news_pre': 'Social media news statement'
+        'party_id': 'Political party identification',
+        'use_twitter': 'How often you use Twitter/X',
+        'use_reddit': 'How often you use Reddit',
+        'use_instagram': 'How often you use Instagram',
+        'use_pinterest': 'How often you use Pinterest',
+        'use_linkedin': 'How often you use LinkedIn',
+        'use_facebook': 'How often you use Facebook',
+        'use_youtube': 'How often you use YouTube',
+        'use_tiktok': 'How often you use TikTok',
+        'use_bluesky': 'How often you use Bluesky',
+        'use_truthsocial': 'How often you use Truth Social',
+        'smp_entertaining_pre': 'Social media platforms are entertaining',
+        'smp_accuracy_pre': 'Social media platform accuracy statement',
+        'smp_enjoyment_pre': 'Social media enjoyment statement',
+        'smp_community_pre': 'Social media community statement',
+        'smp_news_pre': 'Social media news statement',
+        'color_check': 'Color preference check'
     };
 
     const form = document.querySelector('form');
     if (!form) {
-      console.log('Form not found');
-      return true; // Let it submit if we can't find form
+        console.log('Form not found');
+        return true;
     }
 
     let unansweredFields = [];
@@ -392,158 +417,191 @@
 
     // Clear any previous highlighting
     document.querySelectorAll('.missing-answer').forEach(el => {
-      el.classList.remove('missing-answer');
+        el.classList.remove('missing-answer');
     });
 
-    // Check each required field and collect missing ones
-    Object.keys(requiredFields).forEach(function(fieldName) {
-      let isAnswered = false;
-
-      // Check if it's a radio button group
-      const radioInputs = form.querySelectorAll(`input[name="${fieldName}"][type="radio"]`);
-      if (radioInputs.length > 0) {
-        // It's a radio group - check if any is selected
-        const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
-        isAnswered = checked !== null;
-      } else {
-        // It's likely a slider or other input
-        const field = form.querySelector(`input[name="${fieldName}"], select[name="${fieldName}"]`);
-        if (field) {
-          if (field.type === 'range') {
-            // For sliders, we assume they always have a value (default), so they're always answered
-            // If you want to require a specific selection, modify this logic
-            isAnswered = true;
-          } else if (field.type === 'text' || field.type === 'email' || field.tagName === 'TEXTAREA') {
-            isAnswered = field.value.trim() !== '';
-          } else if (field.tagName === 'SELECT') {
-            isAnswered = field.value !== '' && field.value !== null;
-          } else {
-            isAnswered = field.value !== '';
-          }
-        }
-      }
-
-      if (!isAnswered) {
-        unansweredFields.push(requiredFields[fieldName]);
-
-        // Find and highlight the question container
-        let fieldContainer = null;
-
-        // Special handling for the slider
-        if (fieldName === 'party_id') {
-            fieldContainer = document.querySelector('.radio-container');
-          }
-           else {
-          // For matrix table rows, find the row containing the field
-          const fieldInput = form.querySelector(`input[name="${fieldName}"]`);
-          if (fieldInput) {
-            fieldContainer = fieldInput.closest('tr');
-          }
-        }
-
-        if (fieldContainer) {
-          fieldContainer.classList.add('missing-answer');
-          missingElements.push(fieldContainer);
-        }
-      }
+    document.querySelectorAll('.missing-answer-row').forEach(el => {
+        el.classList.remove('missing-answer-row');
     });
+
+    // Helper function to check if a radio group has a checked input
+    function isRadioGroupChecked(name) {
+        return document.querySelector(`input[name="${name}"]:checked`) !== null;
+    }
+
+    // Check party_id
+    if (!isRadioGroupChecked('party_id')) {
+        unansweredFields.push(requiredFields['party_id']);
+        const container = document.querySelector('.radio-container');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
+
+    // Check social media usage questions
+    const socialMediaFields = [
+        'use_twitter',
+        'use_reddit',
+        'use_instagram',
+        'use_pinterest',
+        'use_linkedin',
+        'use_facebook',
+        'use_youtube',
+        'use_tiktok',
+        'use_bluesky',
+        'use_truthsocial'
+    ];
+
+    socialMediaFields.forEach(fieldName => {
+        if (!isRadioGroupChecked(fieldName)) {
+            unansweredFields.push(requiredFields[fieldName]);
+            const row = document.querySelector(`tr:has(input[name="${fieldName}"])`);
+            if (row) {
+                row.classList.add('missing-answer-row');
+                missingElements.push(row);
+            }
+        }
+    });
+
+    // Check SMP statements
+    const smpFields = [
+        'smp_entertaining_pre',
+        'smp_accuracy_pre',
+        'smp_enjoyment_pre',
+        'smp_community_pre',
+        'smp_news_pre'
+    ];
+
+    smpFields.forEach(fieldName => {
+        if (!isRadioGroupChecked(fieldName)) {
+            unansweredFields.push(requiredFields[fieldName]);
+            const row = document.querySelector(`tr:has(input[name="${fieldName}"])`);
+            if (row) {
+                row.classList.add('missing-answer-row');
+                missingElements.push(row);
+            }
+        }
+    });
+
+    // Check color check
+    const colorField = form.querySelector('input[name="color_check"]');
+    if (colorField && colorField.value.trim() === '') {
+        unansweredFields.push(requiredFields['color_check']);
+        const container = document.getElementById('color-check-group');
+        if (container) {
+            container.classList.add('missing-answer');
+            missingElements.push(container);
+        }
+    }
 
     if (unansweredFields.length > 0) {
-      console.log('Validation failed. Unanswered fields:', unansweredFields);
+        console.log('Validation failed. Unanswered fields:', unansweredFields);
 
-      // Create detailed error message
-      let message = 'Please answer the following question';
-      if (unansweredFields.length > 1) {
-        message += 's';
-      }
-      message += ' before submitting:\n\n';
-
-      unansweredFields.forEach(function(fieldLabel, index) {
-        message += '• ' + fieldLabel;
-        if (index < unansweredFields.length - 1) {
-          message += '\n';
+        let message = 'Please answer the following question';
+        if (unansweredFields.length > 1) {
+            message += 's';
         }
-      });
+        message += ' before submitting:\n\n';
 
-      alert(message);
-
-      // Scroll to first missing question
-      if (missingElements.length > 0) {
-        missingElements[0].scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
+        unansweredFields.forEach(function(fieldLabel, index) {
+            message += '• ' + fieldLabel;
+            if (index < unansweredFields.length - 1) {
+                message += '\n';
+            }
         });
-      }
 
-      return false; // Prevent form submission
+        alert(message);
+
+        if (missingElements.length > 0) {
+            missingElements[0].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        return false;
     }
 
     console.log('Validation passed');
-    return true; // Allow form submission
-  }
+    return true;
+}
 
-  // Backup: Also try the event listener approach
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, setting up additional event listeners...');
-
-    const forms = document.querySelectorAll('form');
-    forms.forEach(function(form) {
-      // Try to intercept with capturing phase
-      form.addEventListener('submit', function(e) {
-        console.log('Event listener caught submit');
-        if (!validateForm()) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          return false;
-        }
-      }, true); // Use capturing phase
-    });
-  });
-
-  // Also try intercepting all clicks on submit elements
-  document.addEventListener('click', function(e) {
-    if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
-      console.log('Submit element clicked, validating...');
-      if (!validateForm()) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        return false;
-      }
-    }
-  }, true);
-
-  // Optional: Add real-time validation feedback
-  function addRealTimeValidation() {
+// Add real-time validation feedback
+function addRealTimeValidation() {
     const form = document.querySelector('form');
     if (!form) return;
 
-    // Add change listeners to all form inputs
-    const allInputs = form.querySelectorAll('input, select, textarea');
-    allInputs.forEach(function(input) {
-      input.addEventListener('change', function() {
-        // Remove highlighting when question is answered
-const container = this.closest('tr') || this.closest('.slider-container') || this.closest('.radio-container');
-        if (container && container.classList.contains('missing-answer')) {
-          container.classList.remove('missing-answer');
-        }
-      });
-    });
-  }
+    const allRadios = form.querySelectorAll('input[type="radio"]');
+    allRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const fieldName = this.name;
 
-  // Initialize real-time validation when DOM is ready
-  document.addEventListener('DOMContentLoaded', addRealTimeValidation);
+            if (fieldName === 'party_id') {
+                const container = document.querySelector('.radio-container');
+                if (container && container.classList.contains('missing-answer')) {
+                    container.classList.remove('missing-answer');
+                }
+            } else {
+                const row = this.closest('tr');
+                if (row && row.classList.contains('missing-answer-row')) {
+                    row.classList.remove('missing-answer-row');
+                }
+            }
+        });
+    });
+
+    // Add listener for color checkboxes
+    const colorCheckboxes = form.querySelectorAll('.color-checkbox');
+    colorCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            const container = document.getElementById('color-check-group');
+            if (container && container.classList.contains('missing-answer')) {
+                container.classList.remove('missing-answer');
+            }
+        });
+    });
+}
+
+// DOM Content Loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up validation...');
+
+    addRealTimeValidation();
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submit event caught');
+            if (!validateForm()) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+    });
+});
+
+// Backup validation on submit button click
+document.addEventListener('click', function(e) {
+    if (e.target && (e.target.type === 'submit' || e.target.getAttribute('type') === 'submit')) {
+        console.log('Submit button clicked, validating...');
+        if (!validateForm()) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+        }
+    }
+}, true);
 </script>
 
 <div class="survey-container">
   <form method="post">
-<div class="radio-container" style="margin-bottom: 30px;">
-  <p class="question-text"><b>{{ form.party_id.label }}</b></p>
-
-  {{ form.party_id }}
-
-  <div class="error-message">{{ formfield_errors 'party_id' }}</div>
-</div>
-
+    <div class="radio-container" style="margin-bottom: 30px;">
+      <p class="question-text"><b>{{ form.party_id.label }}</b></p>
+      {{ form.party_id }}
+      <div class="error-message">{{ formfield_errors 'party_id' }}</div>
+    </div>
 
     <!-- Instruction Text -->
     <p class="question-text"><b>Thinking about social networking sites, how often do you visit or use the following?</b></p>
@@ -551,106 +609,119 @@ const container = this.closest('tr') || this.closest('.slider-container') || thi
     <!-- Likert Scale -->
     <div class="matrix-wrapper">
       <table class="matrix-table">
-        <tr>
-          <th></th>
-          <th>Several times a day</th>
-          <th>About once a day</th>
-          <th>A few days a week</th>
-          <th>Every few weeks</th>
-          <th>Less often</th>
-          <th>Never</th>
-          <th>Don't know</th>
-        </tr>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Several times a day</th>
+            <th>About once a day</th>
+            <th>A few days a week</th>
+            <th>Every few weeks</th>
+            <th>Less often</th>
+            <th>Never</th>
+            <th>Don't know</th>
+          </tr>
+        </thead>
+        <tbody id="social-media-rows">
+          <tr>
+            <td class="question-column">
+              {{ form.use_twitter.label }}
+              <div id="errorUseTwitter" class="error-message">{{ formfield_errors 'use_twitter' }}</div>
+            </td>
+            {% for choice in form.use_twitter %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_twitter.label }}
-            <div id="errorUseTwitter" class="error-message">{{ formfield_errors 'use_twitter' }}</div>
-          </td>
-          {% for choice in form.use_twitter %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_reddit.label }}
+              <div id="errorUseReddit" class="error-message">{{ formfield_errors 'use_reddit' }}</div>
+            </td>
+            {% for choice in form.use_reddit %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_instagram.label }}
-            <div id="errorUseInstagram" class="error-message">{{ formfield_errors 'use_instagram' }}</div>
-          </td>
-          {% for choice in form.use_instagram %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_instagram.label }}
+              <div id="errorUseInstagram" class="error-message">{{ formfield_errors 'use_instagram' }}</div>
+            </td>
+            {% for choice in form.use_instagram %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_pinterest.label }}
-            <div id="errorUsePinterest" class="error-message">{{ formfield_errors 'use_pinterest' }}</div>
-          </td>
-          {% for choice in form.use_pinterest %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_pinterest.label }}
+              <div id="errorUsePinterest" class="error-message">{{ formfield_errors 'use_pinterest' }}</div>
+            </td>
+            {% for choice in form.use_pinterest %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_linkedin.label }}
-            <div id="errorUseLinkedIn" class="error-message">{{ formfield_errors 'use_linkedin' }}</div>
-          </td>
-          {% for choice in form.use_linkedin %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_linkedin.label }}
+              <div id="errorUseLinkedIn" class="error-message">{{ formfield_errors 'use_linkedin' }}</div>
+            </td>
+            {% for choice in form.use_linkedin %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_facebook.label }}
-            <div id="errorUseFacebook" class="error-message">{{ formfield_errors 'use_facebook' }}</div>
-          </td>
-          {% for choice in form.use_facebook %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_facebook.label }}
+              <div id="errorUseFacebook" class="error-message">{{ formfield_errors 'use_facebook' }}</div>
+            </td>
+            {% for choice in form.use_facebook %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_youtube.label }}
-            <div id="errorUseYouTube" class="error-message">{{ formfield_errors 'use_youtube' }}</div>
-          </td>
-          {% for choice in form.use_youtube %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_youtube.label }}
+              <div id="errorUseYouTube" class="error-message">{{ formfield_errors 'use_youtube' }}</div>
+            </td>
+            {% for choice in form.use_youtube %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_tiktok.label }}
-            <div id="errorUseTikTok" class="error-message">{{ formfield_errors 'use_tiktok' }}</div>
-          </td>
-          {% for choice in form.use_tiktok %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_tiktok.label }}
+              <div id="errorUseTikTok" class="error-message">{{ formfield_errors 'use_tiktok' }}</div>
+            </td>
+            {% for choice in form.use_tiktok %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_bluesky.label }}
-            <div id="errorUseBluesky" class="error-message">{{ formfield_errors 'use_bluesky' }}</div>
-          </td>
-          {% for choice in form.use_bluesky %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_bluesky.label }}
+              <div id="errorUseBluesky" class="error-message">{{ formfield_errors 'use_bluesky' }}</div>
+            </td>
+            {% for choice in form.use_bluesky %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.use_truthsocial.label }}
-            <div id="errorUsetruthsocial" class="error-message">{{ formfield_errors 'use_truthsocial' }}</div>
-          </td>
-          {% for choice in form.use_truthsocial %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.use_truthsocial.label }}
+              <div id="errorUsetruthsocial" class="error-message">{{ formfield_errors 'use_truthsocial' }}</div>
+            </td>
+            {% for choice in form.use_truthsocial %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
+        </tbody>
       </table>
     </div>
 
@@ -660,69 +731,114 @@ const container = this.closest('tr') || this.closest('.slider-container') || thi
     <!-- Likert Scale -->
     <div class="matrix-wrapper">
       <table class="matrix-table">
-        <tr>
-          <th></th> <!-- Aligns with question column -->
-          <th>Strongly Disagree</th>
-          <th>Disagree</th>
-          <th>Neither Agree Nor Disagree</th>
-          <th>Agree</th>
-          <th>Strongly Agree</th>
-        </tr>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Strongly Disagree</th>
+            <th>Disagree</th>
+            <th>Neither Agree Nor Disagree</th>
+            <th>Agree</th>
+            <th>Strongly Agree</th>
+          </tr>
+        </thead>
+        <tbody id="smp-statements-rows">
+          <tr>
+            <td class="question-column">
+              {{ form.smp_entertaining_pre.label }}
+              <div id="errorSmpEntertainingPre" class="error-message">{{ formfield_errors 'smp_entertaining_pre' }}</div>
+            </td>
+            {% for choice in form.smp_entertaining_pre %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.smp_entertaining_pre.label }}
-            <div id="errorSmpEntertainingPre" class="error-message">{{ formfield_errors 'smp_entertaining_pre' }}</div>
-          </td>
-          {% for choice in form.smp_entertaining_pre %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.smp_accuracy_pre.label }}
+              <div id="errorSmpAccuracyPre" class="error-message">{{ formfield_errors 'smp_accuracy_pre' }}</div>
+            </td>
+            {% for choice in form.smp_accuracy_pre %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.smp_accuracy_pre.label }}
-            <div id="errorSmpAccuracyPre" class="error-message">{{ formfield_errors 'smp_accuracy_pre' }}</div>
-          </td>
-          {% for choice in form.smp_accuracy_pre %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.smp_enjoyment_pre.label }}
+              <div id="errorSmpEnjoymentPre" class="error-message">{{ formfield_errors 'smp_enjoyment_pre' }}</div>
+            </td>
+            {% for choice in form.smp_enjoyment_pre %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.smp_enjoyment_pre.label }}
-            <div id="errorSmpEnjoymentPre" class="error-message">{{ formfield_errors 'smp_enjoyment_pre' }}</div>
-          </td>
-          {% for choice in form.smp_enjoyment_pre %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.smp_community_pre.label }}
+              <div id="errorSmpCommunityPre" class="error-message">{{ formfield_errors 'smp_community_pre' }}</div>
+            </td>
+            {% for choice in form.smp_community_pre %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
 
-        <tr>
-          <td class="question-column">
-            {{ form.smp_community_pre.label }}
-            <div id="errorSmpCommunityPre" class="error-message">{{ formfield_errors 'smp_community_pre' }}</div>
-          </td>
-          {% for choice in form.smp_community_pre %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
-
-        <tr>
-          <td class="question-column">
-            {{ form.smp_news_pre.label }}
-            <div id="errorSmpNewsPre" class="error-message">{{ formfield_errors 'smp_news_pre' }}</div>
-          </td>
-          {% for choice in form.smp_news_pre %}
-            <td data-label="">{{ choice|safe }}</td>
-          {% endfor %}
-        </tr>
+          <tr>
+            <td class="question-column">
+              {{ form.smp_news_pre.label }}
+              <div id="errorSmpNewsPre" class="error-message">{{ formfield_errors 'smp_news_pre' }}</div>
+            </td>
+            {% for choice in form.smp_news_pre %}
+              <td data-label="">{{ choice|safe }}</td>
+            {% endfor %}
+          </tr>
+        </tbody>
       </table>
     </div>
 
+    <!-- Color Preference Attention Check -->
+<div class="form-group" id="color-check-group" style="margin-top: 40px;">
+          <p class="question-text"><b>Now, we would like to get a sense of your general preferences.  Most modern theories of decision-making recognize that decisions do not take place in a vacuum. Individual preferences and knowledge, along with situational variables, can greatly impact the decision process. To demonstrate that you read this much, just go ahead and select both black and green among the alternatives below, no matter what your favorite color is. Yes, ignore the question below and select both of those options.</p>
+
+
+  <label class="question-text" style="display: block; margin-bottom: 15px;">
+    <p class="question-text"><b>What is your favorite color?</b></p>
+  </label>
+
+  <!-- Hidden input to store the selected values -->
+  <input type="hidden" id="color_check" name="color_check" value="">
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="color_white" class="color-checkbox" value="White">
+      <label for="color_white" style="font-weight: 400; cursor: pointer; margin: 0;">White</label>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="color_black" class="color-checkbox" value="Black">
+      <label for="color_black" style="font-weight: 400; cursor: pointer; margin: 0;">Black</label>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="color_red" class="color-checkbox" value="Red">
+      <label for="color_red" style="font-weight: 400; cursor: pointer; margin: 0;">Red</label>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="color_pink" class="color-checkbox" value="Pink">
+      <label for="color_pink" style="font-weight: 400; cursor: pointer; margin: 0;">Pink</label>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="color_green" class="color-checkbox" value="Green">
+      <label for="color_green" style="font-weight: 400; cursor: pointer; margin: 0;">Green</label>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <input type="checkbox" id="color_blue" class="color-checkbox" value="Blue">
+      <label for="color_blue" style="font-weight: 400; cursor: pointer; margin: 0;">Blue</label>
+    </div>
+  </div>
+
+  <div class="error-message">{{ formfield_errors 'color_check' }}</div>
+</div>
+
     <div class="submit-container">
-      <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
+      <button type="submit" id="submitButton" aria-label="Submit survey responses">
         ➔
       </button>
     </div>

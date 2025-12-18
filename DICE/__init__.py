@@ -17,7 +17,6 @@ class C(BaseConstants):
     NAME_IN_URL = 'DICE'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
-
     RULES_TEMPLATE = "DICE/T_Rules.html"
     PRIVACY_TEMPLATE = "DICE/T_Privacy.html"
     TWEET_TEMPLATE = "DICE/T_Tweet.html"
@@ -25,24 +24,24 @@ class C(BaseConstants):
     TOPICS_TEMPLATE = "DICE/T_Trending_Topics.html"
     BANNER_TEMPLATE = "DICE/T_Banner_Ads.html"
 
-
 class Subsession(BaseSubsession):
     pass
 
-
 class Group(BaseGroup):
     pass
-# Create variables to capture:
 
-
+# Variables to capture:
 class Player(BasePlayer):
     tweets_json = models.StringField()
+    assigned_politics_id = models.StringField(blank=True)
     claim_real = models.StringField()
     claim_ai = models.StringField(blank=True)
+    shown_info_treatment = models.BooleanField(
+        doc="Indicates whether the player was shown the info treatment page"
+    )
     image_options_json = models.StringField()
     prolific_id = models.StringField(default=str(" "))
     first_question = models.StringField(blank=True)
-    itemcount_first = models.BooleanField(blank=True, initial=False)
     second_question = models.StringField(blank=True)
     question_order = models.StringField(blank=True)
     creates_watermarks_other = models.StringField(blank=True)
@@ -53,6 +52,27 @@ class Player(BasePlayer):
     moreposts_image_check_5 = models.StringField(choices=['like', 'neutral', 'dislike'], blank=True)
     familiarity_real = models.StringField(blank=True)
     familiarity_ai = models.StringField(blank=True)
+    attention_check = models.LongStringField(
+        blank=True,
+        label="Please check all words that describe how you are currently feeling."
+    )
+
+    color_check = models.LongStringField(
+        blank=True,
+        label="What is your favorite color?"
+    )
+
+    insta_uncover_clicks = models.LongStringField(
+        doc='Tracks clicks on Instagram "uncover photo" button with timestamps',
+        blank=True
+    )
+
+    watermark_hover_events = models.LongStringField(
+        doc='Tracks hover events on CR watermark with timestamps',
+        blank=True
+    )
+
+    hover_screenshot = models.StringField(blank=True)
 
     # Metadata variables:
     disclaimer = models.StringField(blank=True, null=True)
@@ -85,12 +105,13 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect
     )
 
-    watermark_familiarity = models.IntegerField(
+    watermark_familiarity = models.StringField(
         choices=[
-            (1, 'Very familiar'),
-            (2, 'Somewhat familiar'),
-            (3, 'Not familiar at all'),
+            'Very familiar',
+            'Somewhat familiar',
+            'Not familiar at all'
         ],
+        label="Before today, how familiar were you with watermarks or warning labels on social media?",
         widget=widgets.RadioSelect
     )
 
@@ -116,38 +137,38 @@ class Player(BasePlayer):
             (7, 'Strong Republican')
         ],
         widget=widgets.RadioSelect,
-        required=True
+        # required=True
     )
 
     # AI/SMP questions pre-treatment:
     smp_entertaining_pre = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label="I find the content on social media platforms entertaining"
+        label="I find the content on social media platforms entertaining",
     )
 
     smp_accuracy_pre = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I trust the accuracy of the content on social media platforms'
+        label='I trust the accuracy of the content on social media platforms',
     )
 
     smp_enjoyment_pre = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I enjoy spending time on social media platforms'
+        label='I enjoy spending time on social media platforms',
     )
 
     smp_community_pre = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I feel part of a community on social media platforms'
+        label='I feel part of a community on social media platforms',
     )
 
     smp_news_pre = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
         widget=widgets.RadioSelect,
-        label='I get my news from social media platforms'
+        label='I get my news from social media platforms',
     )
     # from pew https://www.pewresearch.org/wp-content/uploads/sites/20/2024/10/SR_24.10.16_media-trust-topline.pdf
     image_accuracy_ai = models.StringField(blank=True)
@@ -159,13 +180,10 @@ class Player(BasePlayer):
         label="Why did you click on that spot?",
         blank=False
     )
-    image_claim_ai = models.StringField(blank=True)
     image_claim_true_ai = models.StringField(blank=True)
     image_feelstrue_ai = models.StringField(blank=True)
     image_feelstrue_real = models.StringField(blank=True)
     image_confidence_ai = models.IntegerField(blank=True)
-    claim_response_ai = models.LongStringField(blank=True)
-    claim_response_real = models.LongStringField(blank=True)
     image_accuracy_real = models.StringField(blank=True)
     image_confidence_real = models.IntegerField(blank=True)
     image_claim_true_real = models.StringField(blank=True)
@@ -185,196 +203,71 @@ class Player(BasePlayer):
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="Twitter/X",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
+    )
+
+    use_reddit = models.StringField(
+        choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
+                 "Less often", "Never", "Don't know"],
+        label="Reddit",
+        widget=widgets.RadioSelect,
     )
 
     use_instagram = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="Instagram/Threads",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
 
     use_pinterest = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="Pinterest",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
 
     use_linkedin = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="LinkedIn",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
 
     use_facebook = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="Facebook",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
 
     use_youtube = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="YouTube",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
 
     use_tiktok = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="TikTok",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
 
     use_bluesky = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="Bluesky",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
 
     use_truthsocial = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
         label="Truth Social",
-        widget=widgets.RadioSelect
+        widget=widgets.RadioSelect,
     )
-
-    trust_twitter_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Twitter/X",
-        widget=widgets.RadioSelect)
-
-    trust_instagram_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Instagram/Threads",
-        widget=widgets.RadioSelect)
-    trust_nationalnews_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="National news organizations",
-        widget=widgets.RadioSelect)
-    trust_localnews_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Local news organizations",
-        widget=widgets.RadioSelect)
-    trust_friendsfamily_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Friends and family",
-        widget=widgets.RadioSelect)
-    trust_pinterest_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Pinterest",
-        widget=widgets.RadioSelect)
-    trust_linkedin_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="LinkedIn",
-        widget=widgets.RadioSelect)
-    trust_facebook_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Facebook",
-        widget=widgets.RadioSelect)
-    trust_youtube_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="YouTube",
-        widget=widgets.RadioSelect)
-    trust_tiktok_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="TikTok",
-        widget=widgets.RadioSelect)
-    trust_bluesky_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Bluesky",
-        widget=widgets.RadioSelect)
-    trust_truthsocial_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Truth Social",
-        widget=widgets.RadioSelect)
-    trust_acquaintances_posttreatment = models.StringField(
-        choices=[
-            ['alot', 'A lot'],
-            ['some', 'Some'],
-            ['not_too_much', 'Not too much'],
-            ['not_at_all', 'Not at all'],
-            ['no_opinion', 'No opinion']
-        ],
-        label="Acquaintances",
-        widget=widgets.RadioSelect)
 
     benefits_ai = models.StringField(
         choices=['Strongly Disagee', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
@@ -397,6 +290,29 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect,
         label='I trust the accuracy of content on social media platforms'
     )
+    trust_AI_company = models.StringField(
+        choices=['A lot', 'Some', 'Not too much', 'Not at all', 'No opinion'],
+        widget=widgets.RadioSelect,
+        label='Companies that build AI tools'
+    )
+
+    trust_user = models.StringField(
+        choices=['A lot', 'Some', 'Not too much', 'Not at all', 'No opinion'],
+        widget=widgets.RadioSelect,
+        label='Users who post content on social media platforms'
+    )
+
+    trust_smp = models.StringField(
+        choices=['A lot', 'Some', 'Not too much', 'Not at all', 'No opinion'],
+        widget=widgets.RadioSelect,
+        label='Social media platforms'
+    )
+
+    trust_journalists_factcheckers = models.StringField(
+        choices=['A lot', 'Some', 'Not too much', 'Not at all', 'No opinion'],
+        widget=widgets.RadioSelect,
+        label='Journalists or fact-checkers'
+    )
 
     smp_enjoyment_post = models.StringField(
         choices=['Strongly Disagree', 'Disagree', 'Neither Agree Nor Disagree', 'Agree', 'Strongly Agree'],
@@ -415,7 +331,6 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect,
         label='I get my news from social media platforms'
     )
-    benefits_understanding_watermarks = models.IntegerField(min=1, max=5)
 
     # Demographics post-treatment:
     age = models.IntegerField(
@@ -467,7 +382,6 @@ class Player(BasePlayer):
         required=None
     )
 
-
     # Watermark Questions
     clarity_watermarks = models.StringField(choices=['Not at all', 'Slightly', 'Moderately', 'Very', "Extremely"],
                                             label="The watermark/label/information is clear",
@@ -484,10 +398,9 @@ class Player(BasePlayer):
     creates_watermarks = models.StringField(blank=True)
 
     # Debrief
-    understand_AI = models.LongStringField()  # or StringField
+    understand_AI = models.LongStringField()
 
     consentdebrief = models.StringField(choices=['yes', 'no'])
-
 
 # FUNCTIONS -----
 def creating_session(subsession):
@@ -498,188 +411,257 @@ def creating_session(subsession):
     # Convert 'doc_id' to string and strip whitespace once upfront
     df['doc_id'] = df['doc_id'].astype(str).str.strip()
 
-    # Assign random vars and tweets to each player
-    for player in subsession.get_players():
-        player.participant.vars['itemcount_first'] = random.random() < 0.5
+    # Store dataframes in session vars so they can be accessed later
+    subsession.session.vars['full_tweets_df'] = df
+    subsession.session.vars['processed_tweets'] = tweets
 
-        # Randomly assign treatment condition (50/50 split)
+    # Assign random vars to each player
+    for player in subsession.get_players():
+        # Randomly assign info treatment condition (50/50 split)
         player.participant.vars['show_info_treatment'] = random.random() < 0.5
+
+        # Set default to False (will be updated if they see the page)
+        player.shown_info_treatment = False
 
         order = ['AI', 'Real'] if random.random() < 0.5 else ['Real', 'AI']
         player.participant.vars['question_order'] = order
         player.participant.vars['first_question'] = order[0]
         player.participant.vars['second_question'] = order[1]
-        player.participant.tweets = tweets  # initial full tweets dataframe
 
-    # Group players by party_id to block treatment assignment
-    party_id_groups = defaultdict(list)
-    for player in subsession.get_players():
-        party_id_groups[player.party_id].append(player)
+        # Generate and store SMP statements order
+        smp_fields = ['smp_entertaining', 'smp_accuracy', 'smp_enjoyment', 'smp_community', 'smp_news']
+        random.shuffle(smp_fields)
+        player.participant.vars['smp_order'] = smp_fields
 
-    # Define treatment types and watermark options
-    treatment_types = [
+        # Mark that treatment has not been assigned yet
+        player.participant.vars['treatment_assigned'] = False
+
+def assign_treatment_posts(player):
+    """Assign treatment and control posts AFTER party_id is collected, with blocking by party_id"""
+
+    # Check if already assigned
+    if player.participant.vars.get('treatment_assigned', False):
+        print(f"Treatment already assigned for player {player.id_in_group}")
+        return
+
+    # Get the stored dataframes
+    df = player.subsession.session.vars['full_tweets_df']
+    tweets = player.subsession.session.vars['processed_tweets']
+
+    print(f"Assigning treatment for player {player.id_in_group} with party_id: {player.party_id}")
+
+    # Initialize blocking structures in session vars if not present
+    if 'party_treatment_counters' not in player.session.vars:
+        player.session.vars['party_treatment_counters'] = {}
+    if 'party_watermark_counters' not in player.session.vars:
+        player.session.vars['party_watermark_counters'] = {}
+
+    party_id = player.party_id
+
+    # Initialize counters for this party_id if not present
+    if party_id not in player.session.vars['party_treatment_counters']:
+        # Create shuffled list of treatment types for this party
+        base_treatment_types = [
+            'Negative Democrat',
+            'Negative Republican',
+            'Positive Democrat',
+            'Positive Republican'
+        ]
+
+        # Create a large pool of treatments (2/3 realistic, 1/3 artistic)
+        treatment_pool = []
+        for _ in range(300):  # Make a pool of 1200 treatments (300 × 4 base types)
+            for base_type in base_treatment_types:
+                style = 'Artistic' if random.random() < 1 / 3 else 'Realistic'
+                full_treatment = f"{base_type.split()[0]} {style} {base_type.split()[1]}"
+                treatment_pool.append(full_treatment)
+
+        random.shuffle(treatment_pool)
+        player.session.vars['party_treatment_counters'][party_id] = {
+            'pool': treatment_pool,
+            'index': 0
+        }
+
+        if party_id not in player.session.vars['party_watermark_counters']:
+            # Create shuffled list of watermarks for this party
+            watermark_options = [
+                "none", "fb_content_warning", "insta_content_warning",
+                "cr_watermark", "cr_watermark_plus_label"
+            ]
+
+            # Create a large pool of watermarks
+            watermark_pool = watermark_options * 240  # 1200 watermarks (240 × 5 options)
+            random.shuffle(watermark_pool)
+            player.session.vars['party_watermark_counters'][party_id] = {
+                'pool': watermark_pool,
+                'index': 0
+            }
+
+    # Get treatment type from the pool
+    treatment_counter = player.session.vars['party_treatment_counters'][party_id]
+    treatment_type = treatment_counter['pool'][treatment_counter['index']]
+    treatment_counter['index'] += 1
+
+    # Get watermark from the pool
+    watermark_counter = player.session.vars['party_watermark_counters'][party_id]
+    player.watermark_condition = watermark_counter['pool'][watermark_counter['index']]
+    watermark_counter['index'] += 1
+
+    print(f"  Assigned treatment_type: {treatment_type}")
+    print(f"  Assigned watermark: {player.watermark_condition}")
+
+    # Filter treatment and control posts
+    all_treatment_types = [
         'Negative Artistic Democrat', 'Negative Artistic Republican',
         'Negative Realistic Democrat', 'Negative Realistic Republican',
         'Positive Artistic Democrat', 'Positive Artistic Republican',
         'Positive Realistic Democrat', 'Positive Realistic Republican'
     ]
-    watermark_options = [
-        "none", "fb_content_warning", "insta_content_warning",
-        "cr_watermark", "cr_watermark_plus_label"
-    ]
+    treatment_posts = tweets[tweets['treatment_type'].isin(all_treatment_types)]
+    control_posts = tweets[~tweets['treatment_type'].isin(all_treatment_types)]
 
-    # Control categories for control posts sampling
+    if treatment_posts.empty:
+        raise ValueError("No treatment posts found")
+
+    # Control categories
     control_categories = ['sports', 'technology', 'entertainment', 'politics']
 
-    for party_id, players in party_id_groups.items():
-        # Use the first player to get the full tweets dataframe for the group
-        group_tweets = players[0].participant.tweets
+    selected_control_posts = []
 
-        # Filter treatment and control posts
-        treatment_posts = group_tweets[group_tweets['treatment_type'].isin(treatment_types)]
-        control_posts = group_tweets[~group_tweets['treatment_type'].isin(treatment_types)]
+    # Sample one treatment post
+    selected_treatment_post = treatment_posts[treatment_posts['treatment_type'] == treatment_type].sample(n=1).copy()
 
-        if treatment_posts.empty:
-            raise ValueError("No treatment posts found for party_id: {}".format(party_id))
+    # Assign treatment post info to player
+    assigned_image_id = str(selected_treatment_post['doc_id'].values[0]).strip()
+    player.assigned_image_id = assigned_image_id
 
-        # Shuffle treatment types for this group
-        random.shuffle(treatment_types)
+    # get AI image claim
+    if 'claim_ai' in selected_treatment_post.columns:
+        player.claim_ai = selected_treatment_post['claim_ai'].values[0]
+        print(f"Player {player.id_in_group}: Assigned claim_ai = '{player.claim_ai}'")
 
-        # Create balanced assignment of watermarks for this group
-        group_size = len(players)
-        watermarks_needed = []
-        full_cycles = group_size // len(watermark_options)
-        remainder = group_size % len(watermark_options)
+    # Disclaimer assignment
+    kamala_ids = {'101', '102', '105', '106', '109', '114'}
+    donald_ids = {'103', '104', '107', '108', '111', '115', '120', '122', '126'}
+    donald_taylor_ids = '116'
+    andrew_ids = '117'
+    donald_elon_ids = '125'
+    charlie_ids = '123', '124'
+    chuck_hakeem_ids = '121'
+    chuck_ids = '119'
+    zohran_ids = '118'
 
-        # Add full cycles of all watermark options
-        for _ in range(full_cycles):
-            watermarks_needed.extend(watermark_options)
+    if assigned_image_id in kamala_ids:
+        player.disclaimer = "Kamala Harris"
+    elif assigned_image_id in donald_ids:
+        player.disclaimer = "Donald Trump"
+    elif assigned_image_id in donald_taylor_ids:
+        player.disclaimer = "Taylor Swift and Donald Trump"
+    elif assigned_image_id in donald_elon_ids:
+        player.disclaimer = "Donald Trump and Elon Musk"
+    elif assigned_image_id in charlie_ids:
+        player.disclaimer = "Charlie Kirk"
+    elif assigned_image_id in chuck_hakeem_ids:
+        player.disclaimer = "Chuck Schumer and Hakeem Jeffries"
+    elif assigned_image_id in chuck_ids:
+        player.disclaimer = "Chuck Schumer"
+    elif assigned_image_id in zohran_ids:
+        player.disclaimer = "Zohran Mamdani"
+    elif assigned_image_id in andrew_ids:
+        player.disclaimer = "Andrew Cuomo"
+    else:
+        player.disclaimer = ""
 
-        # Add remainder randomly
-        if remainder > 0:
-            watermarks_needed.extend(random.sample(watermark_options, remainder))
+    feed_row = df[df['doc_id'] == assigned_image_id]
+    player.feed_condition_row = feed_row.to_json(orient='records') if not feed_row.empty else None
 
-        # Shuffle the final assignment
-        random.shuffle(watermarks_needed)
+    # Set watermark on treatment post
+    selected_treatment_post['watermark'] = player.watermark_condition
+    selected_treatment_post['watermark'] = selected_treatment_post['watermark'].str.strip()
 
-        for i, player in enumerate(players):
-            selected_control_posts = []
+    # Map watermark condition to screenshot column
+    watermark_to_column = {
+        "none": "screenshot_nowatermark",
+        "insta_content_warning": "screenshot_insta",
+        "fb_content_warning": "screenshot_fb",
+        "cr_watermark": "screenshot_cr",
+        "cr_watermark_plus_label": "screenshot_both",
+    }
 
-            # Cycle treatment type for player
-            treatment_type = treatment_types[i % len(treatment_types)]
+    hover_screenshot_column = {
+        "cr_watermark": "screenshot_cr_hover",
+        "cr_watermark_plus_label": "screenshot_cr_hover",
+    }
 
-            # Sample one treatment post
-            selected_treatment_post = treatment_posts[treatment_posts['treatment_type'] == treatment_type].sample(
-                n=1).copy()
+    screenshot_col = watermark_to_column.get(player.watermark_condition)
+    if screenshot_col in selected_treatment_post.columns:
+        val = selected_treatment_post[screenshot_col].values[0]
+        if pd.notna(val):
+            player.screenshot_treatment = val
 
-            # Assign treatment post info to player
-            assigned_image_id = str(selected_treatment_post['doc_id'].values[0]).strip()
-            player.assigned_image_id = assigned_image_id
+    # Assign hover screenshot if applicable
+    hover_col = hover_screenshot_column.get(player.watermark_condition)
+    if hover_col and hover_col in selected_treatment_post.columns:
+        val = selected_treatment_post[hover_col].values[0]
+        if pd.notna(val):
+            player.hover_screenshot = val
 
-            # get AI image claim
-            if 'claim_ai' in selected_treatment_post.columns:
-                player.claim_ai = selected_treatment_post['claim_ai'].values[0]
-                print(f"Player {player.id_in_group}: Assigned claim_ai = '{player.claim_ai}'")
-            else:
-                print(f"WARNING: 'claim_ai' column not found in selected_treatment_post")
-                print(f"Available columns: {selected_treatment_post.columns.tolist()}")
+    # Sample one control post from each control category
+    for category in control_categories:
+        category_clean = category.strip().lower()
+        category_posts = control_posts[control_posts['control'].str.strip().str.lower() == category_clean]
 
-            # --- Add this block for disclaimer assignment ---
-            kamala_ids = {'101', '102', '105', '106', '109', '110', '114'}
-            donald_ids = {'103', '104', '107', '108', '111', '112', '113', '115'}
-            taylor_trump_id = '116'
+        if not category_posts.empty:
+            selected_post = category_posts.sample(n=1).copy()
+            selected_post['watermark'] = "none"
+            selected_control_posts.append(selected_post.iloc[0])
 
-            if assigned_image_id in kamala_ids:
-                player.disclaimer = "Kamala Harris"
-            elif assigned_image_id in donald_ids:
-                player.disclaimer = "Donald Trump"
-            elif assigned_image_id == taylor_trump_id:
-                player.disclaimer = "Taylor Swift and Donald Trump"
-            else:
-                player.disclaimer = ""
+            # For politics category, assign extra fields to player
+            if category_clean == 'politics':
+                if 'screenshot_control' in selected_post.columns:
+                    player.screenshot_control = selected_post['screenshot_control'].values[0]
 
-            feed_row = df[df['doc_id'] == assigned_image_id]
-            player.feed_condition_row = feed_row.to_json(orient='records') if not feed_row.empty else None
+                if 'claim_real' in selected_post.columns:
+                    player.claim_real = selected_post['claim_real'].values[0]
 
-            # Assign watermark from pre-balanced list (blocked by party_id)
-            player.watermark_condition = watermarks_needed[i]
-            selected_treatment_post['watermark'] = player.watermark_condition
+                player.assigned_politics_id = str(selected_post['doc_id'].values[0]).strip()
 
-            # Map watermark condition to screenshot column
-            watermark_to_column = {
-                "none": "screenshot_nowatermark",
-                "insta_content_warning": "screenshot_insta",
-                "fb_content_warning": "screenshot_fb",
-                "cr_watermark": "screenshot_cr",
-                "cr_watermark_plus_label": "screenshot_both",
-            }
-            screenshot_col = watermark_to_column.get(player.watermark_condition)
-            if screenshot_col in selected_treatment_post.columns:
-                val = selected_treatment_post[screenshot_col].values[0]
-                if pd.notna(val):
-                    player.screenshot_treatment = val
+                control_feed_row = df[df['doc_id'] == player.assigned_politics_id]
+                if not control_feed_row.empty:
+                    player.control_feed_condition_row = control_feed_row.to_json(orient='records')
 
-            # Sample one control post from each control category
-            for category in control_categories:
-                category_clean = category.strip().lower()
-                category_posts = control_posts[control_posts['control'].str.strip().str.lower() == category_clean]
+                print(f"Player {player.id_in_group}: politics control doc_id = {player.assigned_politics_id}")
+                print(f"Player {player.id_in_group}: claim_real = {player.claim_real}")
 
-                if not category_posts.empty:
-                    selected_post = category_posts.sample(n=1).copy()
-                    selected_post['watermark'] = "none"
-                    selected_control_posts.append(selected_post.iloc[0])
+    # Combine treatment and control posts into DataFrame
+    selected_control_df = pd.DataFrame(selected_control_posts)
+    selected_posts_df = pd.concat([selected_treatment_post, selected_control_df], ignore_index=True)
 
-                    # For politics category, assign extra fields to player
-                    if category_clean == 'politics':
-                        if 'screenshot_control' in selected_post.columns:
-                            player.screenshot_control = selected_post['screenshot_control'].values[0]
+    selected_posts_df['post_type'] = selected_posts_df.apply(
+        lambda row: 'treatment' if row['doc_id'] == assigned_image_id else 'control',
+        axis=1
+    )
+    selected_posts_df['treatment_nowatermark'] = selected_posts_df.apply(
+        lambda row: row['screenshot_nowatermark'] if row['post_type'] == 'treatment' else None,
+        axis=1
+    )
 
-                        # ADD THIS LINE to extract the claim
-                        if 'claim_real' in selected_post.columns:
-                            player.claim_real = selected_post['claim_real'].values[0]
+    # Shuffle combined posts
+    selected_posts_df = selected_posts_df.sample(frac=1).reset_index(drop=True)
 
-                        player.assigned_politics_id = str(selected_post['doc_id'].values[0]).strip()
+    # Assign shuffled posts DataFrame to participant.tweets
+    player.participant.tweets = selected_posts_df
 
-                        control_feed_row = df[df['doc_id'] == player.assigned_politics_id]
-                        if not control_feed_row.empty:
-                            player.control_feed_condition_row = control_feed_row.to_json(orient='records')
-                        else:
-                            print(f"Warning: No control feed row found for doc_id: {player.assigned_politics_id}")
-                            player.control_feed_condition_row = None
+    # Mark as assigned
+    player.participant.vars['treatment_assigned'] = True
 
-                        # Debug prints (optional)
-                        print(f"Filtering df for doc_id: '{player.assigned_politics_id}'")
-                        print(f"Number of matching rows: {len(control_feed_row)}")
-                        print(f"Player {player.id_in_group}: politics control doc_id = {player.assigned_politics_id}")
-                        print(f"Player {player.id_in_group}: claim_real = {player.claim_real}")  # ADD DEBUG
-                        print("Politics control feed condition row (JSON):", player.control_feed_condition_row)
-            # Combine treatment and control posts into DataFrame
-            selected_control_df = pd.DataFrame(selected_control_posts)
-            selected_posts_df = pd.concat([selected_treatment_post, selected_control_df], ignore_index=True)
-
-            selected_posts_df['post_type'] = selected_posts_df.apply(
-                lambda row: 'treatment' if row['doc_id'] == assigned_image_id else 'control',
-                axis=1
-            )
-            selected_posts_df['treatment_nowatermark'] = selected_posts_df.apply(
-                lambda row: row['screenshot_nowatermark'] if row['post_type'] == 'treatment' else None,
-                axis=1
-            )
-
-            # Shuffle combined posts
-            selected_posts_df = selected_posts_df.sample(frac=1).reset_index(drop=True)
-
-            # Assign shuffled posts DataFrame to participant.tweets
-            player.participant.tweets = selected_posts_df
-
-
-# make images (if any) visible
+    print(f"✅ Treatment assigned successfully for player {player.id_in_group}")
+# make images visible
 def extract_first_url(text):
     urls = re.findall(r"(?P<url>https?://\S+)", str(text))
     if urls:
         return urls[0]
     return None
-
 
 # function that reads data
 def read_feed(path):
@@ -742,7 +724,7 @@ def preprocessing(df):
     df['user_description'] = df['user_description'].fillna(' ')
 
     # Make number of followers a formatted string
-    df['user_followers'] = df['user_followers'].map('{:,.0f}'.format).str.replace(',', '.')
+    df['user_followers'] = df['user_followers'].map('{:,.0f}'.format)
 
     # Check profile image urls
     df['profile_pic_available'] = True
@@ -760,18 +742,21 @@ def preprocessing(df):
 
     return df
 
-
 # PAGES (ordering, etc.)
 class A_Consent(Page):
     form_model = 'player'
     form_fields = ['consent']
 
+class AttentionCheck(Page):
+    form_model = 'player'
+    form_fields = ['prolific_id', 'attention_check']
 
 class B_SMPsTrust(Page):
     form_model = 'player'
     form_fields = [
         'party_id',
         'use_twitter',
+        'use_reddit',
         'use_instagram',
         'use_pinterest',
         'use_linkedin',
@@ -785,25 +770,27 @@ class B_SMPsTrust(Page):
         'smp_enjoyment_pre',
         'smp_community_pre',
         'smp_news_pre',
+        'color_check'
     ]
 
     @staticmethod
-    def before_next_page(self, timeout_happened):
-        self.prolific_id = self.participant.label
+    def before_next_page(player, timeout_happened):
+        player.prolific_id = player.participant.label
 
-
+        # NOW assign treatment based on party_id
+        assign_treatment_posts(player)
 class C_FeedInstructions(Page):
     form_model = 'player'
-
 
 class C_Feed(Page):
     form_model = 'player'
 
     @staticmethod
     def get_form_fields(player: Player):
-        fields = ['likes_data', 'replies_data', 'touch_capability', 'device_type', 'retweets_data']
+        fields = ['likes_data', 'replies_data', 'touch_capability', 'device_type',
+                  'retweets_data', 'watermark_hover_events', 'insta_uncover_clicks']  # Added insta_uncover_clicks
         if not player.session.config['topics'] & player.session.config['show_cta']:
-            more_fields = ['scroll_sequence', 'viewport_data']   # , 'cta']
+            more_fields = ['scroll_sequence', 'viewport_data']
         else:
             more_fields = ['scroll_sequence', 'viewport_data']
 
@@ -843,7 +830,6 @@ class C_Feed(Page):
             # Save the full feed as JSON
             tweets_json = player.participant.tweets.to_json(orient='records')
             player.tweet_data = tweets_json
-
 
 class D_DirectQuestions_AI_First(Page):
     form_model = 'player'
@@ -930,8 +916,6 @@ class D_DirectQuestions_Real_First(Page):
             print(f"{field_name}: {value}")
         print("=== END DEBUG ===")
 
-
-
 class D_DirectQuestions_AI_Second(Page):
     form_model = 'player'
     form_fields = [
@@ -1016,10 +1000,6 @@ class D_DirectQuestions_Real_Second(Page):
             print(f"{field_name}: {value}")
         print("=== END DEBUG ===")
 
-class E_LogisticsQuestions(Page):
-    form_model = 'player'
-    form_fields = ["political_content", "watermark_familiarity"]
-
 class H_Demographics(Page):
     form_model = 'player'
     form_fields = ["age", "gender", "state", "race", "education", "income"]
@@ -1073,6 +1053,7 @@ class MorePosts(Page):
 class F_Enjoyment(Page):
     pass
 
+
 class F_Watermarks(Page):
     form_model = "player"
     form_fields = [
@@ -1088,22 +1069,28 @@ class F_Watermarks(Page):
     def is_displayed(player):
         return player.watermark_condition != "none"
 
+    @staticmethod
+    def vars_for_template(player):
+        return {
+            'hover_screenshot': player.field_maybe_none('hover_screenshot')
+        }
+
 class G_AISMPQuestions(Page):
     form_model = "player"
-    form_fields = ["llm_familiarity", "trust_twitter_posttreatment",
-                   "trust_instagram_posttreatment", "trust_nationalnews_posttreatment", "trust_localnews_posttreatment",
-                   "trust_friendsfamily_posttreatment", "trust_pinterest_posttreatment", "trust_linkedin_posttreatment",
-                   "trust_facebook_posttreatment", "trust_youtube_posttreatment", "trust_tiktok_posttreatment",
-                   "trust_bluesky_posttreatment", "trust_truthsocial_posttreatment", "trust_acquaintances_posttreatment",
-                   "smp_entertaining_post", "smp_accuracy_post", "smp_enjoyment_post", "smp_community_post",
-                   "smp_news_post", "distinguish_ability", "benefits_ai"]
+    form_fields = ["llm_familiarity", "smp_entertaining_post", "smp_accuracy_post", "smp_enjoyment_post", "smp_community_post",
+                   "smp_news_post", "distinguish_ability", "benefits_ai",
+                   'trust_journalists_factcheckers', 'trust_smp', 'trust_user', 'trust_AI_company', 'watermark_familiarity']
+
 
 class Info_Treatment(Page):
-    class Info_Treatment(Page):
-        @staticmethod
-        def is_displayed(player):
-            return player.participant.vars.get('show_info_treatment', False)
+    @staticmethod
+    def is_displayed(player):
+        return player.participant.vars.get('show_info_treatment', False)
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        # Record that they saw the info treatment
+        player.shown_info_treatment = True
 
 class H_Debrief(Page):
     form_model = "player"
@@ -1153,6 +1140,7 @@ class EndSurvey(Page):
 
 page_sequence = [
     A_Consent,
+    AttentionCheck,
     B_SMPsTrust,
     C_FeedInstructions,
     C_Feed,
@@ -1160,7 +1148,6 @@ page_sequence = [
     D_DirectQuestions_AI_First,
     D_DirectQuestions_Real_Second,
     D_DirectQuestions_AI_Second,
-    E_LogisticsQuestions,
     MorePosts,
     F_Watermarks,
     G_AISMPQuestions,

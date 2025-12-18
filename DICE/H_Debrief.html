@@ -206,12 +206,13 @@ label[for="id_understand_AI"] {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const submitButton = document.getElementById('submitButton');
-
   const consentGroup = document.getElementById('consent-group');
   const radios = document.querySelectorAll('input[name="consentdebrief"]');
-
   const understandAIContainer = document.getElementById('understand_AI_container');
   const understandAITextarea = document.getElementById('id_understand_AI');
+
+  // Get the disclaimer from the template
+  const disclaimer = "{{ disclaimer }}".toLowerCase().trim();
 
   // Remove error highlight on input/change
   radios.forEach(radio => {
@@ -226,17 +227,74 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+// Function to validate the understand_AI text
+function validateUnderstandAI(text) {
+  // Normalize: lowercase, replace multiple spaces/dashes with single space
+  const normalized = text.toLowerCase().replace(/[\s-]+/g, ' ').trim();
+
+  // Build acceptable name patterns based on disclaimer
+  let namePattern;
+
+  const disclaimerLower = disclaimer.toLowerCase();
+
+  if (disclaimerLower === 'kamala harris') {
+    // Accept: Kamala Harris, Kamala, or Harris
+    namePattern = '(?:kamala harris|kamala|harris)';
+  } else if (disclaimerLower === 'donald trump') {
+    // Accept: Donald Trump, Donald, or Trump
+    namePattern = '(?:donald trump|donald|trump)';
+  } else if (disclaimerLower === 'taylor swift and donald trump') {
+    // Accept: full names, first names only, or last names only
+    namePattern = '(?:taylor swift and donald trump|taylor and donald|swift and trump)';
+  } else if (disclaimerLower === 'donald trump and elon musk') {
+    // Accept: full names, first names only, or last names only
+    namePattern = '(?:donald trump and elon musk|donald and elon|trump and musk)';
+  } else if (disclaimerLower === 'charlie kirk') {
+    // Accept: Charlie Kirk, Charlie, or Kirk
+    namePattern = '(?:charlie kirk|charlie|kirk)';
+  } else if (disclaimerLower === 'chuck schumer and hakeem jeffries') {
+    // Accept: full names, first names only, or last names only
+    namePattern = '(?:chuck schumer and hakeem jeffries|chuck and hakeem|schumer and jeffries)';
+  } else if (disclaimerLower === 'chuck schumer') {
+    // Accept: Chuck Schumer, Chuck, or Schumer
+    namePattern = '(?:chuck schumer|chuck|schumer)';
+  } else if (disclaimerLower === 'zohran mamdani') {
+    // Accept: Zohran Mamdani, Zohran, or Mamdani
+    namePattern = '(?:zohran mamdani|zohran|mamdani)';
+  } else if (disclaimerLower === 'andrew cuomo') {
+    // Accept: Andrew Cuomo, Andrew, or Cuomo
+    namePattern = '(?:andrew cuomo|andrew|cuomo)';
+  } else {
+    // Fallback: use the disclaimer as-is
+    namePattern = disclaimer.replace(/\s+/g, '\\s+');
+  }
+
+  // Expected pattern: "the image about [name] is ai-generated" or "ai generated" or "ai gen"
+  const pattern = new RegExp(
+    `^the image (?:of|about) ${namePattern} is ai[\\s-]?(?:generated|gen)\\.?$`,
+    'i'
+  );
+
+  return pattern.test(normalized);
+}
+
   submitButton.addEventListener('click', (e) => {
-    e.preventDefault();  // prevent submission until validated
+    e.preventDefault();
 
     let missingQuestions = [];
-    // Check understand_AI textarea
-        if (!understandAITextarea.value.trim()) {
-          missingQuestions.push("Understanding question");
-          understandAIContainer.classList.add('missing-answer-redbox');
-        } else {
-          understandAIContainer.classList.remove('missing-answer-redbox');
-        }
+
+    // Check understand_AI textarea with matching validation
+    const userText = understandAITextarea.value.trim();
+    if (!userText) {
+      missingQuestions.push("Understanding question - please type the required sentence");
+      understandAIContainer.classList.add('missing-answer-redbox');
+    } else if (!validateUnderstandAI(userText)) {
+      missingQuestions.push("Understanding question - the text you entered does not match the required sentence");
+      understandAIContainer.classList.add('missing-answer-redbox');
+    } else {
+      understandAIContainer.classList.remove('missing-answer-redbox');
+    }
+
     // Check consent radios
     const consentSelected = document.querySelector('input[name="consentdebrief"]:checked');
     if (!consentSelected) {
@@ -246,33 +304,27 @@ document.addEventListener('DOMContentLoaded', () => {
       consentGroup.classList.remove('missing-answer');
     }
 
-
-
     if (missingQuestions.length > 0) {
-  alert("Please answer the following question(s) before submitting:\n- " + missingQuestions.join("\n- "));
+      alert("Please answer the following question(s) before submitting:\n- " + missingQuestions.join("\n- "));
 
-  // Scroll to the first missing question based on document order
-  const elementsInOrder = [
-    { missing: !understandAITextarea.value.trim(), element: understandAITextarea },
-    { missing: !consentSelected, element: consentGroup }
-  ];
+      // Scroll to the first missing question
+      const elementsInOrder = [
+        { missing: !userText || !validateUnderstandAI(userText), element: understandAITextarea },
+        { missing: !consentSelected, element: consentGroup }
+      ];
 
-  const firstUnanswered = elementsInOrder.find(item => item.missing);
-  if (firstUnanswered) {
-    firstUnanswered.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+      const firstUnanswered = elementsInOrder.find(item => item.missing);
+      if (firstUnanswered) {
+        firstUnanswered.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
 
-  return;  // prevent submission
-}
-
-
+      return;
+    }
 
     // If all validated, submit the form
     e.target.form.submit();
   });
 });
-
-
 </script>
 
 {{ endblock }}
@@ -281,7 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- This block includes global style sheets -->
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 {{ endblock }}
-
 
 {{ block content }}
 <!-- This block contains HTML content for the main page -->
@@ -303,6 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         </div>
 
+<form method="post">
+
         <p class="lead">
 <!--            <Large>-->
                 <p><strong>To continue to the end of the survey, please confirm or withdraw your consent at the bottom of this page.</strong></p>
@@ -318,8 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
          style="max-width: 100%; width: 100%; max-width: 600px; cursor: crosshair;">
 </div>
 
-
-
 <!-- Reduced top margin for this div -->
 <div style="text-align: center; margin: -30px auto 10px auto;">
   <p style="margin: 0;"><strong>THE IMAGE IN THIS POST IS AI-GENERATED.</strong></p>
@@ -330,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
   This was necessary for us to better understand natural reactions to deepfakes. When designing this study, we took care to minimize any possible risks or discomforts that might be related to the deception.
 </p>
 
-
 <div id="understand_AI_container" style="text-align: center; margin: 20px auto;">
   <label for="id_understand_AI" class="form-label" style="display: inline-block;">
     To make sure you understand this message, please type the following sentence:
@@ -338,10 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </label>
 </div>
 
-
-
 <textarea name="understand_AI" id="id_understand_AI" rows="4" class="form-control"></textarea>
-
 
                 <p> <strong>Some tips for recognizing deepfakes generated with AI include looking for:</strong></p>
                 <ul>
@@ -400,7 +447,6 @@ Ernest C. Young Hall, Room 1010
 155 S. Grant St.,
 West Lafayette, IN 47907-2114
 
-
 </p>
 
 <p style="margin-top: 1.5rem; margin-bottom: 0.5rem;"><strong>Documentation of Informed Consent</strong></p>
@@ -434,5 +480,7 @@ West Lafayette, IN 47907-2114
     ➔
   </button>
 </div>
-
+    </form>
+    </div>
+</div>
 {{ endblock }}

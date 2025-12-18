@@ -534,7 +534,7 @@ document.addEventListener('click', function(e) {
 
 
     <div class="question">
-        <p><strong>Based on your own assessment, is the image in the post above AI-generated?</strong></p>
+        <p><strong>Is the image in the post above AI-generated?</strong></p>
         <div class="multiple-choice">
             <label><input type="radio" name="image_accuracy_real" value="AI-generated"> Yes</label>
             <label><input type="radio" name="image_accuracy_real" value="Accurate"> No</label>
@@ -562,10 +562,10 @@ document.addEventListener('click', function(e) {
 
 
 <div id="claim-truth-section" style="margin-top:40px;">
-    <p><strong>To what extent do you think that "{{ player.claim_real }}" is <em>literally true</em>?</strong></p>
+    <p><strong>To what extent do you think that the post's intended claim that "{{ player.claim_real }}" is <em>literally true</em>?</strong></p>
     <div class="multiple-choice">
-        <label><input type="radio" name="image_claim_true_real" value="It is not true"> It is not true</label>
-        <label><input type="radio" name="image_claim_true_real" value="It is true"> It is true</label>
+        <label><input type="radio" name="image_claim_true_real" value="It is not true"> It is not literally true</label>
+        <label><input type="radio" name="image_claim_true_real" value="It is true"> It is literally true</label>
     </div>
 </div>
 
@@ -582,7 +582,7 @@ document.addEventListener('click', function(e) {
 
     <div id="familiarity-section" style="margin-top:40px;">
     <div class="question">
-        <p><strong>Have you seen this post before?</strong></p>
+        <p><strong>Before today, had you seen the image in the post above?</strong></p>
         <div class="multiple-choice">
             <label><input type="radio" name="familiarity_real" value="Yes"> Yes</label>
             <label><input type="radio" name="familiarity_real" value="No"> No</label>

@@ -264,7 +264,7 @@
 
 <form method="post">
   <!-- Instruction Text -->
-    <label class="matrix-instructions">Please indicate your level of agreement with the following statements regarding the
+<label class="matrix-instructions">Please indicate your level of agreement with the following statements regarding the
   {% if player.watermark_condition == "cr_watermark" %}
     watermark
   {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
@@ -277,7 +277,7 @@
   you saw on the previous social media page:
 </label>
 
-  <!-- Likert Scale Table -->
+<!-- Likert Scale Table -->
 <div class="matrix-table-wrapper" id="matrix-wrapper">
   <table class="matrix-table">
     <thead>
@@ -291,8 +291,8 @@
       </tr>
     </thead>
 
-    <tbody class="matrix-row" id="row-clarity_watermarks">
-      <tr>
+    <tbody id="watermark-statements-rows">
+      <tr class="matrix-row" id="row-clarity_watermarks">
         <td class="question-column">
           The
           {% if player.watermark_condition == "cr_watermark" %}
@@ -310,10 +310,8 @@
           <td>{{ choice }}</td>
         {% endfor %}
       </tr>
-    </tbody>
 
-    <tbody class="matrix-row" id="row-informative_watermarks">
-      <tr>
+      <tr class="matrix-row" id="row-informative_watermarks">
         <td class="question-column">
           The
           {% if player.watermark_condition == "cr_watermark" %}
@@ -331,10 +329,8 @@
           <td>{{ choice }}</td>
         {% endfor %}
       </tr>
-    </tbody>
 
-    <tbody class="matrix-row" id="row-trustworthy_watermarks">
-      <tr>
+      <tr class="matrix-row" id="row-trustworthy_watermarks">
         <td class="question-column">
           The
           {% if player.watermark_condition == "cr_watermark" %}
@@ -352,10 +348,8 @@
           <td>{{ choice }}</td>
         {% endfor %}
       </tr>
-    </tbody>
 
-    <tbody class="matrix-row" id="row-biased_watermarks">
-      <tr>
+      <tr class="matrix-row" id="row-biased_watermarks">
         <td class="question-column">
           The
           {% if player.watermark_condition == "cr_watermark" %}
@@ -384,8 +378,6 @@
   {{ formfield_errors 'trustworthy_watermarks' }}
   {{ formfield_errors 'biased_watermarks' }}
 </div>
-
-
 <div class="form-group" id="creates-watermark-group">
   <label for="creates_watermarks" style="margin-bottom: 10px;"><strong>Who do you believe creates the
     {% if player.watermark_condition == "cr_watermark" %}watermark{%
@@ -394,16 +386,14 @@
     else %}watermark or label{% endif %} in the post above?</strong>
   </label>
 
-  <div><input type="radio" name="creates_watermarks" value="The social media platform" onclick="toggleOtherTextbox(false)"> The social media platform</div>
-  <div><input type="radio" name="creates_watermarks" value="Other social media users" onclick="toggleOtherTextbox(false)"> Other social media users</div>
-  <div><input type="radio" name="creates_watermarks" value="Journalists" onclick="toggleOtherTextbox(false)"> Journalists</div>
-  <div><input type="radio" name="creates_watermarks" value="Activists" onclick="toggleOtherTextbox(false)"> Activists</div>
-  <div><input type="radio" name="creates_watermarks" value="The user who posted the content" onclick="toggleOtherTextbox(false)"> The user who posted the content</div>
-  <div><input type="radio" name="creates_watermarks" value="The AI Developer" onclick="toggleOtherTextbox(false)"> The AI developer</div>
-  <div><input type="radio" name="creates_watermarks" value="Government Politicians" onclick="toggleOtherTextbox(false)"> Government/politicians</div>
-  <div><input type="radio" name="creates_watermarks" value="Non-profit organizations" onclick="toggleOtherTextbox(false)"> Non-profit organizations</div>
-  <div><input type="radio" name="creates_watermarks" value="International organizations" onclick="toggleOtherTextbox(false)"> International organizations</div>
-  <div><input type="radio" name="creates_watermarks" value="Fact-checkers" onclick="toggleOtherTextbox(false)"> Fact-checkers</div>
+  <div id="creates-watermarks-choices">
+    <div><input type="radio" name="creates_watermarks" value="AI company" onclick="toggleOtherTextbox(false)"> The <strong>company</strong> that built the AI tool</div>
+    <div><input type="radio" name="creates_watermarks" value="social media user" onclick="toggleOtherTextbox(false)"> The <strong>user</strong> who posted the content</div>
+    <div><input type="radio" name="creates_watermarks" value="social media platform" onclick="toggleOtherTextbox(false)"> The <strong>social media platform</strong></div>
+    <div><input type="radio" name="creates_watermarks" value="journalists or factcheckers" onclick="toggleOtherTextbox(false)"> <strong>Journalists</strong> or <strong>fact-checkers</strong></div>
+  </div>
+
+  <!-- Keep "Other" separate so it's always last -->
   <div><input type="radio" name="creates_watermarks" value="Other" onclick="toggleOtherTextbox(true)"> Other (please specify):</div>
 
   <div id="otherTextbox" style="display: none; margin-top: 8px;">
@@ -420,14 +410,50 @@
   </div>
 </div>
 
-  <div class="submit-container">
-    <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
-      ➔
-    </button>
-  </div>
+
+
+<div class="submit-container">
+  <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
+    ➔
+  </button>
+</div>
 </form>
 
 <script>
+  // Randomize watermark statements rows
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('watermark-statements-rows');
+    if (!tbody) return;
+
+    // Get all rows
+    const rows = Array.from(tbody.querySelectorAll('tr.matrix-row'));
+
+    // Fisher-Yates shuffle algorithm
+    for (let i = rows.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rows[i], rows[j]] = [rows[j], rows[i]];
+    }
+
+    // Re-append rows in randomized order
+    rows.forEach(row => tbody.appendChild(row));
+});
+  // Randomize creates_watermarks radio choices
+document.addEventListener('DOMContentLoaded', function() {
+    const choicesContainer = document.getElementById('creates-watermarks-choices');
+    if (!choicesContainer) return;
+
+    // Get all choice divs
+    const choices = Array.from(choicesContainer.querySelectorAll('div'));
+
+    // Fisher-Yates shuffle algorithm
+    for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    // Re-append choices in randomized order
+    choices.forEach(choice => choicesContainer.appendChild(choice));
+});
 // Enhanced validation function with highlighting and popup messages (matching other pages approach)
 function validateForm() {
     console.log('validateForm() called');
@@ -445,7 +471,7 @@ function validateForm() {
     const form = document.querySelector('form');
     if (!form) {
         console.log('Form not found');
-        return true; // Let it submit if we can't find form
+        return true;
     }
 
     let unansweredFields = [];
@@ -468,11 +494,9 @@ function validateForm() {
                 const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
                 isAnswered = checked !== null;
 
-                // Only add to missing if this is the first unanswered matrix question
                 if (!isAnswered) {
                     fieldContainer = document.getElementById(`row-${fieldName}`);
                 }
-
             }
         } else if (fieldName === 'creates_watermarks') {
             // Check creates_watermarks selection
@@ -533,11 +557,11 @@ function validateForm() {
             });
         }
 
-        return false; // Prevent form submission
+        return false;
     }
 
     console.log('Validation passed');
-    return true; // Allow form submission
+    return true;
 }
 
   // Toggle visibility of the "Other" textbox

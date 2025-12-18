@@ -1,4 +1,7 @@
 <script>
+    // Track Instagram "uncover photo" button clicks - MUST LOAD FIRST
+var instaUncoverData = window.instaUncoverData || [];
+console.log('🚀 Inline Instagram tracking loaded');
 (() => {
   // ⚡ CRITICAL: Prevent multiple instances of this script
   if (window.overlayManagerInitialized) {
@@ -35,12 +38,31 @@
   }
 
   // expose these if your template calls them
-  window.dismissOverlaySession = function(docId) {
+window.dismissOverlaySession = function(docId) {
+    // TRACK THE CLICK FIRST
+    const clickTime = Date.now();
+    console.log('✅ TRACKED uncover click for doc_id:', docId);
+
+    if (!window.instaUncoverData) window.instaUncoverData = [];
+    window.instaUncoverData.push({
+        doc_id: String(docId),
+        event: 'uncover_click',
+        timestamp: clickTime,
+        button_text: 'Uncover Photo'
+    });
+
+    // Update hidden field
+    const uncoverField = document.getElementById('insta_uncover_clicks');
+    if (uncoverField) {
+        uncoverField.value = JSON.stringify(window.instaUncoverData);
+        console.log('📝 Updated field:', uncoverField.value);
+    }
+
+    // THEN do the original overlay dismissal
     docId = String(docId);
     window.dismissedOverlays.add(docId);
     const el = document.getElementById('overlay_' + docId);
     if (el) {
-      // Hide the overlay (don't remove it yet, let the interaction cleanup handle removal)
       el.style.display = 'none';
       console.log('✅ Dismissed overlay for docId:', docId);
     }
@@ -324,20 +346,41 @@
       uncoverButton = clickedElement.querySelector('.click-to-see-box');
     }
 
-    if (uncoverButton && uncoverButton.textContent?.includes('Uncover Photo')) {
-      const onclickAttr = uncoverButton.getAttribute('onclick');
-      if (onclickAttr) {
-        const match = onclickAttr.match(/dismissOverlaySession\('(\w+)'\)/);
-        if (match) {
-          const docId = match[1];
-          window.DISMISSED_OVERLAYS.add(String(docId));
-          try {
-            localStorage.setItem('DISMISSED_OVERLAYS', JSON.stringify([...window.DISMISSED_OVERLAYS]));
-          } catch(e) {}
-          console.log('✅ Added to dismissed overlays:', docId);
-        }
+if (uncoverButton && uncoverButton.textContent?.includes('Uncover Photo')) {
+  const onclickAttr = uncoverButton.getAttribute('onclick');
+  if (onclickAttr) {
+    const match = onclickAttr.match(/dismissOverlaySession\('(\w+)'\)/);
+    if (match) {
+      const docId = match[1];
+
+      // TRACK THE CLICK
+      const clickTime = Date.now();
+      console.log('✅ TRACKED uncover click for doc_id (from prevention script):', docId);
+
+      if (!window.instaUncoverData) window.instaUncoverData = [];
+      window.instaUncoverData.push({
+        doc_id: String(docId),
+        event: 'uncover_click',
+        timestamp: clickTime,
+        button_text: 'Uncover Photo'
+      });
+
+      // Update hidden field
+      const uncoverField = document.getElementById('insta_uncover_clicks');
+      if (uncoverField) {
+        uncoverField.value = JSON.stringify(window.instaUncoverData);
+        console.log('📝 Updated field (from prevention script):', uncoverField.value);
       }
+
+      // Original overlay management code
+      window.DISMISSED_OVERLAYS.add(String(docId));
+      try {
+        localStorage.setItem('DISMISSED_OVERLAYS', JSON.stringify([...window.DISMISSED_OVERLAYS]));
+      } catch(e) {}
+      console.log('✅ Added to dismissed overlays:', docId);
     }
+  }
+}
 
     // Cleanup after any interaction
     if (clickedElement.closest('.like-button') || clickedElement.closest('.retweet-button')) {
@@ -532,18 +575,16 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
 
             </div>
 
-
-            {{ if i.pic_available == True }}
+{{ if i.pic_available == True }}
 <div class="watermark-container" tabindex="0" style="position: relative;" id="watermark_{{i.doc_id}}">
     <img src="{{ i.media }}" class="card-img ps-0 mt-2 rounded-4 img-fluid img-tweet" alt="...">
     <!-- Semi-transparent overlay -->
-    <div class="overlay" id="overlay_{{i.doc_id}}" style="pointer-events: none;">
- <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16">
-  <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/>
-  <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/>
-  <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/>
-</svg>
-
+    <div class="overlay" id="overlay_{{i.doc_id}}" style="pointer-events: none; opacity: 0.8;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-eye-slash" viewBox="0 0 16 16">
+            <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"/>
+            <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"/>
+            <path d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"/>
+        </svg>
         <h3 style="cursor: default;">Manipulated Content</h3>
         <p style="cursor: default;">This photo may contain manipulated media.</p><br>
         <p class="click-to-see-box"
@@ -783,7 +824,9 @@ ontouchstart="sequence('i' + {{i.doc_id}});">
                                 <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2" fill="yellow"></circle>
                                 <text x="12" y="16" font-size="12" font-weight="bold" text-anchor="middle" fill="black">!</text>
                             </svg>
-                            <span>A deepfake is a highly realistic but fake image, video, or audio of a person saying or doing something they never actually said or did. Some tips for recognizing an image that may have been generated with AI include: looking for missing or extra fingers or hands that are deformed in some way; looking at the faces, small faces are often distorted; looking for misspelled text in the image; looking for inconsistent reflections.</span>
+                            <span>Stay informed. Manipulated media. <br>
+                                A deepfake is a highly realistic but fake image, video, or audio of a person saying or doing something they never actually said or did or of a situation that never happened. <br>
+                                Be vigilant: whether deepfakes are more realistic or more artistic, be aware that some politically-motivated groups may use manipulated media to deceive you or subtly influence your emotions and beliefs</span>
                         </div>
                     {{ endif }}
 

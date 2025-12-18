@@ -1,31 +1,62 @@
 {% extends "global/Page.html" %}
+{% load static %}
 
 {% block content %}
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        color: #333;
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #333;
+    font-size: 1.1rem;  /* ADD THIS - increases base font size */
+}
+
+p {
+    font-size: 1.1rem;  /* ADD THIS - matches body text size */
+    margin-bottom: 1rem;
+}
+
+h1 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    font-size: 1.8rem;  /* ADD THIS - larger headings */
+}
+
+h2 {
+    color: #34495e;
+    margin-top: 30px;
+    font-size: 1.5rem;  /* ADD THIS */
+}
+
+ul {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+li {
+    margin-bottom: 15px;
+    font-size: 1.1rem;  /* ADD THIS - matches other text */
+}
+
+    /* Image container and sizing */
+    .image-container {
+        text-align: center;
+        margin: 20px 0;
     }
-    h1 {
-        color: #2c3e50;
-        border-bottom: 2px solid #3498db;
-        padding-bottom: 10px;
+
+    .image-container img {
+        max-width: 600px;  /* Maximum width */
+        width: 100%;       /* Responsive - will shrink on smaller screens */
+        height: auto;      /* Maintain aspect ratio */
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    h2 {
-        color: #34495e;
-        margin-top: 30px;
-    }
-    ul {
-        margin: 15px 0;
-        padding-left: 25px;
-    }
-    li {
-        margin-bottom: 15px;
-    }
+
     .image-placeholder {
         background-color: #f0f0f0;
         border: 2px dashed #ccc;
@@ -35,7 +66,8 @@
         color: #666;
         font-style: italic;
     }
-      /* Submit button container */
+
+    /* Submit button container */
     .submit-container {
       display: flex;
       justify-content: flex-end;
@@ -59,6 +91,24 @@
       background-color: #1a5fd9;
     }
 
+/* Responsive for mobile */
+@media (max-width: 700px) {
+    body {
+        font-size: 1rem;
+    }
+
+    p, li {
+        font-size: 1rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .image-container img {
+        max-width: 100%;
+    }
+}
 </style>
 
 <p>During the study, you saw and heard a little bit about watermarks or labels. Please read the text below to understand a little bit more.</p>
@@ -67,29 +117,29 @@
 
 <ul>
     <li>
-        <strong>A watermark</strong> is a marker that shows an image may have been created or changed using AI. Some watermarks are visible, like small text, symbols, or logos placed on top of the picture. Others are invisible to the eye and are built into the image's digital file so that certain tools can detect them.
+        <strong>A watermark is a marker that shows an image may have been created or changed using AI.</strong> Some watermarks are visible, like small text, symbols, or logos placed on top of the picture. Others are invisible to the eye and are built into the image's digital file so that certain tools can detect them.
     </li>
 </ul>
 
-<div class="image-placeholder">
-    [example image with cr watermark – can use the one from pap]
+<div class="image-container">
+    <img src="{% static 'img/visible_label.jpg' %}" alt="Example of CR watermark">
 </div>
 
 <ul>
     <li>
-        <strong>A label</strong> is similar, but it appears next to the content rather than on the image itself. For example, a label might say "AI-generated," "Digitally altered," or provide a short explanation below a social media post.
+       A label is similar, but it appears next to the content rather than on the image itself. For example, a label might say "AI-generated," "Digitally altered," or provide a short explanation below a social media post.
     </li>
 </ul>
 
-<div class="image-placeholder">
-    [example image with content warning – can use the one from pap]
+<div class="image-container">
+    <img src="{% static 'img/label.jpg' %}" alt="Example of labels">
 </div>
 
 <h1>Why are they used?</h1>
 
 <ul>
     <li>
-        Watermarks and labels are used to help people understand when something they see online may not be a real photograph or an authentic piece of media. As AI-generated images become more realistic, these signals can make it easier to notice when content might be misleading, manipulated, or artificial.
+        <strong>Watermarks and labels are used to help people understand when something they see online may not be a real photograph or an authentic piece of media.</strong> As AI-generated images become more realistic, these signals can make it easier to notice when content might be misleading, manipulated, or artificial.
     </li>
     <li>
         AI developers, social media companies, and fact-checkers also use them to improve transparency, support media or digital literacy, and give viewers clearer clues about the trustworthiness of what they see.
@@ -97,7 +147,7 @@
 </ul>
 
     <div class="submit-container">
-        <button type="submit" id="submitButton" aria-label="Submit survey responses" onclick="return validateForm()">
+        <button type="submit" id="submitButton" aria-label="Submit survey responses">
             ➔
         </button>
     </div>

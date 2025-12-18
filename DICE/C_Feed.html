@@ -2,7 +2,8 @@
 
 {% block scripts %}
 <!-- Move this script to your main HTML file, OUTSIDE of any loops, preferably in the <head> or before closing </body> -->
-
+localStorage.removeItem('dismissedOverlays');
+localStorage.removeItem('DISMISSED_OVERLAYS');
 
 <!-- Popper & Bootstrap bundle first -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -17,6 +18,9 @@
 <script src="{% static 'js/interactions.js' %}"></script>
 <script src="{% static 'js/scrolling.js' %}"></script>
 <script src="{% static 'js/dwell.js' %}"></script>
+<script src="{% static 'js/watermark_hover.js' %}"></script>  <!-- ADD THIS LINE -->
+<script src="{% static 'js/insta_uncover_tracking.js' %}"></script>  <!-- ADD THIS LINE -->
+
 
 {% endblock %}
 
@@ -31,7 +35,7 @@
 <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 {% endblock %}
 
-{% block title %}Twitter Mockup{% endblock %}
+{% block title %}Twitter{% endblock %}
 
 {% block content %}
 <!-- ALL your HTML content goes here -->
@@ -46,6 +50,10 @@
 <input type="hidden" id="replies_data" name="replies_data">
 <input type="hidden" id="touch_capability" name="touch_capability" value="">
 <input type="hidden" id="device_type" name="device_type" value="">
+<!-- In C_Feed.html -->
+<input type="hidden" name="watermark_hover_events" id="watermark_hover_events" value="">
+<input type="hidden" name="insta_uncover_clicks" id="insta_uncover_clicks" value="">  <!-- ADD THIS -->
+
 
 <!-- Loading Screen shown while content is loading -->
 <div id="loadingScreen" class="d-flex justify-content-center align-items-center twitter-loading-bg" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;">
