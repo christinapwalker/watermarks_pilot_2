@@ -420,40 +420,68 @@
 </form>
 
 <script>
-  // Randomize watermark statements rows
+ // Randomize watermark statements rows using stored order
 document.addEventListener('DOMContentLoaded', function() {
     const tbody = document.getElementById('watermark-statements-rows');
     if (!tbody) return;
 
-    // Get all rows
-    const rows = Array.from(tbody.querySelectorAll('tr.matrix-row'));
+    // Get the stored order from the server
+    const watermarkOrder = {{ participant.vars.watermark_statements_order|json }};
 
-    // Fisher-Yates shuffle algorithm
-    for (let i = rows.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rows[i], rows[j]] = [rows[j], rows[i]];
+    if (watermarkOrder && watermarkOrder.length > 0) {
+        const rows = Array.from(tbody.querySelectorAll('tr.matrix-row'));
+
+        // Create a map of field name to row
+        const rowMap = {};
+        rows.forEach(row => {
+            const rowId = row.id.replace('row-', '');
+            rowMap[rowId] = row;
+        });
+
+        // Clear tbody
+        tbody.innerHTML = '';
+
+        // Append rows in the stored order
+        watermarkOrder.forEach(fieldName => {
+            if (rowMap[fieldName]) {
+                tbody.appendChild(rowMap[fieldName]);
+            }
+        });
     }
-
-    // Re-append rows in randomized order
-    rows.forEach(row => tbody.appendChild(row));
 });
-  // Randomize creates_watermarks radio choices
+
+// Randomize creates_watermarks radio choices using stored order
 document.addEventListener('DOMContentLoaded', function() {
     const choicesContainer = document.getElementById('creates-watermarks-choices');
     if (!choicesContainer) return;
 
-    // Get all choice divs
-    const choices = Array.from(choicesContainer.querySelectorAll('div'));
+    // Get the stored order from the server
+    const createsOrder = {{ participant.vars.creates_watermarks_order|json }};
 
-    // Fisher-Yates shuffle algorithm
-    for (let i = choices.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [choices[i], choices[j]] = [choices[j], choices[i]];
+    if (createsOrder && createsOrder.length > 0) {
+        const choices = Array.from(choicesContainer.querySelectorAll('div'));
+
+        // Create a map of value to choice div
+        const choiceMap = {};
+        choices.forEach(choice => {
+            const radio = choice.querySelector('input[type="radio"]');
+            if (radio && radio.value) {
+                choiceMap[radio.value] = choice;
+            }
+        });
+
+        // Clear container
+        choicesContainer.innerHTML = '';
+
+        // Append choices in the stored order
+        createsOrder.forEach(value => {
+            if (choiceMap[value]) {
+                choicesContainer.appendChild(choiceMap[value]);
+            }
+        });
     }
-
-    // Re-append choices in randomized order
-    choices.forEach(choice => choicesContainer.appendChild(choice));
 });
+
 // Enhanced validation function with highlighting and popup messages (matching other pages approach)
 function validateForm() {
     console.log('validateForm() called');

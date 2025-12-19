@@ -340,42 +340,33 @@ document.addEventListener('DOMContentLoaded', function() {
     rows.forEach(row => tbody.appendChild(row));
 });
 
-// Randomize SMP statements rows using stored order
+// Randomize social media rows using stored order
 document.addEventListener('DOMContentLoaded', function() {
-    const smpTbody = document.getElementById('smp-statements-rows');
-    if (!smpTbody) return;
+    const tbody = document.getElementById('social-media-rows');
+    if (!tbody) return;
 
     // Get the stored order from the server
-    const smpOrder = {{ participant.vars.smp_order|json }};
+    const socialMediaOrder = {{ participant.vars.social_media_order|json }};
 
-    if (smpOrder && smpOrder.length > 0) {
-        const rows = Array.from(smpTbody.querySelectorAll('tr'));
+    if (socialMediaOrder && socialMediaOrder.length > 0) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
 
         // Create a map of field name to row
         const rowMap = {};
         rows.forEach(row => {
-            const errorDiv = row.querySelector('.error-message');
-            if (errorDiv && errorDiv.id) {
-                // Extract base field name
-                let fieldName = errorDiv.id
-                    .replace('error', '')
-                    .replace('Pre', '')
-                    .replace('Post', '')
-                    .replace(/([A-Z])/g, '_$1')
-                    .toLowerCase()
-                    .replace(/^_/, '');
-
-                rowMap[fieldName] = row;
+            const input = row.querySelector('input[type="radio"]');
+            if (input && input.name) {
+                rowMap[input.name] = row;
             }
         });
 
         // Clear tbody
-        smpTbody.innerHTML = '';
+        tbody.innerHTML = '';
 
         // Append rows in the stored order
-        smpOrder.forEach(fieldName => {
+        socialMediaOrder.forEach(fieldName => {
             if (rowMap[fieldName]) {
-                smpTbody.appendChild(rowMap[fieldName]);
+                tbody.appendChild(rowMap[fieldName]);
             }
         });
     }

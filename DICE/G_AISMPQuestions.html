@@ -534,7 +534,7 @@
 
 <!-- Watermark Familiarity Question -->
 <div class="form-group" id="watermark-familiarity-group">
-  <p><b>Before today, how familiar were you with watermarks or warning labels on social media?</b></p>
+  <p><b>Before today, how familiar were you with warning/information labels or watermarks on social media?</b></p>
   <div>
     <input type="radio" id="watermark_very" name="watermark_familiarity" value="Very familiar">
     <label for="watermark_very">Very familiar</label>
@@ -559,61 +559,65 @@
 </div>
 
 <script>
-// Randomize social media rows on page load (only once!)
+// Randomize trust actors rows using stored order
 document.addEventListener('DOMContentLoaded', function() {
-    const tbody = document.getElementById('social-media-rows');
+    const tbody = document.getElementById('trust-actors-rows');
     if (!tbody) return;
 
-    // Get all rows
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-
-    // Fisher-Yates shuffle algorithm
-    for (let i = rows.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rows[i], rows[j]] = [rows[j], rows[i]];
-    }
-
-    // Re-append rows in randomized order
-    rows.forEach(row => tbody.appendChild(row));
-});
-
-// Randomize SMP statements rows using stored order
-document.addEventListener('DOMContentLoaded', function() {
-    const smpTbody = document.getElementById('smp-statements-rows');
-    if (!smpTbody) return;
-
     // Get the stored order from the server
-    const smpOrder = {{ participant.vars.smp_order|json }};
+    const trustActorsOrder = {{ participant.vars.trust_actors_order|json }};
 
-    if (smpOrder && smpOrder.length > 0) {
-        const rows = Array.from(smpTbody.querySelectorAll('tr'));
+    if (trustActorsOrder && trustActorsOrder.length > 0) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
 
         // Create a map of field name to row
         const rowMap = {};
         rows.forEach(row => {
-            const errorDiv = row.querySelector('.error-message');
-            if (errorDiv && errorDiv.id) {
-                // Extract base field name
-                // errorSmpEntertainingPre -> smp_entertaining
-                let fieldName = errorDiv.id
-                    .replace('error', '')           // Remove 'error'
-                    .replace('Pre', '')              // Remove 'Pre'
-                    .replace('Post', '')             // Remove 'Post' (for the other page)
-                    .replace(/([A-Z])/g, '_$1')     // Add underscores before capitals
-                    .toLowerCase()                   // Convert to lowercase
-                    .replace(/^_/, '');              // Remove leading underscore
-
+            const fieldName = row.getAttribute('data-field');
+            if (fieldName) {
                 rowMap[fieldName] = row;
             }
         });
 
         // Clear tbody
-        smpTbody.innerHTML = '';
+        tbody.innerHTML = '';
 
         // Append rows in the stored order
-        smpOrder.forEach(fieldName => {
+        trustActorsOrder.forEach(fieldName => {
             if (rowMap[fieldName]) {
-                smpTbody.appendChild(rowMap[fieldName]);
+                tbody.appendChild(rowMap[fieldName]);
+            }
+        });
+    }
+});
+
+// Randomize SMP post statements rows using stored order
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('smp-post-rows');
+    if (!tbody) return;
+
+    // Get the stored order from the server
+    const smpPostOrder = {{ participant.vars.smp_post_order|json }};
+
+    if (smpPostOrder && smpPostOrder.length > 0) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        // Create a map of field name to row
+        const rowMap = {};
+        rows.forEach(row => {
+            const fieldName = row.getAttribute('data-field');
+            if (fieldName) {
+                rowMap[fieldName] = row;
+            }
+        });
+
+        // Clear tbody
+        tbody.innerHTML = '';
+
+        // Append rows in the stored order
+        smpPostOrder.forEach(fieldName => {
+            if (rowMap[fieldName]) {
+                tbody.appendChild(rowMap[fieldName]);
             }
         });
     }

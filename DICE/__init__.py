@@ -39,6 +39,9 @@ class Player(BasePlayer):
     shown_info_treatment = models.BooleanField(
         doc="Indicates whether the player was shown the info treatment page"
     )
+    watermark_statements_order = models.StringField(blank=True)
+    creates_watermarks_order = models.StringField(blank=True)
+    social_media_order = models.StringField(blank=True)
     image_options_json = models.StringField()
     prolific_id = models.StringField(default=str(" "))
     first_question = models.StringField(blank=True)
@@ -66,11 +69,13 @@ class Player(BasePlayer):
         doc='Tracks clicks on Instagram "uncover photo" button with timestamps',
         blank=True
     )
+    smp_post_order = models.StringField(blank=True)
 
     watermark_hover_events = models.LongStringField(
         doc='Tracks hover events on CR watermark with timestamps',
         blank=True
     )
+    smp_order = models.StringField(blank=True)
 
     # Metadata variables:
     disclaimer = models.StringField(blank=True, null=True)
@@ -103,7 +108,7 @@ class Player(BasePlayer):
             'Somewhat familiar',
             'Not familiar at all'
         ],
-        label="Before today, how familiar were you with watermarks or warning labels on social media?",
+        label="Before today, how familiar were you with warning/information labels or watermarks on social media?",
         widget=widgets.RadioSelect
     )
 
@@ -285,8 +290,9 @@ class Player(BasePlayer):
     trust_AI_company = models.StringField(
         choices=['A lot', 'Some', 'Not too much', 'Not at all', 'No opinion'],
         widget=widgets.RadioSelect,
-        label='Companies that build AI tools'
+        label='Companies that build artificial intelligence (AI) tools'
     )
+    trust_actors_order = models.StringField(blank=True)
 
     trust_user = models.StringField(
         choices=['A lot', 'Some', 'Not too much', 'Not at all', 'No opinion'],
@@ -424,6 +430,36 @@ def creating_session(subsession):
         smp_fields = ['smp_entertaining', 'smp_accuracy', 'smp_enjoyment', 'smp_community', 'smp_news']
         random.shuffle(smp_fields)
         player.participant.vars['smp_order'] = smp_fields
+
+        # Generate and store SMP post statements order
+        smp_post_fields = ['smp_entertaining_post', 'smp_accuracy_post', 'smp_enjoyment_post', 'smp_community_post',
+                           'smp_news_post']
+        random.shuffle(smp_post_fields)
+        player.participant.vars['smp_post_order'] = smp_post_fields
+
+        # Generate and store trust actors order
+        trust_actors_fields = ['trust_AI_company', 'trust_user', 'trust_smp', 'trust_journalists_factcheckers']
+        random.shuffle(trust_actors_fields)
+        player.participant.vars['trust_actors_order'] = trust_actors_fields
+
+        # Generate and store social media order
+        social_media_fields = ['use_twitter', 'use_reddit', 'use_instagram', 'use_pinterest',
+                               'use_linkedin', 'use_facebook', 'use_youtube', 'use_tiktok',
+                               'use_bluesky', 'use_truthsocial']
+        random.shuffle(social_media_fields)
+        player.participant.vars['social_media_order'] = social_media_fields
+
+        # Generate and store watermark statements order
+        watermark_statements_fields = ['clarity_watermarks', 'informative_watermarks',
+                                       'trustworthy_watermarks', 'biased_watermarks']
+        random.shuffle(watermark_statements_fields)
+        player.participant.vars['watermark_statements_order'] = watermark_statements_fields
+
+        # Generate and store creates_watermarks options order
+        creates_watermarks_options = ['AI company', 'social media user', 'social media platform',
+                                      'journalists or factcheckers']
+        random.shuffle(creates_watermarks_options)
+        player.participant.vars['creates_watermarks_order'] = creates_watermarks_options
 
         # Mark that treatment has not been assigned yet
         player.participant.vars['treatment_assigned'] = False
@@ -758,8 +794,16 @@ class B_SMPsTrust(Page):
     def before_next_page(player, timeout_happened):
         player.prolific_id = player.participant.label
 
+        # Save the randomization orders
+        if 'social_media_order' in player.participant.vars:
+            player.social_media_order = json.dumps(player.participant.vars['social_media_order'])
+
+        if 'smp_order' in player.participant.vars:
+            player.smp_order = json.dumps(player.participant.vars['smp_order'])  # ADD THIS LINE
+
         # NOW assign treatment based on party_id
         assign_treatment_posts(player)
+
 class C_FeedInstructions(Page):
     form_model = 'player'
 
@@ -1050,6 +1094,14 @@ class F_Watermarks(Page):
     def is_displayed(player):
         return player.watermark_condition != "none"
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        # Save the randomization orders
+        if 'watermark_statements_order' in player.participant.vars:
+            player.watermark_statements_order = json.dumps(player.participant.vars['watermark_statements_order'])
+
+        if 'creates_watermarks_order' in player.participant.vars:
+            player.creates_watermarks_order = json.dumps(player.participant.vars['creates_watermarks_order'])
 
 class G_AISMPQuestions(Page):
     form_model = "player"
@@ -1057,6 +1109,14 @@ class G_AISMPQuestions(Page):
                    "smp_news_post", "distinguish_ability", "benefits_ai",
                    'trust_journalists_factcheckers', 'trust_smp', 'trust_user', 'trust_AI_company', 'watermark_familiarity']
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        # Save the randomization orders
+        if 'trust_actors_order' in player.participant.vars:
+            player.trust_actors_order = json.dumps(player.participant.vars['trust_actors_order'])
+
+        if 'smp_post_order' in player.participant.vars:
+            player.smp_post_order = json.dumps(player.participant.vars['smp_post_order'])
 
 class Info_Treatment(Page):
     @staticmethod
