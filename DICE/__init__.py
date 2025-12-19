@@ -799,9 +799,9 @@ class B_SMPsTrust(Page):
             player.social_media_order = json.dumps(player.participant.vars['social_media_order'])
 
         if 'smp_order' in player.participant.vars:
-            player.smp_order = json.dumps(player.participant.vars['smp_order'])  # ADD THIS LINE
+            player.smp_order = json.dumps(player.participant.vars['smp_order'])
 
-        # NOW assign treatment based on party_id
+        # assign treatment based on party_id
         assign_treatment_posts(player)
 
 class C_FeedInstructions(Page):

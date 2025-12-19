@@ -322,23 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Randomize social media rows on page load (only once!)
-document.addEventListener('DOMContentLoaded', function() {
-    const tbody = document.getElementById('social-media-rows');
-    if (!tbody) return;
 
-    // Get all rows
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-
-    // Fisher-Yates shuffle algorithm
-    for (let i = rows.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rows[i], rows[j]] = [rows[j], rows[i]];
-    }
-
-    // Re-append rows in randomized order
-    rows.forEach(row => tbody.appendChild(row));
-});
 
 // Randomize social media rows using stored order
 document.addEventListener('DOMContentLoaded', function() {
@@ -367,6 +351,45 @@ document.addEventListener('DOMContentLoaded', function() {
         socialMediaOrder.forEach(fieldName => {
             if (rowMap[fieldName]) {
                 tbody.appendChild(rowMap[fieldName]);
+            }
+        });
+    }
+});
+
+// Randomize social media rows using stored order
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('social-media-rows');
+    // ... existing social media code ...
+});
+
+// ADD THIS - Randomize SMP statements rows using stored order
+document.addEventListener('DOMContentLoaded', function() {
+    const smpTbody = document.getElementById('smp-statements-rows');
+    if (!smpTbody) return;
+
+    // Get the stored order from the server
+    const smpOrder = {{ participant.vars.smp_order|json }};
+
+    if (smpOrder && smpOrder.length > 0) {
+        const rows = Array.from(smpTbody.querySelectorAll('tr'));
+
+        // Create a map of field name to row
+        const rowMap = {};
+        rows.forEach(row => {
+            const input = row.querySelector('input[type="radio"]');
+            if (input && input.name) {
+                rowMap[input.name] = row;
+            }
+        });
+
+        // Clear tbody
+        smpTbody.innerHTML = '';
+
+        // Append rows in the stored order
+        smpOrder.forEach(fieldName => {
+            const fullFieldName = fieldName + '_pre'; // Add '_pre' suffix
+            if (rowMap[fullFieldName]) {
+                smpTbody.appendChild(rowMap[fullFieldName]);
             }
         });
     }
