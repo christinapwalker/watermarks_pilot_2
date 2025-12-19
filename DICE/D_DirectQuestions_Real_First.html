@@ -306,6 +306,20 @@ function validateForm() {
         }
     }
 
+    // Check claim truth radios
+const claimTruthRadios = form.querySelectorAll('input[name="image_claim_true_real"]');
+const claimTruthSection = document.getElementById('claim-truth-section');
+if (claimTruthSection && claimTruthSection.offsetParent !== null) {
+    const claimTruthSelected = Array.from(claimTruthRadios).some(r => r.checked);
+    if (!claimTruthSelected) {
+        unansweredFields.push(requiredFields['image_claim_true_real']);
+        if (claimTruthSection) {
+            claimTruthSection.classList.add('missing-answer');
+            missingElements.push(claimTruthSection);
+        }
+    }
+}
+
 // Check feels true section
     const feelTrueQuestion = document.getElementById('feel-true-question');
     if (feelTrueQuestion && feelTrueQuestion.offsetParent !== null) {
@@ -550,7 +564,7 @@ document.addEventListener('click', function(e) {
         <p id="description-image_confidence_real" class="slider-result"></p>
     </div>
     <div class="question" id="click-instruction">
-        <p style="margin-bottom: 40px;"><strong>In the post above, please click on the part of the post or image that helped you make your determination about whether the image is AI-generated, a red dot will appear to confirm your selection.</strong></p>
+        <p style="margin-bottom: 40px;"><strong>In the post above, please click on the part of the post or image that helped you make your determination about whether the image is AI-generated. A red dot will appear to confirm your selection.</strong></p>
     </div>
 
     <div class="question">

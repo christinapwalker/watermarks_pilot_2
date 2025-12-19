@@ -72,8 +72,6 @@ class Player(BasePlayer):
         blank=True
     )
 
-    hover_screenshot = models.StringField(blank=True)
-
     # Metadata variables:
     disclaimer = models.StringField(blank=True, null=True)
     screenshot_control = models.StringField()
@@ -85,9 +83,7 @@ class Player(BasePlayer):
     assigned_image_id = models.StringField()
     feed_condition_row = models.StringField()
     control_feed_condition_row = models.StringField()
-    feed_condition = models.StringField(doc='indicates the feed condition a player is randomly assigned to')
     watermark_condition = models.StringField(doc='indicates the watermark condition a player is randomly assigned to')
-    sequence = models.StringField(doc='prints the sequence of tweets based on doc_id')
     # cta = models.BooleanField(doc='indicates whether CTA was clicked or not') # is this the watermark?
     scroll_sequence = models.LongStringField(doc='tracks the sequence of feed items a participant scrolled through.')
     viewport_data = models.LongStringField(doc='tracks the time feed items were visible in a participants viewport.')
@@ -100,10 +96,6 @@ class Player(BasePlayer):
     device_type = models.StringField(doc="indicates the participant's device type based on screen width.",
                                      blank=True)
 
-    political_content = models.IntegerField(
-        choices=[(i, str(i)) for i in range(11)],
-        widget=widgets.RadioSelect
-    )
 
     watermark_familiarity = models.StringField(
         choices=[
@@ -195,7 +187,7 @@ class Player(BasePlayer):
         choices=['Have not heard about them', 'Have heard a little about them but have not tried them out',
                  'Have heard about them and have tried them out',
                  'Use them sometimes in my work or personal life', 'Use them frequently in my work or personal life'],
-        label="Before today, how familiar were you with large language models (LLMs), or AI chatbots, like ChatGPT, Gemini, or Claude?",
+        label="Before today, how familiar were you with large language models (LLMs), or artificial intelligence (AI) chatbots, like ChatGPT, Gemini, or Claude?",
         widget=widgets.RadioSelect,
         required=None
     )
@@ -588,23 +580,12 @@ def assign_treatment_posts(player):
         "cr_watermark_plus_label": "screenshot_both",
     }
 
-    hover_screenshot_column = {
-        "cr_watermark": "screenshot_cr_hover",
-        "cr_watermark_plus_label": "screenshot_cr_hover",
-    }
-
     screenshot_col = watermark_to_column.get(player.watermark_condition)
     if screenshot_col in selected_treatment_post.columns:
         val = selected_treatment_post[screenshot_col].values[0]
         if pd.notna(val):
             player.screenshot_treatment = val
 
-    # Assign hover screenshot if applicable
-    hover_col = hover_screenshot_column.get(player.watermark_condition)
-    if hover_col and hover_col in selected_treatment_post.columns:
-        val = selected_treatment_post[hover_col].values[0]
-        if pd.notna(val):
-            player.hover_screenshot = val
 
     # Sample one control post from each control category
     for category in control_categories:
@@ -1069,11 +1050,6 @@ class F_Watermarks(Page):
     def is_displayed(player):
         return player.watermark_condition != "none"
 
-    @staticmethod
-    def vars_for_template(player):
-        return {
-            'hover_screenshot': player.field_maybe_none('hover_screenshot')
-        }
 
 class G_AISMPQuestions(Page):
     form_model = "player"
@@ -1165,5 +1141,5 @@ def custom_export(players):
     for p in players:
         participant = p.participant
         session = p.session
-        yield [session.code, participant.code, participant.label, p.id_in_group, p.feed_condition, p.sequence,
+        yield [session.code, participant.code, participant.label, p.id_in_group,
                p.watermark_condition, p.scroll_sequence, p.viewport_data, p.likes_data, p.replies_data, p.retweets_data]

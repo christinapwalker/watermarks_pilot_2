@@ -1,15 +1,22 @@
 {% load static %}
 
 {% block scripts %}
-<!-- Move this script to your main HTML file, OUTSIDE of any loops, preferably in the <head> or before closing </body> -->
+<script>
 localStorage.removeItem('dismissedOverlays');
 localStorage.removeItem('DISMISSED_OVERLAYS');
+
+// Prevent overlays from reappearing on interactions
+document.addEventListener('click', function(e) {
+    // Clear overlay flags whenever any interaction happens
+    localStorage.removeItem('dismissedOverlays');
+    localStorage.removeItem('DISMISSED_OVERLAYS');
+});
+</script>
 
 <!-- Popper & Bootstrap bundle first -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Then your custom scripts -->
 <script src="{% static 'js/bootstrap_components.js' %}"></script>
 <script src="{% static 'js/preloader.js' %}"></script>
 <script src="{% static 'js/gradients.js' %}"></script>
