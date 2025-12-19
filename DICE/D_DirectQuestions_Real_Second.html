@@ -321,7 +321,7 @@ function validateForm() {
 // Check feels true section
     const feelTrueQuestion = document.getElementById('feel-true-question');
     if (feelTrueQuestion && feelTrueQuestion.offsetParent !== null) {
-        const binaryRadios = form.querySelectorAll('input[name="image_feelstrue_binary_real"]');
+        const binaryRadios = form.querySelectorAll('input[name="image_feelstrue_real"]');
         const feelsTrueAnswered = Array.from(binaryRadios).some(r => r.checked);
 
         if (!feelsTrueAnswered) {
@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Replace the existing binaryRadios.forEach block with this:
 
 // Simplified binary radio handler - no follow-up questions
-const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_binary_real"]');
+const binaryRadios = document.querySelectorAll('input[name="image_feelstrue_real"]');
 binaryRadios.forEach(radio => {
     radio.addEventListener('change', function() {
         // Remove highlighting when user interacts
@@ -586,8 +586,8 @@ document.addEventListener('click', function(e) {
         <p><strong>Regardless of whether you think the claim of the post is literally true, to what extent do you think the post represents something that <em>feels true</em> about the world?</strong></p>
 
         <div class="multiple-choice">
-            <label><input type="radio" name="image_feelstrue_binary_real" value="Does not feel true"> Does not feel true</label>
-            <label><input type="radio" name="image_feelstrue_binary_real" value="Feels true"> Feels true</label>
+            <label><input type="radio" name="image_feelstrue_real" value="Does not feel true"> Does not feel true</label>
+            <label><input type="radio" name="image_feelstrue_real" value="Feels true"> Feels true</label>
         </div>
     </div>
 </div>

@@ -1029,9 +1029,6 @@ class H_Demographics(Page):
     form_model = 'player'
     form_fields = ["age", "gender", "state", "race", "education", "income"]
 
-class F_SMPPostSurvey(Page):
-    pass
-
 class MorePosts(Page):
     form_model = 'player'
     form_fields = ['moreposts_image_check_1',
@@ -1074,10 +1071,6 @@ class MorePosts(Page):
         player.image_options_json = json.dumps(options)
 
         return dict(image_options=options)
-
-class F_Enjoyment(Page):
-    pass
-
 
 class F_Watermarks(Page):
     form_model = "player"
