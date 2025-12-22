@@ -1231,7 +1231,7 @@ def custom_export(players):
                 p.likes_data,
                 p.retweets_data,
                 p.replies_data,
-                '',  # page_name
-                '',  # seconds_on_page
-                ''  # epoch_time
+                pc.page_name,
+                pc.seconds_on_page,
+                pc.timestamp
             ]
