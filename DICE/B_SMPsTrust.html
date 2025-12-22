@@ -81,7 +81,7 @@
 
   /* Question Column */
   .question-column {
-    width: 20%;
+    width: 50%;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -89,6 +89,27 @@
     font-weight: 600;
     color: #222;
   }
+
+
+  .slider-labels span {
+    position: absolute;
+    top: 0;
+    transform: rotate(60deg) translateY(6px);
+    transform-origin: top center;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* Position slider labels */
+  .slider-labels span:nth-child(1) { left: 0%; }
+  .slider-labels span:nth-child(2) { left: 16.666%; }
+  .slider-labels span:nth-child(3) { left: 33.333%; }
+  .slider-labels span:nth-child(4) { left: 50%; }
+  .slider-labels span:nth-child(5) { left: 66.666%; }
+  .slider-labels span:nth-child(6) { left: 83.333%; }
+  .slider-labels span:nth-child(7) { left: 90%; }
+
 
   /* ----- Matrix Table Specific Styles ----- */
   .matrix-table {
@@ -107,21 +128,34 @@
     font-size: 1rem;
     color: #333;
   }
+  /* Add this to your existing styles, around line 140 or in the matrix-table section */
 
-  .matrix-table .question-column {
-    width: 30%;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    text-align: left;
-    font-weight: 600;
-    color: #222;
-  }
+.matrix-table td {
+  direction: ltr; /* Force left-to-right direction */
+}
 
-  /* Radio Answer Columns - equal width for all */
+/* Ensure radio buttons render in correct order on all devices */
+.matrix-table tbody td:not(.question-column) {
+  direction: ltr;
+  text-align: center;
+}
+
+.matrix-table .question-column {
+  width: 40%;
+  max-width: 40%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  text-align: left;
+  font-weight: 600;
+  color: #222;
+}
+
+
+  /* Radio Answer Columns */
   .matrix-table th:not(:first-child),
   .matrix-table td:not(.question-column) {
-    width: auto;
     padding: 4px 2px;
     font-size: 0.85rem;
     word-break: normal;
@@ -228,71 +262,86 @@
     background-color: #1a5fd9;
   }
 
-  /* ===== Responsive ===== */
-  @media (max-width: 700px) {
-    .survey-container {
-      margin: 15px;
-      padding: 20px;
-    }
+@media (max-width: 700px) {
 
-    /* Mobile Radio Button Fixes */
-    .form-group div {
-      margin-bottom: 15px;
-      gap: 10px;
-    }
-
-    .form-group label {
-      font-size: 0.9rem;
-      line-height: 1.3;
-    }
-
-    .form-group input[type="radio"] {
-      width: 18px;
-      height: 18px;
-      margin-top: 1px;
-    }
-
-    p, .slider-value {
-      font-size: 1rem;
-    }
-
-    .matrix-table th,
-    .matrix-table td {
-      font-size: 0.75rem;
-      padding: 6px;
-    }
-
-    .matrix-table {
-      width: 100%;
-      table-layout: fixed;
-    }
-
-    .question-label {
-      font-size: 1rem;
-    }
-
-    /* Slightly wider question column */
-    .matrix-table .question-column {
-      width: 50%;
-      font-size: 0.5rem;
-      padding-left: 1px;
-      padding-right: 1px;
-      word-break: break-word;
-      white-space: normal;
-    }
-
-    /* Make radio columns narrow */
-    .matrix-table th:not(:first-child),
-    .matrix-table td:not(.question-column) {
-      max-width: 1px;
-      white-space: normal;
-      word-break: break-word;
-      padding: 0px 0px;
-      font-size: 0.6rem;
-    }
+  .matrix-table {
+    table-layout: fixed;
   }
-</style>
 
+  .matrix-table th,
+  .matrix-table td {
+    font-size: 0.65rem;
+    padding: 1px 1px;
+  }
+
+
+#smp-statements-wrapper .matrix-table thead tr {
+  height: 150px;
+}
+
+#smp-use-wrapper .matrix-table thead tr {
+  height: 110px;
+}
+
+  .matrix-table th:not(:first-child) {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: left;
+    padding: 1px;
+    font-size: 0.6rem;
+    height: 100px;
+    vertical-align: bottom;
+  }
+
+    /* Override colgroup widths on mobile */
+  .matrix-table colgroup col:first-child {
+    width: 40% !important;
+  }
+
+  .matrix-table colgroup col:not(:first-child) {
+    width: auto !important;
+  }
+
+  .matrix-table .question-column {
+    font-size: 0.65rem;
+     width: 40% !important;
+    max-width: 40% !important;  /* Add this line */
+    padding-right: 2px;
+    }
+
+  /* Make matrix radio buttons much smaller on mobile */
+  .matrix-table input[type="radio"] {
+    width: 15px !important;
+    height: 15px !important;
+    transform: scale(0.8) !important;
+    margin: 0.15rem !important;
+  }
+    /* Make question column dominant */
+  .matrix-table colgroup col:first-child {
+    width: 20% !important;
+  }
+
+  /* Force each option column to be very narrow */
+  .matrix-table colgroup col:not(:first-child) {
+    width: 5% !important;
+  }
+  /* Question column */
+  .matrix-table .question-column {
+    width: 65% !important;
+    max-width: 65% !important;
+    padding-right: 4px;
+    line-height: 1.25;
+  }
+
+  /* Option columns: strip padding */
+  .matrix-table td:not(.question-column),
+  .matrix-table th:not(:first-child) {
+    padding: 1px !important;
+  }
+
+}
+
+</style>
 <script>
 // Handle color check checkboxes
 document.addEventListener('DOMContentLoaded', function() {
@@ -621,9 +670,19 @@ document.addEventListener('click', function(e) {
     <p class="question-text"><b>Thinking about social networking sites, how often do you visit or use the following?</b></p>
 
     <!-- Likert Scale -->
-    <div class="matrix-wrapper">
-      <table class="matrix-table">
-        <thead>
+    <div class="matrix-wrapper" id="smp-use-wrapper">
+  <table class="matrix-table">
+        <colgroup>
+      <col style="width: 16%;"> <!-- Question column -->
+      <col style="width: 15%;">
+      <col style="width: 15%;">
+      <col style="width: 15%;">
+      <col style="width: 15%;">
+      <col style="width: 15%;">
+      <col style="width: 15%;">
+      <col style="width: 15%;">
+    </colgroup>
+     <thead>
           <tr>
             <th></th>
             <th>Several times a day</th>
@@ -743,18 +802,26 @@ document.addEventListener('click', function(e) {
     <p class="question-text"><b>Please indicate your level of agreement with the following statements regarding social media platforms:</b></p>
 
     <!-- Likert Scale -->
-    <div class="matrix-wrapper">
-      <table class="matrix-table">
+<div class="matrix-wrapper" id="smp-statements-wrapper">
+  <table class="matrix-table">
+           <colgroup>
+      <col style="width: 20%;"> <!-- Question column -->
+      <col style="width: 16%;"> <!-- Strongly Disagree -->
+      <col style="width: 16%;"> <!-- Disagree -->
+      <col style="width: 16%;"> <!-- Neither -->
+      <col style="width: 16%;"> <!-- Agree -->
+      <col style="width: 16%;"> <!-- Strongly Agree -->
+    </colgroup>
         <thead>
-          <tr>
-            <th></th>
-            <th>Strongly Disagree</th>
-            <th>Disagree</th>
-            <th>Neither Agree Nor Disagree</th>
-            <th>Agree</th>
-            <th>Strongly Agree</th>
-          </tr>
-        </thead>
+      <tr>
+        <th></th>
+        <th>Strongly Disagree</th>
+        <th>Disagree</th>
+        <th>Neither Agree Nor Disagree</th>
+        <th>Agree</th>
+        <th>Strongly Agree</th>
+      </tr>
+    </thead>
         <tbody id="smp-statements-rows">
           <tr>
             <td class="question-column">

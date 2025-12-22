@@ -22,13 +22,13 @@
   }
 
   p {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1rem;
   }
 
   .question-label {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #222;
   }
@@ -39,7 +39,7 @@
   }
 
   .form-group label {
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: 400;
     color: #333;
     line-height: 1.4;
@@ -51,7 +51,7 @@
     width: 100%;
     max-width: 500px;
     padding: 10px;
-    font-size: 1rem;
+    font-size: 1.5rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     margin-top: 10px;
@@ -100,7 +100,7 @@
     color: white;
     border: none;
     padding: 10px 22px;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 700;
     border-radius: 5px;
     cursor: pointer;
@@ -120,12 +120,37 @@
     }
 
     p {
-      font-size: 1rem;
+      font-size: .9rem;
     }
 
     .question-label {
-      font-size: 1rem;
+      font-size: .9rem;
     }
+
+      /* Make form labels smaller on mobile */
+  .form-group label {
+    font-size: 0.9rem !important;
+  }
+
+  /* Make input text smaller on mobile */
+  .form-group input[type="text"] {
+    font-size: 0.9rem;
+  }
+
+  /* Make attention check paragraphs smaller on mobile */
+  #attention-check-group p {
+    font-size: 0.85rem !important;
+  }
+
+  /* Make checkbox labels smaller on mobile */
+  #attention-check-group label[for^="feeling_"] {
+    font-size: 0.9rem !important;
+  }
+
+  /* Make button smaller on mobile */
+  button[type="submit"] {
+    font-size: 1rem;
+  }
   }
 </style>
 
@@ -274,11 +299,11 @@
 
     <!-- Attention Check Question -->
     <div class="form-group" id="attention-check-group" style="margin-top: 40px;">
-      <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px;">
+      <p style="font-size: 1.5rem; line-height: 1.6; margin-bottom: 20px;">
         <strong>Before we proceed, we have a question about how you're feeling.</strong>
       </p>
 
-      <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; color: #222;">
+      <p style="font-size: 1.3rem; line-height: 1.6; margin-bottom: 20px; color: #222;">
         Recent research on decision-making shows that choices are affected by context. Differences in how people feel, their previous knowledge and experience, and their environment can affect choices. To help us understand how people make decisions, we are interested in information about you. Specifically, we are interested in whether you actually take the time to read the directions: if not, some results may not tell us very much about decision-making in the real world. <strong>To show that you have read the instructions, please ignore the question about how you are feeling and instead check only the "jittery" option as your answer.</strong> Thank you very much.
       </p>
 
@@ -288,8 +313,7 @@
 
       <input type="hidden" id="attention_check" name="attention_check" value="">
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
+<div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">        <div style="display: flex; align-items: center; gap: 8px;">
           <input type="checkbox" id="feeling_interested" class="attention-checkbox" value="Interested">
           <label for="feeling_interested" style="font-weight: 400; cursor: pointer; margin: 0;">Interested</label>
         </div>

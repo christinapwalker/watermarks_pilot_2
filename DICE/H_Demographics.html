@@ -295,6 +295,18 @@
       margin: 15px;
       padding: 20px;
     }
+    /* Constrain dropdown widths */
+.form-field select {
+  max-width: 400px;
+  width: 100%;
+}
+
+/* On mobile, allow full width */
+@media (max-width: 700px) {
+  .form-field select {
+    max-width: 100%;
+  }
+}
 
     /* Mobile Radio Button Fixes */
     .form-group div {

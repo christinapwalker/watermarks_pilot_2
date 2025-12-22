@@ -3,6 +3,11 @@
 {% block content %}
 
 <style>
+  #creates-watermark-group div {
+    font-size: 1.1rem;  /* Adjust this value as needed */
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
 
   .matrix-row.missing-answer td {
   background-color: #ffebee !important;
@@ -63,11 +68,15 @@
 .matrix-table th,
 .matrix-table td {
   border: 1px solid #ddd;
-  padding: 4px 2px;
+  padding: 8px 4px;
   text-align: center;
-  font-size: 0.75rem;
-  /*word-break: break-word;*/
+  font-size: 0.95rem;  /* Increased from 0.75rem */
   color: #333;
+}
+
+/* Keep radio button cells compact */
+.matrix-table td:not(.question-column) {
+  padding: 4px 2px;
 }
 
 .matrix-table th {
@@ -79,7 +88,7 @@
   width: 35%;
   text-align: left;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 1.1rem;
   white-space: normal;
   word-break: break-word;
 }
@@ -171,6 +180,14 @@
     font-size: 0.65rem;
     width: 50%;
     padding-right: 4px;
+    }
+
+  /* Make matrix radio buttons much smaller on mobile */
+  .matrix-table input[type="radio"] {
+    width: 18px !important;
+    height: 18px !important;
+    transform: scale(0.7) !important;
+    margin: 0.15rem !important;
   }
 }
 
@@ -202,7 +219,7 @@
 
   td:first-child,
   th:first-child {
-    width: 60%;
+    width: 40%;
   }
 
   td:not(:first-child),
@@ -266,9 +283,9 @@
   <!-- Instruction Text -->
 <label class="matrix-instructions">Please indicate your level of agreement with the following statements regarding the
   {% if player.watermark_condition == "cr_watermark" %}
-    watermark
+    visible watermark
   {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-    label
+    warning or information label
   {% elif player.watermark_condition == "cr_watermark_plus_label" %}
     watermark and information
   {% else %}
@@ -294,17 +311,17 @@
     <tbody id="watermark-statements-rows">
       <tr class="matrix-row" id="row-clarity_watermarks">
         <td class="question-column">
-          The
-          {% if player.watermark_condition == "cr_watermark" %}
-            watermark
-          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-            label
-          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-            watermark and information
-          {% else %}
-            watermark or label
-          {% endif %}
-          is clear
+                The
+      {% if player.watermark_condition == "cr_watermark" %}
+        visible watermark
+      {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+        warning or information label
+      {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+        watermark and information
+      {% else %}
+        watermark or label
+      {% endif %}
+      is clear
         </td>
         {% for choice in form.clarity_watermarks %}
           <td>{{ choice }}</td>
@@ -314,59 +331,59 @@
       <tr class="matrix-row" id="row-informative_watermarks">
         <td class="question-column">
           The
-          {% if player.watermark_condition == "cr_watermark" %}
-            watermark
-          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-            label
-          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-            watermark and information
-          {% else %}
-            watermark or label
-          {% endif %}
-          is informative
-        </td>
-        {% for choice in form.informative_watermarks %}
-          <td>{{ choice }}</td>
-        {% endfor %}
+      {% if player.watermark_condition == "cr_watermark" %}
+        visible watermark
+      {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+        warning or information label
+      {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+        watermark and information
+      {% else %}
+        watermark or label
+      {% endif %}
+      is informative
+    </td>
+    {% for choice in form.informative_watermarks %}
+      <td>{{ choice }}</td>
+    {% endfor %}
       </tr>
 
       <tr class="matrix-row" id="row-trustworthy_watermarks">
         <td class="question-column">
           The
-          {% if player.watermark_condition == "cr_watermark" %}
-            watermark
-          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-            label
-          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-            watermark and information
-          {% else %}
-            watermark or label
-          {% endif %}
-          is trustworthy
-        </td>
-        {% for choice in form.trustworthy_watermarks %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
+      {% if player.watermark_condition == "cr_watermark" %}
+        visible watermark
+      {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+        warning or information label
+      {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+        watermark and information
+      {% else %}
+        watermark or label
+      {% endif %}
+      is trustworthy
+    </td>
+    {% for choice in form.trustworthy_watermarks %}
+      <td>{{ choice }}</td>
+    {% endfor %}
+  </tr>
 
       <tr class="matrix-row" id="row-biased_watermarks">
         <td class="question-column">
           The
-          {% if player.watermark_condition == "cr_watermark" %}
-            watermark
-          {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
-            label
-          {% elif player.watermark_condition == "cr_watermark_plus_label" %}
-            watermark and information
-          {% else %}
-            watermark or label
-          {% endif %}
-          is biased
-        </td>
-        {% for choice in form.biased_watermarks %}
-          <td>{{ choice }}</td>
-        {% endfor %}
-      </tr>
+      {% if player.watermark_condition == "cr_watermark" %}
+        visible watermark
+      {% elif player.watermark_condition == "fb_content_warning" or player.watermark_condition == "insta_content_warning" %}
+        warning or information label
+      {% elif player.watermark_condition == "cr_watermark_plus_label" %}
+        watermark and information
+      {% else %}
+        watermark or label
+      {% endif %}
+      is biased
+    </td>
+    {% for choice in form.biased_watermarks %}
+      <td>{{ choice }}</td>
+    {% endfor %}
+  </tr>
     </tbody>
   </table>
 </div>

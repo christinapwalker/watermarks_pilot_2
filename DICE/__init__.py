@@ -7,6 +7,7 @@ import random
 from collections import defaultdict
 from . import image_utils
 import json
+from django.utils.safestring import mark_safe
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 doc = """
@@ -213,7 +214,7 @@ class Player(BasePlayer):
     use_instagram = models.StringField(
         choices=["Several times a day", "About once a day", "A few days a week", "Every few weeks",
                  "Less often", "Never", "Don't know"],
-        label="Instagram/Threads",
+        label=mark_safe("Instagram/<br>Threads"),
         widget=widgets.RadioSelect,
     )
 
@@ -666,6 +667,7 @@ def assign_treatment_posts(player):
     # Shuffle combined posts
     selected_posts_df = selected_posts_df.sample(frac=1).reset_index(drop=True)
 
+    player.tweets_json = selected_posts_df.to_json(orient='records')
     # Assign shuffled posts DataFrame to participant.tweets
     player.participant.tweets = selected_posts_df
 
@@ -1029,46 +1031,44 @@ class H_Demographics(Page):
     form_model = 'player'
     form_fields = ["age", "gender", "state", "race", "education", "income"]
 
+
 class MorePosts(Page):
     form_model = 'player'
-    form_fields = ['moreposts_image_check_1',
-                   'moreposts_image_check_2',
-                   'moreposts_image_check_3',
-                   'moreposts_image_check_4',
-                   'moreposts_image_check_5',]
+    form_fields = [
+        'moreposts_image_check_1',
+        'moreposts_image_check_2',
+        'moreposts_image_check_3',
+        'moreposts_image_check_4',
+        'moreposts_image_check_5',
+    ]
 
     @staticmethod
-    def vars_for_template(player):
+    def vars_for_template(player: Player):
+        # 1. Get the randomized dataframe from participant vars
+        df = player.participant.tweets
+
+        # 2. Extract the screenshot column based on the post type
+        # In your assign_treatment_posts, 'treatment' rows have
+        # player.screenshot_treatment, 'control' rows have screenshot_control.
         options = []
+        for _, row in df.iterrows():
+            if row['post_type'] == 'treatment':
+                # Use the assigned treatment screenshot (with watermarks)
+                img = player.screenshot_treatment
+            else:
+                # Use the standard control screenshot
+                img = row.get('screenshot_control')
 
-        # Add the control screenshot if it exists
-        screenshot_control = player.field_maybe_none('screenshot_control')
-        if screenshot_control:
-            options.append(screenshot_control)
+            if img:
+                options.append(img)
 
-        # Add the treatment screenshot if it exists
-        screenshot_treatment = player.field_maybe_none('screenshot_treatment')
-        if screenshot_treatment:
-            options.append(screenshot_treatment)
-
-        # If you need more images, get them from the dataframe
-        if len(options) < 5:
-            df = player.participant.tweets
-            for col in ['screenshot_control', 'screenshot_treatment', 'screenshot_nowatermark']:
-                if col in df.columns:
-                    additional = df[col].dropna().tolist()
-                    options.extend(additional)
-
-            # Remove duplicates while preserving order
-            seen = set()
-            options = [x for x in options if not (x in seen or seen.add(x))]
-
-        # Limit to first 5
+        # 3. Limit to first 5 to match your 5 form fields
         options = options[:5]
 
-        # Save data
-        player.tweets_json = player.participant.tweets.to_json()
+        # 4. Save metadata for your records
         player.image_options_json = json.dumps(options)
+        # It's better to use orient='records' to keep row order in JSON
+        player.tweets_json = df.to_json(orient='records')
 
         return dict(image_options=options)
 

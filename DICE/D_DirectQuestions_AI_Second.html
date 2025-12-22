@@ -86,7 +86,7 @@ textarea {
 .slider-label-right {
     position: absolute;
     top: -20px;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #666;
     user-select: none;
@@ -216,6 +216,27 @@ button[type="submit"]:hover {
     0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
     70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
     100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
+
+/* Stack radio options vertically on mobile for specific questions */
+@media (max-width: 700px) {
+
+    #claim-truth-section .multiple-choice,
+    #feel-true-question .multiple-choice,
+    #familiarity-section .multiple-choice {
+        flex-direction: column;
+        flex-wrap: nowrap;   /* ← THIS is the key */
+        gap: 12px;
+    }
+
+    #claim-truth-section .multiple-choice label,
+    #feel-true-question .multiple-choice label,
+    #familiarity-section .multiple-choice label {
+        flex: 1 1 auto;      /* safer than 100% */
+        width: 100%;
+        padding: 10px;
+        border-radius: 4px;
+    }
 }
 </style>
 <script>
@@ -569,8 +590,8 @@ document.addEventListener('click', function(e) {
     </div>
 </div>
 
-    <div id="familiarity-section" style="margin-top:40px;">
-    <div class="question">
+        <div id="familiarity-section" style="margin-top:40px;">
+    <div class="question" id="familiarity-question">
         <p><strong>Before today, had you seen the image in the post above?</strong></p>
         <div class="multiple-choice">
             <label><input type="radio" name="familiarity_ai" value="Yes"> Yes</label>

@@ -69,12 +69,50 @@
       width: 100%;
     }
 
-    @media (max-width: 768px) {
-      th, td {
-        font-size: 0.85rem;
-        padding: 4px;
-      }
-    }
+/* Better handling for column headers on mobile */
+@media (max-width: 768px) {
+  th, td {
+    font-size: 0.7rem;
+    padding: 4px;
+  }
+
+  /* Prevent awkward wrapping of "No opinion" header */
+  th:not(:first-child) {
+    font-size: 0.7rem;
+    padding: 8px 2px;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  /* Adjust column widths on mobile to give more space to headers */
+  td:first-child,
+  th:first-child {
+    width: 40%;
+  }
+
+  td:not(:first-child),
+  th:not(:first-child) {
+    width: 20%;
+  }
+}
+
+/* For very small screens */
+@media (max-width: 500px) {
+  th:not(:first-child) {
+    font-size: 0.7rem;
+    padding: 6px 1px;
+  }
+
+  td:first-child,
+  th:first-child {
+    width: 30%;
+  }
+
+  td:not(:first-child),
+  th:not(:first-child) {
+    width: 10%;
+  }
+}
 
     /* Submit button container */
     .submit-container {
