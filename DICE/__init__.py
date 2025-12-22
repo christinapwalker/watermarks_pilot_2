@@ -1189,10 +1189,49 @@ page_sequence = [
 # Captures higher level data about each player
 def custom_export(players):
     # header row
-    yield ['session', 'participant_code', 'participant_label', 'participant_in_session', 'condition', 'item_sequence',
-           'scroll_sequence', 'item_dwell_time', 'likes', 'retweets']
+    yield ['session', 'participant_code', 'participant_label', 'participant_in_session',
+           'condition', 'item_sequence', 'scroll_sequence', 'item_dwell_time',
+           'likes', 'retweets', 'replies', 'page_name', 'seconds_on_page', 'epoch_time']
+
     for p in players:
         participant = p.participant
         session = p.session
-        yield [session.code, participant.code, participant.label, p.id_in_group,
-               p.watermark_condition, p.scroll_sequence, p.viewport_data, p.likes_data, p.replies_data, p.retweets_data]
+
+        # Get page completion data
+        page_completions = participant.page_completions.all().order_by('timestamp')
+
+        # If there are page completions, yield one row per page
+        if page_completions.exists():
+            for pc in page_completions:
+                yield [
+                    session.code,
+                    participant.code,
+                    participant.label,
+                    p.id_in_group,
+                    p.watermark_condition,
+                    p.scroll_sequence,
+                    p.viewport_data,
+                    p.likes_data,
+                    p.retweets_data,
+                    p.replies_data,
+                    pc.page_name,
+                    pc.seconds_on_page,
+                    pc.timestamp
+                ]
+        else:
+            # If no page completion data, still export the player data with empty page info
+            yield [
+                session.code,
+                participant.code,
+                participant.label,
+                p.id_in_group,
+                p.watermark_condition,
+                p.scroll_sequence,
+                p.viewport_data,
+                p.likes_data,
+                p.retweets_data,
+                p.replies_data,
+                '',  # page_name
+                '',  # seconds_on_page
+                ''  # epoch_time
+            ]
