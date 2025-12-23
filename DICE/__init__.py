@@ -291,7 +291,7 @@ class Player(BasePlayer):
     trust_AI_company = models.StringField(
         choices=['A lot', 'Some', 'Not too much', 'Not at all', 'No opinion'],
         widget=widgets.RadioSelect,
-        label='Companies that build artificial intelligence (AI) tools'
+        label='Companies that build software tools like artificial intelligence (AI) used to create images'
     )
     trust_actors_order = models.StringField(blank=True)
 
