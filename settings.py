@@ -57,7 +57,7 @@ SESSION_CONFIG_DEFAULTS = dict(
 
 
 
-PARTICIPANT_FIELDS = ['tweets', 'finished']
+PARTICIPANT_FIELDS = ['tweets', 'finished', 'prolific_id']
 # SESSION_FIELDS = ['prolific_completion_url', 'completion_code']
 
 # ISO-639 code

@@ -766,9 +766,13 @@ class A_Consent(Page):
     form_model = 'player'
     form_fields = ['consent']
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.prolific_id = player.participant.label or ''
+
 class AttentionCheck(Page):
     form_model = 'player'
-    form_fields = ['prolific_id', 'attention_check']
+    form_fields = ['prolific_id','attention_check']
 
 class B_SMPsTrust(Page):
     form_model = 'player'
@@ -794,7 +798,6 @@ class B_SMPsTrust(Page):
 
     @staticmethod
     def before_next_page(player, timeout_happened):
-        player.prolific_id = player.participant.label
 
         # Save the randomization orders
         if 'social_media_order' in player.participant.vars:

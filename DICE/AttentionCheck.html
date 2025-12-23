@@ -206,16 +206,16 @@
       el.classList.remove('missing-answer');
     });
 
-    // Check Prolific ID
-    const prolificField = form.querySelector('input[name="prolific_id"]');
-    if (prolificField && prolificField.value.trim() === '') {
-      unansweredFields.push(requiredFields['prolific_id']);
-      const container = document.getElementById('prolific-id-group');
-      if (container) {
-        container.classList.add('missing-answer');
-        missingElements.push(container);
-      }
-    }
+// Check Prolific ID
+const prolificField = form.querySelector('input[name="prolific_id"]');
+if (prolificField && prolificField.value.trim() === '') {
+  unansweredFields.push('Prolific ID (contact researcher if blank)');  // Updated message
+  const container = document.getElementById('prolific-id-group');
+  if (container) {
+    container.classList.add('missing-answer');
+    missingElements.push(container);
+  }
+}
 
     // Check attention check
     const attentionField = form.querySelector('input[name="attention_check"]');
@@ -288,14 +288,23 @@
 <div class="survey-container">
   <form method="post">
 
-    <!-- Prolific ID -->
-    <div class="form-group" id="prolific-id-group">
-      <label for="prolific_id" class="question-label" style="display: block; margin-bottom: 10px;">
-        <strong>Please enter your Prolific ID:</strong>
-      </label>
-      <input type="text" id="prolific_id" name="prolific_id" value="{{ player.prolific_id }}" placeholder="Enter your Prolific ID">
-      <div class="error-message">{{ formfield_errors 'prolific_id' }}</div>
-    </div>
+<!-- Prolific ID - READ ONLY (automatically captured) -->
+<div class="form-group" id="prolific-id-group">
+  <label for="prolific_id" class="question-label" style="display: block; margin-bottom: 10px;">
+    <strong>Your Prolific ID:</strong>
+  </label>
+  <input
+    type="text"
+    id="prolific_id"
+    name="prolific_id"
+    value="{{ player.prolific_id }}"
+    readonly
+    style="background-color: #f5f5f5; cursor: not-allowed;"
+  >
+  <p style="font-size: 1rem; color: #666; margin-top: 5px; margin-bottom: 0;">
+    This should be automatically filled from Prolific.
+  </p>
+</div>
 
     <!-- Attention Check Question -->
     <div class="form-group" id="attention-check-group" style="margin-top: 40px;">
